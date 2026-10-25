@@ -14475,6 +14475,210 @@
       },
       "npBeamRevision": "straight-cannon-axis-20261025",
       "npJunctionRevision": "opaque-gap-fill-20261025"
+    },
+    {
+      "id": "orion",
+      "name": "오리온 · 아처",
+      "class": "아처",
+      "classKey": "bow",
+      "kind": "servant",
+      "file": "orion.png",
+      "width": 1536,
+      "height": 768,
+      "columns": 4,
+      "rows": 3,
+      "frames": 12,
+      "cell": [
+        384,
+        256
+      ],
+      "groundY": 240,
+      "bodyPx": 132,
+      "guideBodyPx": 132,
+      "pixelBlock": 2,
+      "revision": "orion-2px-v3",
+      "sourceRevision": "orion-fresh-art-20261025",
+      "actions": {
+        "idle": {
+          "file": "orion.png",
+          "cell": [
+            384,
+            256
+          ],
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "durationMs": [
+            400,
+            400,
+            400,
+            400
+          ],
+          "holdLast": false
+        },
+        "hit": {
+          "file": "orion.png",
+          "cell": [
+            384,
+            256
+          ],
+          "frames": [
+            0,
+            4,
+            5,
+            0
+          ],
+          "durationMs": [
+            180,
+            130,
+            220,
+            650
+          ],
+          "holdLast": false
+        },
+        "dodge": {
+          "file": "orion.png",
+          "cell": [
+            384,
+            256
+          ],
+          "frames": [
+            0,
+            6,
+            0
+          ],
+          "durationMs": [
+            180,
+            280,
+            650
+          ],
+          "holdLast": false
+        },
+        "guard": {
+          "file": "orion.png",
+          "cell": [
+            384,
+            256
+          ],
+          "frames": [
+            0,
+            7,
+            0
+          ],
+          "durationMs": [
+            180,
+            600,
+            600
+          ],
+          "holdLast": false
+        },
+        "down": {
+          "file": "orion.png",
+          "cell": [
+            384,
+            256
+          ],
+          "frames": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "durationMs": [
+            260,
+            220,
+            220,
+            1100
+          ],
+          "holdLast": true
+        },
+        "attack": {
+          "file": "orion_attack.png",
+          "cell": 512,
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "durationMs": [
+            240,
+            220,
+            140,
+            160,
+            180,
+            650
+          ],
+          "holdLast": false
+        },
+        "ultimate": {
+          "file": "orion_np.png",
+          "cell": 512,
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "durationMs": [
+            240,
+            380,
+            520,
+            220,
+            300,
+            700
+          ],
+          "holdLast": false
+        }
+      },
+      "cellSize": [
+        384,
+        256
+      ],
+      "designRevision": "orion-arm-v5-new2px",
+      "sheets": {
+        "basic": {
+          "file": "orion.png",
+          "width": 1536,
+          "height": 768,
+          "usedHeight": 768,
+          "cell": [
+            384,
+            256
+          ],
+          "columns": 4,
+          "rows": 3,
+          "frames": 12,
+          "groundY": 240
+        },
+        "attack": {
+          "file": "orion_attack.png",
+          "width": 1536,
+          "height": 1024,
+          "cell": 512,
+          "columns": 3,
+          "rows": 2,
+          "frames": 6,
+          "groundY": 496
+        },
+        "ultimate": {
+          "file": "orion_np.png",
+          "width": 1536,
+          "height": 1024,
+          "cell": 512,
+          "columns": 3,
+          "rows": 2,
+          "frames": 6,
+          "groundY": 496
+        }
+      }
     }
   ]
 }
