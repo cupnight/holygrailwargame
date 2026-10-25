@@ -6762,23 +6762,42 @@ const Sim = (() => {
     let v=npRV(s.h)*NPK.rank+PV(s.P[3])*NPK.mana+(sp.bvAll||0)+(sp.bvBig&&SCV[scBase(s.o)]>=2?sp.bvBig:0);
     return v+npCVsp(b,s); }
 
+  // NPC의 보구 횟수 (12번): 기본 1 + 마스터 A 이상 1 + 서번트 마력 A 이상 1, 최대 3. 한 번 쓰면 다음 합에는 쓰지 않는다
+  function npcNPMax(e){ if(e.hero==='solomon') return 0; if(e.hero==='arash') return 1; return Math.min(3,1+(e.pw>=74?1:0)+(PV(npcParams(e).p[3])>=5?1:0)); }
+  function npcCanNP(b){ const e=b.e; if(b.eArtUsed||npNoNP(b,'en')) return false; if((b.eNP||0)>=npcNPMax(e)) return false; return b.eNPr==null||b.round>=b.eNPr+2; }
+  function npcMark(b){ b.eNP=(b.eNP||0)+1; b.eNPr=b.round; }
+  // NPC가 이번 합에 먼저 보구를 꺼낼 확률 (12번 · 보구 종류마다 쓰는 때)
+  function npcNPProb(b){ const w=W(), e=b.e, eh=H_BY[e.hero], r=npRole(eh), fin=b.ctx.final, rd=b.round; let p;
+    if(r==='A') p=.06+(e.hp<50?.1:0)+(fin?.1:0)+(w.hp<=35?.25:0);
+    else if(r==='S') p=.05+(100-e.hp)*.004+(fin?.08:0);
+    else if(r==='D') p=fxGet(b,'en','wall')?0:(!(b.artN>0)?.05+(fin?.2:0)+(e.hp<50?.2:0):.05);
+    else if(r==='F') p=fxGet(b,'en','field')?0:(rd===1?.35:rd===2?.25:.08)+(fin?.1:0);
+    else if(r==='H') p=fxGet(b,'en','sup')?0:(e.hp<=60?.2+(60-e.hp)*.01:.01);
+    else if(r==='B') p=fxGet(b,'en','sup')?0:(rd<=2?.3:.06);
+    else if(r==='W') p=fxGet(b,'en','sup')?0:(eh.id==='caligula'?(w.hp<35?.4:.03):(rd<=2?.3:.06));
+    else if(eh.id==='medea') p=fxGet(b,'me','curse')?0:(fxL(b).some(f=>f.side==='me'&&['field','wall','sup','holmes','reflect'].includes(f.type))?.6:rd<=2?.25:.05);
+    else if(eh.id==='angra') p=fxGet(b,'en','reflect')?0:(e.hp>=60?.12:.03);
+    else if(eh.id==='holmes') p=fxGet(b,'en','holmes')?0:(rd<=2?.35:.03);
+    else if(eh.id==='circe') p=fxGet(b,'en','pig')?0:(rd<=2?.35:.08);
+    else p=0;
+    return p*((b.eNP||0)>=1?.5:1); }
   // NPC 마스터가 격돌 순간에 고른다 (6번)
   function npcNPChoice(b,started){ const e=b.e, est=npEst(b,'en'), losing=est<-4;
     if(e.master&&e.seals>0&&!b.npcSealUsed&&(b.ctx.final||losing||e.tac==='reckless'||e.tac==='hunter')&&ch(.6)) return 'seal';
     if(!started&&losing&&(e.tac==='naive'||e.tac==='defensive'||e.tac==='desperate'||e.hp<35)&&!npNoDodge(b,'en')) return 'dodge';
     return 'face'; }
   // 플레이어가 보구를 쓰면, 아직 보구를 쓰지 않은 상대가 맞받아칠 수 있다. 돌려주는 값: 상대의 선택
-  function npcReacts(b){ const e=b.e, eh=H_BY[e.hero], r=npRole(eh); if(b.eArtUsed||e.hero==='solomon') return null;
+  function npcReacts(b){ const e=b.e, eh=H_BY[e.hero], r=npRole(eh); if(e.hero==='solomon') return null;
     if(fxGet(b,'en','wall')) return 'wall';
     if(fxGet(b,'en','field')) return 'hold';
-    if(npNoNP(b,'en')) return null;
-    if(r==='D') return ch(.5+(e.hp<50?.2:0))?'wallR':null;
+    if(!npcCanNP(b)) return null;
+    if(r==='D') return ch(.7+(e.hp<50?.1:0))?'wallR':null;
     if(eh.id==='medea') return npMagic(hero())&&ch(.6)?'null':null;
     if(eh.id==='angra') return ch(.5)?'reflect':null;
     if(eh.id==='holmes'){ if(ch(.4)){ b.enKnow=true; return 'fire'; } return null; }
     if(!'ASF'.includes(r)) return null;
     return ch(.3+(b.ctx.final?.2:0)+(e.hp<50?.15:0))?'fire':null; }
-  function npcFire(b,react){ const w=W(),h=hero(),e=b.e, ea=artOf(H_BY[e.hero]); b.eArtUsed=true;
+  function npcFire(b,react){ const w=W(),h=hero(),e=b.e, ea=artOf(H_BY[e.hero]); npcMark(b);
     if(e.hero==='karna'&&!e.kavacha){ e.kavacha=1; log(`${pName(e)}${J(pName(e),이)} 황금 갑옷을 벗어 던졌다.`,'war'); }
     if(npRole(H_BY[e.hero])==='F') (b.npTag=b.npTag||{}).en='field';
     if(npRole(H_BY[e.hero])==='S'&&!fxGet(b,'en','self')) fxL(b).push({side:'en',type:'self',id:e.hero,left:99,age:0});
@@ -6788,14 +6807,14 @@ const Sim = (() => {
     b.eKnownHit=false; log(`${pre} “${ea.n}.” ${ea.d.replace(/\.$/,'')}.`,'war'); revealArt(e,''); return 1; }
   // NPC가 이 합에 보구를 꺼내려 할 때: 피해를 주는 보구가 아니면 여기서 펼치고 끝낸다. 돌려주는 값: eArtHit
   function npcTryNP(b){ const w=W(),e=b.e, eh=H_BY[e.hero], r=npRole(eh);
-    if(b.eArtUsed||e.hero==='solomon'||npNoNP(b,'en')) return 0;
-    if(!ch(.08+(e.hp<50?.12:0)+(b.ctx.final?.08:0))) return 0;
+    if(!npcCanNP(b)) return 0;
+    if(!ch(npcNPProb(b))) return 0;
     // 방벽이 서 있는 것을 아는 신중한 마스터는 보구를 아낀다
     const mw=fxGet(b,'me','wall'); if(mw&&e.master&&e.tac!=='reckless'&&e.tac!=='hunter'&&ch(e.tac==='defensive'||e.tac==='naive'||e.tac==='cunning'?.8:.5)){ if(!b.saveLog){ b.saveLog=1; log(`${e.mname}${J(e.mname,이)} 방벽을 보고 서번트를 붙잡았다. 상대 마스터가 보구를 아낀다.`,'war'); } return 0; }
-    if(r==='D'){ if(fxGet(b,'en','wall')) return 0; b.eArtUsed=true; npWallUp(b,'en'); return 0; }
+    if(r==='D'){ if(fxGet(b,'en','wall')) return 0; npcMark(b); npWallUp(b,'en'); return 0; }
     if(r==='F'&&fxGet(b,'en','field')) return 0;
-    if('HBW'.includes(r)){ if(fxGet(b,'en','sup')) return 0; b.eArtUsed=true; npSupUp(b,'en'); return 0; }
-    if(r==='X'){ b.eArtUsed=true; if(eh.id==='medea') npMedea(b,'en'); else if(eh.id==='angra') npAngraUp(b,'en'); else if(eh.id==='holmes') npHolmes(b,'en'); else if(eh.id==='circe') npCirce(b,'en'); return 0; }
+    if('HBW'.includes(r)){ if(fxGet(b,'en','sup')) return 0; npcMark(b); npSupUp(b,'en'); return 0; }
+    if(r==='X'){ npcMark(b); if(eh.id==='medea') npMedea(b,'en'); else if(eh.id==='angra') npAngraUp(b,'en'); else if(eh.id==='holmes') npHolmes(b,'en'); else if(eh.id==='circe') npCirce(b,'en'); return 0; }
     return npcFire(b,false); }
   // 플레이어 서번트가 보구를 해방한다 (마력·노출 처리). 원래 clash()의 처리를 옮겨 왔다
   function npPay(b,react){ const w=W(),h=hero(),a=artOf(h);
@@ -6866,7 +6885,7 @@ const Sim = (() => {
   // 이 합에서 누가 어떻게 보구를 쓰는지 정한다. 선택이 필요하면 고르게 한 뒤 go(sel)로 이어 간다
   function npDecide(b,info,go){ const w=W(),h=hero(),e=b.e, eN=pName(e), mN=h.name;
     let my=info.myNP, en=info.enNP, enSel=null;
-    if(my&&!en){ const r=npcReacts(b); if(r==='fire'){ npcFire(b,true); en=true; } else if(r==='wallR'||r==='null'||r==='reflect'){ b.eArtUsed=true; npcReactLog(b,r); return go({me:'face',en:r}); } else if(r==='wall'||r==='hold') return go({me:'face',en:r}); }
+    if(my&&!en){ const r=npcReacts(b); if(r==='fire'){ npcFire(b,true); en=true; } else if(r==='wallR'||r==='null'||r==='reflect'){ npcMark(b); npcReactLog(b,r); return go({me:'face',en:r}); } else if(r==='wall'||r==='hold') return go({me:'face',en:r}); }
     if(en&&fxGet(b,'me','wall')&&!my) return go({me:'wall',en:'face'});
     if(en&&fxGet(b,'me','field')&&!my) return go({me:'hold',en:'face'});
     if(my&&en){
@@ -6945,7 +6964,7 @@ const Sim = (() => {
     log('화살이 손을 떠나는 순간, 아라쉬의 몸이 빛이 되어 부서졌다. 한 발과 맞바꾼 목숨이었다.','loss');
     log(voiceLine(h,w.trust>=DIST?'…닿았나? 그럼 됐다. 잘 있어라, 마스터.':'이걸로 됐다.'),'voice');
     if(e.alive&&e.hp<=0){ e.usedRevive=e.usedRevive||false; defeatNpc(e,'우리'); }
-    w.heroAlive=false; w.hp=0; w.selfGone=true; S.flags.stella=1; w.myOut={d:w.day,tod:w.tod,why:'스텔라를 쏘고 소멸했다'}; wrec('mine',`${h.name}${J(h.name,이)} 스텔라를 쏘고 소멸했다`);
+    w.heroAlive=false; w.hp=0; w.myOut={d:w.day,tod:w.tod,why:'스텔라를 쏘고 소멸했다'}; wrec('mine',`${h.name}${J(h.name,이)} 스텔라를 쏘고 소멸했다`);
     if(contracted().length===0){ S.flags.war='victor'; w.ended=true; w.queue=[]; endBattle(); finale(null); return; }
     S.flags.war='lost'; mark('loss'); if(w.battle) w.battle.res=e.alive?'lose':'mutual';
     if(contracted().length>1&&!w.final) afterLoss(); else w.out=true;
@@ -6963,21 +6982,21 @@ const Sim = (() => {
   // 전투 메뉴의 보구 선택지 (역할마다 다르다)
   function npMenu(b){ const w=W(),h=hero(),a=artOf(h),r=npRole(h),cost=npCost(), base={t:`보구: ${a.n}`,st:[{l:'서번트 마력',v:Math.round(w.sm)},{l:'마력',v:Math.round(S.st.mana)}]};
     if(r==='D'){ const on=fxGet(b,'me','wall'), d=npWallDur(b,'me');
-      return {...base,d:on?'방벽이 이미 서 있다':`랭크 ${a.r} · 방벽을 펼친다 · ${d}합 동안 남아 상대 보구를 막아 낸다 · 그 합에도 평소처럼 싸운다 [서번트 마력 −${cost}]`,off:!!on||w.sm<cost,auto:!on&&w.sm>=cost+15&&(w.hp<70||b.ctx.final),f:()=>{ smUse(cost); npWallUp(b,'me'); return clash(0); }}; }
+      return {...base,d:on?'방벽이 이미 서 있다':`랭크 ${a.r} · 방벽을 펼친다 · ${d}합 동안 남아 상대 보구를 막아 낸다 · 그 합에도 평소처럼 싸운다 [서번트 마력 −${cost}]`,off:!!on||w.sm<cost,auto:!on&&w.sm>=cost+15&&!((b.eNP||0)>0)&&(b.ctx.final||w.hp<50),f:()=>{ smUse(cost); npWallUp(b,'me'); return clash(0); }}; }
     if(r==='F'){ const on=fxGet(b,'me','field'), d=npFieldDur(b,'me');
-      return {...base,d:on?'장이 이미 펼쳐져 있다':`랭크 ${a.r} · 장을 펼친다 · 펼친 합에 보구 피해의 절반을 주고 ${d}합 동안 장이 남는다 · 정체가 드러난다 [서번트 마력 −${cost}]`,off:!!on||w.sm<cost,auto:!on&&w.sm>=cost+15,f:()=>clash(0,'art')}; }
+      return {...base,d:on?'장이 이미 펼쳐져 있다':`랭크 ${a.r} · 장을 펼친다 · 펼친 합에 보구 피해의 절반을 주고 ${d}합 동안 장이 남는다 · 정체가 드러난다 [서번트 마력 −${cost}]`,off:!!on||w.sm<cost,auto:!on&&w.sm>=cost+15&&b.round<=2,f:()=>clash(0,'art')}; }
     const pig=npNoNP(b,'me');
     if('HBW'.includes(r)){ const on=fxGet(b,'me','sup'), d=npSupDur(b,'me'), sp=SUP_SP[h.id]||{};
       const what=r==='H'?'회복':r==='B'?'강화':'약화';
-      return {...base,d:on?'보조 효과가 아직 남아 있다':`랭크 ${a.r} · ${what} · ${d}합 동안 효과가 남는다 · 그 합에도 평소처럼 싸운다 [서번트 마력 −${cost}]`,off:!!on||w.sm<cost||pig,auto:!on&&w.sm>=cost+15&&(r!=='H'||w.hp<70),f:()=>{ smUse(cost); npSupUp(b,'me'); return clash(0); }}; }
+      return {...base,d:on?'보조 효과가 아직 남아 있다':`랭크 ${a.r} · ${what} · ${d}합 동안 효과가 남는다 · 그 합에도 평소처럼 싸운다 [서번트 마력 −${cost}]`,off:!!on||w.sm<cost||pig,auto:!on&&w.sm>=cost+15&&(r==='H'?w.hp<=60:h.id==='caligula'?b.e.hp<35:b.round<=2),f:()=>{ smUse(cost); npSupUp(b,'me'); return clash(0); }}; }
     if(h.id==='medea'){ const on=fxGet(b,'me','curse');
-      return {...base,d:on?'계약은 이미 흔들려 있다':`랭크 ${a.r} · 단검으로 상대를 찔러 계약을 흔든다 · 이번 전투 동안 상대 스테이터스 1랭크 하락, 상대의 장·방벽·보조 효과를 푼다 [서번트 마력 −${cost}]`,off:!!on||w.sm<cost||pig,auto:!on&&w.sm>=cost+15,f:()=>{ smUse(cost); npMedea(b,'me'); return clash(0); }}; }
+      return {...base,d:on?'계약은 이미 흔들려 있다':`랭크 ${a.r} · 단검으로 상대를 찔러 계약을 흔든다 · 이번 전투 동안 상대 스테이터스 1랭크 하락, 상대의 장·방벽·보조 효과를 푼다 [서번트 마력 −${cost}]`,off:!!on||w.sm<cost||pig,auto:!on&&w.sm>=cost+15&&(b.round<=2||fxL(b).some(f=>f.side==='en'&&['field','wall','sup','holmes','reflect'].includes(f.type))),f:()=>{ smUse(cost); npMedea(b,'me'); return clash(0); }}; }
     if(h.id==='angra'){ const on=fxGet(b,'me','reflect'), d=npSupDur(b,'me');
-      return {...base,d:on?'이미 펼쳐져 있다':`랭크 ${a.r} · ${d}합 동안 받는 합 피해를 그대로 되돌린다 [서번트 마력 −${cost}]`,off:!!on||w.sm<cost||pig,auto:!on&&w.sm>=cost+15&&w.hp>40,f:()=>{ smUse(cost); npAngraUp(b,'me'); return clash(0); }}; }
+      return {...base,d:on?'이미 펼쳐져 있다':`랭크 ${a.r} · ${d}합 동안 받는 합 피해를 그대로 되돌린다 [서번트 마력 −${cost}]`,off:!!on||w.sm<cost||pig,auto:!on&&w.sm>=cost+15&&w.hp>=60,f:()=>{ smUse(cost); npAngraUp(b,'me'); return clash(0); }}; }
     if(h.id==='holmes'){ const on=fxGet(b,'me','holmes'), d=npSupDur(b,'me');
-      return {...base,d:on?'추리가 아직 이어지고 있다':`랭크 ${a.r} · 상대의 진명과 보구를 밝히고 다른 조 하나의 진명도 추리한다 · ${d}합 동안 합 +5, 상대 회피 무효 [서번트 마력 −${cost}]`,off:!!on||w.sm<cost||pig,auto:!on&&w.sm>=cost+10,f:()=>{ smUse(cost); npHolmes(b,'me'); return clash(0); }}; }
+      return {...base,d:on?'추리가 아직 이어지고 있다':`랭크 ${a.r} · 상대의 진명과 보구를 밝히고 다른 조 하나의 진명도 추리한다 · ${d}합 동안 합 +5, 상대 회피 무효 [서번트 마력 −${cost}]`,off:!!on||w.sm<cost||pig,auto:!on&&w.sm>=cost+10&&b.round<=2,f:()=>{ smUse(cost); npHolmes(b,'me'); return clash(0); }}; }
     if(h.id==='circe'){ const on=fxGet(b,'me','pig'), d=npSupDur(b,'me');
-      return {...base,d:on?'상대는 아직 돼지다':b.e.hero==='odysseus'?'오디세우스에게는 듣지 않는다':`랭크 ${a.r} · 변이 판정에 이기면 ${d}합 동안 상대가 돼지가 된다 · 보구 봉쇄, 합 −12, 물러날 수 없음 [서번트 마력 −${cost}]`,off:!!on||w.sm<cost||pig||b.e.hero==='odysseus',auto:!on&&w.sm>=cost+15,f:()=>{ smUse(cost); npCirce(b,'me'); return clash(0); }}; }
+      return {...base,d:on?'상대는 아직 돼지다':b.e.hero==='odysseus'?'오디세우스에게는 듣지 않는다':`랭크 ${a.r} · 변이 판정에 이기면 ${d}합 동안 상대가 돼지가 된다 · 보구 봉쇄, 합 −12, 물러날 수 없음 [서번트 마력 −${cost}]`,off:!!on||w.sm<cost||pig||b.e.hero==='odysseus',auto:!on&&w.sm>=cost+15&&b.round<=2,f:()=>{ smUse(cost); npCirce(b,'me'); return clash(0); }}; }
     if(h.id==='arash') return {...base,d:`단 한 번. 피해 두 배, 꿰뚫리지 않는 한 발. 대신 아라쉬는 소멸하고 당신의 전쟁은 여기서 끝난다. 마지막 상대라면 성배는 당신의 것이다 [서번트 마력 −${cost}]`,off:w.sm<cost||pig,auto:b.ctx.final&&w.hp<40&&b.e.hp>w.hp,f:()=>clash(0,'art')};
     return {...base,d:`랭크 ${a.r} · 정체가 드러난다 [서번트 마력 −${cost}]`,off:w.sm<cost||pig,auto:(w.hp<50||b.e.hp<45)&&w.sm>=cost+15,f:()=>clash(0,'art')}; }
 
