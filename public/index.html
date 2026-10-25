@@ -6658,7 +6658,7 @@ const Sim = (() => {
   const FIELD_SP={emiya:{hap:f=>Math.min(9,3+2*f.age)},nero:{hap:3,ehap:-4,ecv:-4},qinshihuang:{hap:4,sealHalf:1},semiramis:{hap:3,npTake:.6,take:.8},asterios:{hap:6,lock:1}};
   // 방벽 특례 (8번)
   // 보조 보구 (9번): imm 펼칠 때 · 그 밖은 남는 효과
-  const SUP_SP={merlin:{imm:{heal:15},heal:6,ehap:-3},tamamo:{imm:{heal:10,sm:15},heal:5},andersen:{imm:{heal:10},hap:8,deal:1.5,take:.8,cv:6,will:2},
+  const SUP_SP={merlin:{imm:{heal:10},heal:6,ehap:-3},tamamo:{imm:{heal:5,sm:10},heal:5},andersen:{imm:{heal:10},hap:8,deal:1.5,take:.8,cv:6,will:2},
     mozart:{imm:{np:.5},ehap:-6,oppAll:1.2},salieri:{imm:{np:.5},ehap:-6,flee:.15},caligula:{imm:{np:.6},ehap:-10,lock:1}};
   const WALL_SP={jeanne:{take:1,guard:1},leonidas:{take:.6,noRaid:1,bvBig:5},boudica:{bvAll:5,rev:1}};
   function fxHap(b,f,own){ // own: 효과를 가진 쪽의 합에 더하는 값 / 아니면 상대 쪽에 더하는 값
