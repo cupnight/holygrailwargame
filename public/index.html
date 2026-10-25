@@ -6780,7 +6780,7 @@ const Sim = (() => {
     else if(eh.id==='holmes') p=fxGet(b,'en','holmes')?0:(rd<=2?.35:.03);
     else if(eh.id==='circe') p=fxGet(b,'en','pig')?0:(rd<=2?.35:.08);
     else p=0;
-    return p*((b.eNP||0)>=1?.5:1); }
+    return p; }
   // NPC 마스터가 격돌 순간에 고른다 (6번)
   function npcNPChoice(b,started){ const e=b.e, est=npEst(b,'en'), losing=est<-4;
     if(e.master&&e.seals>0&&!b.npcSealUsed&&(b.ctx.final||losing||e.tac==='reckless'||e.tac==='hunter')&&ch(.6)) return 'seal';
