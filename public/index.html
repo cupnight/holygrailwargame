@@ -6762,9 +6762,9 @@ const Sim = (() => {
     let v=npRV(s.h)*NPK.rank+PV(s.P[3])*NPK.mana+(sp.bvAll||0)+(sp.bvBig&&SCV[scBase(s.o)]>=2?sp.bvBig:0);
     return v+npCVsp(b,s); }
 
-  // NPC의 보구 횟수 (12번): 기본 1 + 마스터 A 이상 1 + 서번트 마력 A 이상 1, 최대 3. 한 번 쓰면 다음 합에는 쓰지 않는다
+  // NPC의 보구 횟수 (12번): 기본 1 + 마스터 A 이상 1 + 서번트 마력 A 이상 1, 최대 3. 한 합에 한 번만 쓴다
   function npcNPMax(e){ if(e.hero==='solomon') return 0; if(e.hero==='arash') return 1; return Math.min(3,1+(e.pw>=74?1:0)+(PV(npcParams(e).p[3])>=5?1:0)); }
-  function npcCanNP(b){ const e=b.e; if(b.eArtUsed||npNoNP(b,'en')) return false; if((b.eNP||0)>=npcNPMax(e)) return false; return b.eNPr==null||b.round>=b.eNPr+2; }
+  function npcCanNP(b){ const e=b.e; if(b.eArtUsed||npNoNP(b,'en')) return false; if((b.eNP||0)>=npcNPMax(e)) return false; return b.eNPr!==b.round; }
   function npcMark(b){ b.eNP=(b.eNP||0)+1; b.eNPr=b.round; }
   // NPC가 이번 합에 먼저 보구를 꺼낼 확률 (12번 · 보구 종류마다 쓰는 때)
   function npcNPProb(b){ const w=W(), e=b.e, eh=H_BY[e.hero], r=npRole(eh), fin=b.ctx.final, rd=b.round; let p;
