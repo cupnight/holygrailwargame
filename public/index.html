@@ -303,6 +303,7 @@ aside{display:grid;gap:18px;align-content:start}
 @media (hover:hover) and (pointer:fine){.keys{display:block;margin:-14px 0 0;font-size:13px;color:var(--dim);line-height:2}.keys.keys-g{margin:0;font-size:11px;line-height:1.5;color:var(--faint);text-align:right}.keys.keys-g kbd{font-size:10px;padding:0 4px;border-bottom-width:1px}}
 .keys kbd{font-family:var(--f-mono);font-size:11px;padding:1px 6px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;color:var(--text);background:var(--panel2)}
 .choice .cd{font-size:12.5px;color:var(--dim);white-space:pre-line}
+.out-row{position:relative;z-index:1;margin-top:14px}
 .bondp{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r)}
 .bp-head{width:100%;display:flex;align-items:center;gap:10px;background:transparent;border:0;color:var(--text);padding:14px 18px;cursor:pointer;font:inherit;text-align:left}
 .bp-head .bp-t{color:var(--gold2);font-weight:600}
@@ -615,11 +616,12 @@ html.birth-on,html.birth-on body{overflow:hidden}
       <button class="btn primary" id="startBtn">태어나기</button>
       <button class="btn hidden" id="contBtn">이어하기</button>
       <p class="warn">사는 동안 일시 정지와 배속, 자동 결정을 진행할 수 있습니다.</p>
-      <div class="pn-row"><button class="pn-btn" id="patchBtn" type="button">패치 노트 <span class="mono" id="patchVer"></span><i class="dot hidden" id="patchDot" aria-label="새 소식"></i></button><a id="fbBtn" class="pn-btn fb" href="https://x.com/cupnight_" target="_blank" rel="noopener">의견 보내기 <span class="h">@cupnight_</span></a><button class="pn-btn inst hidden" id="installBtn" type="button">앱으로 설치</button><span class="pn-pair hidden" id="statPair"><button class="pn-btn st" id="statBtn" type="button"></button><button class="pn-help" data-help="stat" type="button" aria-label="익명 통계 도움말">?</button></span><span class="pn-pair hidden" id="ghostPair"><button class="pn-btn st gh" id="ghostBtn" type="button"></button><button class="pn-help" data-help="ghost" type="button" aria-label="다른 플레이어의 조 도움말">?</button></span><button class="pn-btn st fx" id="fxBtn" type="button"></button></div>
+      <div class="pn-row"><button class="pn-btn" id="patchBtn" type="button">패치 노트 <span class="mono" id="patchVer"></span><i class="dot hidden" id="patchDot" aria-label="새 소식"></i></button><span class="pn-pair hidden" id="statPair"><button class="pn-btn st" id="statBtn" type="button"></button><button class="pn-help" data-help="stat" type="button" aria-label="익명 통계 도움말">?</button></span><span class="pn-pair hidden" id="ghostPair"><button class="pn-btn st gh" id="ghostBtn" type="button"></button><button class="pn-help" data-help="ghost" type="button" aria-label="다른 플레이어의 조 도움말">?</button></span><button class="pn-btn st fx" id="fxBtn" type="button"></button></div>
       <p class="keys">단축키 — <kbd>Space</kbd> 일시정지 · <kbd>1</kbd>–<kbd>4</kbd> 배속 · <kbd>A</kbd> 자동 결정 · <kbd>1</kbd>–<kbd>9</kbd> 선택지 · <kbd>0</kbd> 묶음 접기 · <kbd>Esc</kbd> 팝업 닫기·접기</p>
       <div class="ghn hidden" id="ghNews" aria-live="polite"></div>
       <div class="pn-row hidden" id="ghnRow"><button class="pn-btn st bell" id="ghnAlert" type="button"></button><button class="ghn-more" id="ghnAll" type="button"></button></div>
     </div>
+    <div class="pn-row out-row"><a id="fbBtn" class="pn-btn fb" href="https://x.com/cupnight_" target="_blank" rel="noopener">의견 보내기 <span class="h">@cupnight_</span></a><button class="pn-btn inst hidden" id="installBtn" type="button">앱으로 설치</button></div>
     <div class="bondp hidden" id="bondPanel">
       <button class="bp-head" id="bpHead" type="button" aria-expanded="false" aria-controls="bpBody"><span class="bp-t">인연 소환</span><span class="bp-cur" id="bpCur">고르지 않음</span><span class="bp-arr" aria-hidden="true">▾</span></button>
       <div class="bp-body hidden" id="bpBody">
