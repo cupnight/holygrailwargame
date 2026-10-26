@@ -763,7 +763,7 @@ const Sim = (() => {
      frags:['나는 아서 왕의 이야기를 들으며 자랐다. 그분처럼 되고 싶었지.','예루살렘을 눈앞에 두고 돌아섰다. 이길 수는 있어도 지킬 수는 없었으니까.','석궁 화살 하나에 죽었다. 쏜 소년은 살려 주라고 했다. 그게 기사니까.']},
     {id:'emiya',cls:'bow',name:'에미야',title:'이름 없는 수호자',from:'어느 마술사의 끝',s:['D','C','C','B','E'],art:{n:'무한의 검제',d:'마음속 풍경에 꽂힌 무수한 검'},traits:['연민','명예'],wish:'정의의 편이 되려 했던 젊은 날의 자신을 지우는 것',relic:'금이 간 붉은 보석 펜던트',sp:'intel',
      frags:['누군가를 구하고 싶었다. 모두를 구하고 싶었다. 그 꿈은 틀리지 않았다. 다만 대가가 컸지.','한 사람을 살리려고 열 명을 버렸다. 그 계산을 몇 번이나 했는지 모른다.','죽은 뒤에도 나는 세계의 청소부가 되었다. 끝없이, 같은 일을.']},
-    {id:'gilgamesh',cls:'bow',name:'길가메시',title:'영웅왕',from:'길가메시 서사시',s:['B','C','C','A','A'],art:{n:'에누마 엘리시',d:'세계를 갈라놓은 원초의 검'},traits:['야망','자유'],wish:'성배는 원래 내 보물이다. 되찾을 뿐',relic:'세상에서 처음 허물을 벗은 뱀의 화석',sp:'gate',
+    {id:'gilgamesh',cls:'bow',name:'길가메시',title:'영웅왕',from:'길가메시 서사시',s:['B','B','B','A','A'],art:{n:'에누마 엘리시',d:'세계를 갈라놓은 원초의 검'},traits:['야망','자유'],wish:'성배는 원래 내 보물이다. 되찾을 뿐',relic:'세상에서 처음 허물을 벗은 뱀의 화석',sp:'gate',
      frags:['세상의 보물은 모두 내 것이었다. 지금도 그렇다.','친구라 부를 수 있는 자는 단 하나였다. 흙으로 빚어진 녀석이었지.','불로초를 손에 넣었다. 뱀에게 빼앗겼다. …웃을 테면 웃어라, 잡종.']},
     {id:'chiron',cls:'bow',name:'케이론',title:'현명한 켄타우로스',from:'그리스 신화',s:['B','A+','B','B','C'],art:{n:'안타레스 스나이프',d:'하늘의 전갈자리를 겨누는 화살'},traits:['연민','충성'],wish:'제자들이 무사히 살아가는 것',relic:'켄타우로스의 낡은 활시위',sp:'intel',
      frags:['아킬레우스, 이아손, 아스클레피오스… 모두 제 제자였습니다. 모두 자랑스럽습니다.','헤라클레스의 화살에 히드라의 독이 묻어 있었습니다. 저는 죽지 못하는 몸이었지요.','불사를 프로메테우스에게 넘기고서야 고통이 끝났습니다. 그리고 별이 되었습니다.']},
@@ -3113,7 +3113,7 @@ const Sim = (() => {
     rama:{n:'나찰을 꿰뚫는 불멸 - 브라흐마스트라',r:'A+',k:'대마보구',x:'나찰왕 라바나를 쓰러뜨린 불멸의 화살을 검처럼 던진다.'},
     richard:{n:'영원히 머나먼 승리의 검 - 엑스칼리버',r:'D~A+',k:'대군보구',x:'손에 쥔 것이라면 검이든 나뭇가지든 엑스칼리버라 우겨 빛의 검으로 바꾼다. 원본에는 끝내 미치지 못하지만, 그는 그것을 누구보다 잘 휘두른다.'},
     emiya:{n:'무한의 검제 - 언리미티드 블레이드 워크스',r:'E~A++',k:'고유결계',x:'마음속 풍경을 현실로 펼친다. 무수한 검이 꽂힌 황야.'},
-    gilgamesh:{n:'천지를 괴리시키는 개벽의 별 - 에누마 엘리시',r:'A++',k:'대계보구',x:'세계를 갈라놓은 원초의 검 에아의 일격. 땅과 하늘이 찢어진다.'},
+    gilgamesh:{n:'천지를 괴리시키는 개벽의 별 - 에누마 엘리시',r:'EX',k:'대계보구',x:'세계를 갈라놓은 원초의 검 에아의 일격. 땅과 하늘이 찢어진다.'},
     chiron:{n:'천갈일사 - 안타레스 스나이프',r:'A',k:'대인보구',x:'하늘의 전갈자리가 되어 적을 겨누는 단 한 발.'},
     arash:{n:'유성일조 - 스텔라',r:'B++',k:'대군보구',x:'국경을 정한 단 한 발의 화살. 쏘는 자의 몸과 바꾼다.'},
     tristan:{n:'통곡의 환주 - 페일노트',r:'A',k:'대군보구',x:'하프의 현을 튕겨 날리는 보이지 않는 화살. 멀리서, 소리 없이.'},
@@ -5072,7 +5072,7 @@ const Sim = (() => {
   function atkKinds(h){ const k=['round']; if(canMagic(h)) k.push('magic'); if(burstSk(h)) k.push('burst'); return k; }
   const expUp=v=>(S.hero==='lancelot'&&v>0)?Math.round(v*.75):v;
   const CLS_BIAS={bow:.6,caster:0,shadow:-11,judge:-6.8,sword:-.6,lance:.2,berserk:-1.2};
-  const BIAS={lancelot:-2,gilgamesh:10.7,superorion:6.7,arjuna:4,karna:10.5,caenis:-5,enkidu:5,artoria:2,rama:-7,solomon:-2.5,raikou:-4,asterios:1,ibaraki:0.5,chiron:-7.5,ptolemaios:-6.5,tesla:4,nobunaga:3,robin:-1.5,paracelsus:-2,circe:-2,serenity:-7,jack:-5,shuten:6,kinghassan:7.5,lishuwen:1.5,semiramis:2,emiya:-2.5,shakespeare:-1,hundred:3,kojiro:-0.5,holmes:-1,scathach:4,atalanta:3,spartacus:4.5,bedivere:0.5,tamamo:-2.5,salieri:-3,penthesilea:-3,diarmuid:3,achilles:-2.5,dantes:3};
+  const BIAS={lancelot:-2,gilgamesh:3,superorion:6.7,arjuna:4,karna:10.5,caenis:-5,enkidu:5,artoria:2,rama:-7,solomon:-2.5,raikou:-4,asterios:1,ibaraki:0.5,chiron:-7.5,ptolemaios:-6.5,tesla:4,nobunaga:3,robin:-1.5,paracelsus:-2,circe:-2,serenity:-7,jack:-5,shuten:6,kinghassan:7.5,lishuwen:1.5,semiramis:2,emiya:-2.5,shakespeare:-1,hundred:3,kojiro:-0.5,holmes:-1,scathach:4,atalanta:3,spartacus:4.5,bedivere:0.5,tamamo:-2.5,salieri:-3,penthesilea:-3,diarmuid:3,achilles:-2.5,dantes:3};
   function clsBonus(h,P){ return h.cls==='caster'? PV(P[3])*1.2 : MAGE_BERSERK[h.id]? PV(P[3])*2.0 : h.cls==='shadow'? PV(P[1])*1.0 : 0; }
   function npcPower(p,vsMe){
     const h=H_BY[p.hero];
