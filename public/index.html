@@ -328,6 +328,7 @@ aside{display:grid;gap:18px;align-content:start}
 .cf-inL{animation:cfInL var(--d) cubic-bezier(.3,.1,.3,1) both}
 .cf-inR{animation:cfInR var(--d) cubic-bezier(.3,.1,.3,1) both}
 .cf-lo{animation:cfLo var(--d) linear both}
+.cf-hand{animation:cfHand var(--d) linear both}
 .cf-wall{animation:cfWall var(--d) linear both}
 .cf-fl{transform-box:fill-box!important;transform-origin:center;animation:cfFl var(--d) ease-out both}
 .cf-sh{transform-box:fill-box!important;transform-origin:center;animation:cfSh var(--d) ease-out both}
@@ -340,6 +341,7 @@ aside{display:grid;gap:18px;align-content:start}
 @keyframes cfShout{0%{opacity:0;transform:translateY(4px)}8%,42%{opacity:1;transform:none}56%,100%{opacity:0}}
 @keyframes cfInL{0%{transform:translateX(-210px);opacity:0}10%{opacity:1}42%,100%{transform:none;opacity:1}}
 @keyframes cfInR{0%{transform:translateX(210px);opacity:0}10%{opacity:1}42%,100%{transform:none;opacity:1}}
+@keyframes cfHand{0%,50%{opacity:1}56%,100%{opacity:0}}
 @keyframes cfLo{0%,48%{opacity:1}62%,100%{opacity:.12}}
 @keyframes cfWall{0%{opacity:0}12%,100%{opacity:1}}
 @keyframes cfFl{0%,36%{opacity:0;transform:scale(.4)}46%{opacity:1;transform:scale(1.1)}64%,100%{opacity:0;transform:scale(1.3)}}
@@ -10977,9 +10979,12 @@ const CFX_M={
   a:(x0,x1,y,c,f)=>{ const {i,d}=cfxDefs(c); let o=''; for(let k=0;k<15;k++){ const t=k/14-.5, yy=y+t*76, xe=x1-Math.abs(t)*40-(k%3)*10; o+=`<line x1="${x0}" y1="${y+t*14}" x2="${xe}" y2="${yy}" stroke="url(#cfl${i})" stroke-width="${k%2?1.3:2}"/><path d="M${xe} ${yy} l-7 -3 l0 6 z" fill="${c[0]}" opacity=".9"/>`; } return d+cfxFlip(x0,x1,f,`<g filter="url(#cfg${i})" opacity=".6">${o}</g>${o}`); },
   c:(x0,x1,y,c,f,w=34)=>{ const {i,d}=cfxDefs(c); return d+cfxFlip(x0,x1,f,`<path d="M${x0} ${y-w*.35} L${x1-10} ${y-w/2} Q${x1+12} ${y} ${x1-10} ${y+w/2} L${x0} ${y+w*.35} Z" fill="url(#cfl${i})" filter="url(#cfg${i})" opacity=".9"/><path d="M${x0} ${y-w*.14} L${x1-8} ${y-w*.2} Q${x1+4} ${y} ${x1-8} ${y+w*.2} L${x0} ${y+w*.14} Z" fill="${c[0]}" opacity=".95"/>${(()=>{ const L=x1-x0, n=Math.max(4,Math.round(L/50)); let o=''; for(let k=0;k<n;k++){ const t=k/n, a=x0+L*t*.92, b=x0+L*(t*.92+.2); o+=`<line x1="${a}" y1="${y-w/2-6-(k%4)*2}" x2="${Math.min(x1-14,b)}" y2="${y-w/2-6-(k%4)*2}" stroke="${c[1]}" stroke-width="1" opacity=".5"/><line x1="${a+L*.05}" y1="${y+w/2+6+(k%4)*2}" x2="${Math.min(x1-14,b+L*.04)}" y2="${y+w/2+6+(k%4)*2}" stroke="${c[1]}" stroke-width="1" opacity=".5"/>`; } return o; })()}<circle cx="${x1-6}" cy="${y}" r="${w*.7}" fill="url(#cfr${i})"/>`); },
   n:(x0,x1,y,c,f,h=92)=>{ const {i,d}=cfxDefs(c); let o=''; for(let k=0;k<6;k++){ const yy=y-h/2+k*h/5, a=8+k%2*5; o+=`<path d="M${x0} ${yy} C${x0+(x1-x0)*.3} ${yy-a}, ${x0+(x1-x0)*.6} ${yy+a}, ${x1-(k%2?14:0)} ${yy}" stroke="url(#cfl${i})" stroke-width="${k===2||k===3?4:2.2}" fill="none"/>`; } return d+cfxFlip(x0,x1,f,`<rect x="${x0}" y="${y-h/2}" width="${x1-x0}" height="${h}" fill="url(#cfl${i})" opacity=".18"/><g filter="url(#cfg${i})">${o}</g>${o}`); },
-  w:(x0,x1,y,c,f)=>{ const {i,d}=cfxDefs(c), P=[]; for(let k=0;k<=9;k++) P.push([x0+(x1-x0)*k/9,y+(k%2?-1:1)*(3+k)]);
-    const top=P.map(p=>`${p[0]},${p[1]-3-(p[0]-x0)/(x1-x0)*9}`).join(' '), bot=P.slice().reverse().map(p=>`${p[0]},${p[1]+3+(p[0]-x0)/(x1-x0)*9}`).join(' ');
-    return d+cfxFlip(x0,x1,f,`<polygon points="${top} ${bot}" fill="url(#cfl${i})" filter="url(#cfg${i})"/><polyline points="${P.map(p=>p.join(',')).join(' ')}" stroke="#07050b" stroke-width="5" fill="none"/>${[.3,.5,.7,.85].map((t,k)=>{const x=x0+(x1-x0)*t, g=k%2?-1:1; return `<path d="M${x} ${y} l${8+k*3} ${g*(10+k*3)} l6 ${g*8}" stroke="${c[1]}" stroke-width="1.2" fill="none" opacity=".7"/>`;}).join('')}<circle cx="${x1}" cy="${y}" r="22" fill="url(#cfr${i})"/>`); }};
+  // 대계: 균열은 출발점(x0)에서 일정한 간격으로 그린다. 길이가 달라도 출발점 쪽 모양이 같아서, 꿰뚫은 뒤 늘어날 때 그대로 이어진다
+  w:(x0,x1,y,c,f)=>{ const {i,d}=cfxDefs(c), P=[], st=22, n=Math.max(4,Math.ceil((x1-x0)/st)), amp=r=>3+Math.min(9,r/st);
+    for(let k=0;k<=n;k++){ const r=Math.min(k*st,x1-x0); const j=.65+((k*37+11)%10)/14; P.push([x0+r+(k%3-1)*4,y+(k%2?-1:1)*amp(r)*j,r]); }
+    const wd=r=>3+Math.min(9,r/st), top=P.map(p=>`${p[0]},${p[1]-wd(p[2])}`).join(' '), bot=P.slice().reverse().map(p=>`${p[0]},${p[1]+wd(p[2])}`).join(' ');
+    let br=''; for(let k=1;k*50<x1-x0-10;k++){ const x=x0+k*50, g=k%2?-1:1; br+=`<path d="M${x} ${y} l${8+k%3*3} ${g*(10+k%3*3)} l6 ${g*8}" stroke="${c[1]}" stroke-width="1.2" fill="none" opacity=".7"/>`; }
+    return d+cfxFlip(x0,x1,f,`<polygon points="${top} ${bot}" fill="url(#cfl${i})" filter="url(#cfg${i})"/><polyline points="${P.map(p=>p[0]+','+p[1]).join(' ')}" stroke="#07050b" stroke-width="5" fill="none"/>${br}<circle cx="${x1}" cy="${y}" r="22" fill="url(#cfr${i})"/>`); }};
 const cfxWall=(x,y,c,h=70)=>{ const {i,d}=cfxDefs(c); let o=''; for(let k=0;k<5;k++){ const yy=y-h/2+k*h/5; o+=`<path d="M${x-12} ${yy+3} h24 v${h/5-10} q-12 10 -24 0 z" fill="${c[2]}" fill-opacity=".35" stroke="${c[1]}" stroke-width="1.4"/>`; } return d+`<rect x="${x-3}" y="${y-h/2-6}" width="6" height="${h+12}" rx="3" fill="${c[1]}" filter="url(#cfg${i})"/>${o}`; };
 const cfxFlash=(x,y,c,r=64)=>{ const {i,d}=cfxDefs(c); return d+`<circle cx="${x}" cy="${y}" r="${r}" fill="url(#cfr${i})"/>`+Array.from({length:12},(_,k)=>{ const a=k*Math.PI/6+.2, r1=r*.45, r2=r*(k%2?.9:1.15); return `<line x1="${x+Math.cos(a)*r1}" y1="${y+Math.sin(a)*r1}" x2="${x+Math.cos(a)*r2}" y2="${y+Math.sin(a)*r2}" stroke="${c[1]}" stroke-width="1.5"/>`; }).join(''); };
 const cfxShards=(x,y,c,n=22,seed=3)=>{ let s=seed,o=''; for(let k=0;k<n;k++){ s=(s*9301+49297)%233280; const a=s/233280*6.28; s=(s*9301+49297)%233280; const r=16+s/233280*74, px=x+Math.cos(a)*r, py=y+Math.sin(a)*r*.6; o+=`<path d="M${px} ${py} l${4+k%3*2} -2 l-3 5 z" fill="${c[k%2]}" opacity="${.3+(k%4)*.17}"/>`; } return o; };
@@ -10989,14 +10994,14 @@ function cfxSvg(fx){ const Y=128, M=CFX_M, sk=x=>M[x]?x:'p', inC=(k,side)=>k==='
   if(fx.t==='block'){ // 방벽을 왼쪽에 두고 그린 뒤, 상대 방벽이면 좌우를 뒤집는다
     const A=fx.side==='me'?fx.en:fx.me, ac=CFX_C[fx.side==='me'?'en':'me'], wx=150;
     let g=`<g class="cf-wall">${cfxWall(wx,Y,CFX_C.wall)}</g>`;
-    g+=`<g class="cf-lo"><g class="${inC(sk(A.sc),'R')}">${M[sk(A.sc)](wx+12,400,Y,ac,true)}</g></g>`+head(sk(A.sc),'R',wx+12,ac).replace('<g class="cf-hdR">','<g class="cf-hdR" style="--hdX:238px">');
+    g+=`<g class="${fx.full?'cf-lo':'cf-hand'}"><g class="${inC(sk(A.sc),'R')}">${M[sk(A.sc)](wx+12,400,Y,ac,true)}</g></g>`+head(sk(A.sc),'R',wx+12,ac).replace('<g class="cf-hdR">','<g class="cf-hdR" style="--hdX:238px">');
     g+=`<g class="cf-fl">${cfxFlash(wx+6,Y,CFX_C.wall,50)}</g>`;
     if(fx.full) g+=`<g class="cf-sh"><path d="M${wx+12} ${Y-40} A44 44 0 0 1 ${wx+12} ${Y+40}" stroke="#cfe3d4" stroke-width="2" fill="none" opacity=".7"/><path d="M${wx+20} ${Y-30} A32 32 0 0 1 ${wx+20} ${Y+30}" stroke="#cfe3d4" stroke-width="1" fill="none" opacity=".45"/>${cfxShards(wx+80,Y-6,ac,24,9)}</g>`;
     else g+=`<g class="cf-winR" style="opacity:.55">${M[sk(A.sc)](0,400,Y,ac,true)}</g><g class="cf-sh">${cfxShards(wx,Y,CFX_C.wall,14,7)}</g>`;
     return fx.side==='me'?g:`<g transform="translate(400,0) scale(-1,1)">${g}</g>`; }
   const mk=sk(fx.me.sc), ek=sk(fx.en.sc);
-  let g=`<g class="${fx.res==='me'?'':'cf-lo'}"><g class="${inC(mk,'L')}">${M[mk](0,200,Y,CFX_C.me,false)}</g></g>`;
-  g+=`<g class="${fx.res==='en'?'':'cf-lo'}"><g class="${inC(ek,'R')}">${M[ek](200,400,Y,CFX_C.en,true)}</g></g>`;
+  let g=`<g class="${fx.res==='me'?'cf-hand':'cf-lo'}"><g class="${inC(mk,'L')}">${M[mk](0,200,Y,CFX_C.me,false)}</g></g>`;
+  g+=`<g class="${fx.res==='en'?'cf-hand':'cf-lo'}"><g class="${inC(ek,'R')}">${M[ek](200,400,Y,CFX_C.en,true)}</g></g>`;
   g+=head(mk,'L',200,CFX_C.me)+head(ek,'R',200,CFX_C.en);
   g+=`<g class="cf-fl">${cfxFlash(200,Y,fx.res==='en'?CFX_C.en:CFX_C.me)}${fx.res==='off'?cfxFlash(200,Y,CFX_C.en,40):''}</g>`;
   if(fx.res==='me') g+=`<g class="cf-winL">${M[mk](0,394,Y,CFX_C.me,false)}</g><g class="cf-sh">${cfxShards(300,Y,CFX_C.en)}</g>`;
