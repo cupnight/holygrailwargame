@@ -11036,7 +11036,7 @@ function cfxLab(f,side,lo,wall){ return `<div class="cf-lab ${side}${wall?' wc':
 function cfxEnd(){ clearTimeout(cfxT); cfxT=null; const o=$('#cfx'); if(o) o.remove(); try{ Sim.setHold(false); }catch(e){} }
 function clashFx(fx){
   try{ if(store.get(K_NOCFX)===true||document.hidden||matchMedia('(prefers-reduced-motion: reduce)').matches) return; }catch(e){}
-  cfxEnd(); const sp=(Sim.S&&Sim.S.speed)||1, D=sp>=8?800:sp>=4?1100:sp>=2?1450:1850;
+  cfxEnd(); const D=3000; // 배속과 상관없이 3초
   const lo=fx.t==='block'?{me:fx.side==='en'&&fx.full,en:fx.side==='me'&&fx.full}:{me:fx.res!=='me',en:fx.res!=='en'};
   const sh=fx[fx.shout]||fx.me, shC=fx.t==='block'&&fx.side==='me'?' wc':fx.shout==='en'?' en':'';
   const o=document.createElement('div'); o.id='cfx'; o.className='cfx'; o.style.setProperty('--d',D+'ms');
