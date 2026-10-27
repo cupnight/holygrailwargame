@@ -5219,7 +5219,7 @@ const Sim = (() => {
     if(t.artKnown) return; t.artKnown=true; const a=artOf(H_BY[t.hero]);
     log(`${why||''}${pName(t)}의 보구: ${a.n} (랭크 ${a.r} · ${a.k}). ${a.x}`,'war');
     wrec('art',`${pName(t)}의 보구를 알았다 — ${a.n}`,{p:t.i});
-    if(!t.revealed){ giveHint(t,'보구의 기세로 짐작했다. '); addIntel(t,45); }
+    if(!t.revealed){ giveHint(t,'보구의 기세로 짐작했다. '); addIntel(t,45,'sight'); }
   }
   function learnLore(t,n){ const th=H_BY[t.hero]; t.lore=Math.min(th.frags.length,(t.lore||0)+(n||1)); }
   // 정보를 얻은 경로에 맞는 문장
@@ -5251,9 +5251,10 @@ const Sim = (() => {
   function addIntel(t,g,why){
     if(g>0&&t.hero==='lancelot') g=Math.round(g*.6);
     t.intel=clamp(t.intel+g); if(t.intel>=45) clsReveal(t,'모은 단서를 맞춰 보았다. ');
-    if(!t.known&&t.intel>=30){ t.known=true; log(`${cn(t)} 조의 거처를 알아냈다. ${t.arche}, ${t.mname}.`,'war'); ghostIntro(t); }
-    if(!t.wishKnown&&t.intel>=50){ t.wishKnown=true; log(`${t.mname}의 소원은 ‘${AR(t).wish}’이라고 한다.`,'n'); }
-    const T=INTEL_SRC[why]||INTEL_SRC.def;
+    const loc=why!=='sight'&&why!=='btalk'; // 싸우며 본 것(sight: 보구·마스터)과 전장에서 나눈 말(btalk)은 거처나 소원까지 알려 주지 않는다
+    if(loc&&!t.known&&t.intel>=30){ t.known=true; log(`${cn(t)} 조의 거처를 알아냈다. ${t.arche}, ${t.mname}.`,'war'); ghostIntro(t); }
+    if(loc&&!t.wishKnown&&t.intel>=50){ t.wishKnown=true; log(`${t.mname}의 소원은 ‘${AR(t).wish}’이라고 한다.`,'n'); }
+    const T=INTEL_SRC[why==='btalk'?'talk':why]||INTEL_SRC.def;
     const TH=(typeof globalThis!=='undefined'&&globalThis.__TH)||INTEL_TH;
     if(TH.hint&&t.intel>=TH.hint&&!t.revealed&&!t.hint) giveHint(t,'');
     if(t.intel>=(hero()&&hero().sp==='judge'?TH.judge:TH.name)) revealPair(t,pick(T.pair));
@@ -6217,7 +6218,7 @@ const Sim = (() => {
   }
   function nightDecision(){
     const w=W(), h=hero();
-    const unknown=alivePairs().filter(p=>p.intel<80);
+    const unknown=alivePairs().filter(p=>p.intel<80||!p.known);
     const targets=alivePairs().filter(p=>p.known&&!p.ally&&!p.truce);
     const ally=w.pairs.find(p=>p.ally&&p.alive);
     const ch_=[];
@@ -6415,7 +6416,7 @@ const Sim = (() => {
   // 정찰 클래스 보정: 선택지 배지와 결과 칩으로 보여 준다
   const SCOUT_CLS=h=>h.sp==='judge'?{b:'룰러 보정',r:'「룰러」의 권능으로 진명에 한 걸음 더 다가갔다'}:h.cls==='bow'?{b:'아처 보정',r:'「아처」의 눈으로 더 많은 단서를 찾아냈다'}:null;
   function rideScout(){
-    const w=W(),h=hero(); const pool=alivePairs().filter(p=>p.intel<80&&!p.ally); const t=wpick(pool,p=>100-p.intel); if(!t){ log('도시는 조용했다.'); return; }
+    const w=W(),h=hero(); const pool=alivePairs().filter(p=>(p.intel<80||!p.known)&&!p.ally); const t=wpick(pool,p=>Math.max(10,100-p.intel)+(p.known?0:30)); if(!t){ log('도시는 조용했다.'); return; }
     w.roamed=true; w.exposure=clamp(w.exposure+expUp(12)); w.sm=clamp(w.sm-8);
     log(pickNR([`${h.name}의 탈것이 밤의 대로를 가로질렀다. 신호등이 한꺼번에 깜빡였다.`,`${h.name}${J(h.name,과)} 함께 강을 따라 도시 끝까지 내달렸다. 바람 소리밖에 들리지 않았다.`,'고가도로 위를 질주했다. 도시의 마력이 지도처럼 눈 아래 펼쳐졌다.',`${h.name}의 탈것이 지붕에서 지붕으로 뛰어올랐다. 거처 몇 곳의 불빛이 한눈에 들어왔다.`],'rideS'),'war');
     addIntel(t,ri(40,55)+(h.sp==='intel'?15:0)+SV(h,'insight')+S.st.lore*.08,'trail'); if(CHK) CHK.push({txt:'「라이더」의 탈것으로 도시를 가로질렀다',ok:true});
@@ -6424,7 +6425,7 @@ const Sim = (() => {
   }
   function scout(){
     const w=W(),h=hero();
-    const t=wpick(alivePairs().filter(p=>p.intel<80),p=>100-p.intel); if(!t){log('도시는 조용했다.');return;}
+    const t=wpick(alivePairs().filter(p=>p.intel<80||!p.known),p=>Math.max(10,100-p.intel)+(p.known?0:30)); if(!t){log('도시는 조용했다.');return;}
     w.roamed=true;
     const site=pick(CX().sites||['구시가지']);
     log(pickNR(['옥상에서 옥상으로 건너갔다.','강변을 따라 마력의 흔적을 쫓았다.','서번트가 먼저 기척을 찾아냈다.','버려진 공장 지대를 돌았다.',`${site} 쪽으로 마력의 잔향이 이어져 있었다.`,'지하철 막차가 끊긴 선로를 따라 걸었다.','인적 없는 상가 지하 주차장을 한 층씩 내려갔다.','공사장 크레인 꼭대기에서 도시를 내려다보았다.',h.cls==='bow'?`${h.name}${J(h.name,이)} 멀리서 도시 전체를 훑었다.`:h.cls==='shadow'?`${h.name}${J(h.name,이)} 기척을 지운 채 앞서 나갔다.`:h.cls==='rider'?`${h.name}의 탈것을 타고 도시를 가로질렀다.`:h.cls==='caster'?`${h.name}${J(h.name,이)} 사역마를 날려 거리를 살폈다.`:`${h.name}${J(h.name,이)} 당신을 등 뒤에 두고 앞장섰다.`],'scoutL'));
@@ -6673,7 +6674,7 @@ const Sim = (() => {
     else if(BEATS[my.slot]===en.slot) d+=12; else if(BEATS[en.slot]===my.slot) d-=12;
     let t=d>=15?2:d>=5?1:d>-5?0:d>-20?-1:-2;
     if(my.slot==='def'||en.slot==='def') t=Math.max(-1,Math.min(1,t));
-    e.mDueled=true; e.mSeen=true; addIntel(e,20);
+    e.mDueled=true; e.mSeen=true; addIntel(e,20,'sight');
     const eN=e.mname, mN=h.name;
     if(t===2){ b.eWeak={v:8,until:99}; log(`승부는 한순간이었다. ${eN}${J(eN,이)} 피를 토하며 무릎을 꿇었다. 서번트에게 가던 마력이 크게 흔들린다.`,'war'); }
     else if(t===1){ b.eWeak={v:5,until:b.round+1}; log(`${eN}${J(eN,이)} 비틀거렸다. 상대 서번트의 움직임이 잠시 둔해졌다.`,'war'); }
@@ -7478,7 +7479,7 @@ const Sim = (() => {
     const ar=AR(e);
     if(e.master){ log(`${e.mname}: “${pick((MLX[e.aid]&&MLX[e.aid].reply)||REPLY[e.tac]||REPLY.cunning)}”`,'enemy'); }
     if(!e.wishKnown){ e.wishKnown=true; log(`${e.mname}의 소원은 ‘${ar.wish}’이라고 했다.`,'n'); }
-    addIntel(e,15,'talk'); learnLore(e,1);
+    addIntel(e,15,'btalk'); learnLore(e,1);
     const eh=H_BY[e.hero];
     if(e.revealed&&eh.frags[(e.lore||1)-1]) log(voiceLine(eh,eh.frags[(e.lore||1)-1]),'enemy');
     const bd=S.st.bond;
