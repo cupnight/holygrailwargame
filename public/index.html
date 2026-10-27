@@ -7031,7 +7031,7 @@ const Sim = (() => {
   function npcMark(b){ b.eNP=(b.eNP||0)+1; b.eNPr=b.round; b.e.sm=Math.max(0,npcSmOf(b.e)-npcCost(b.e)); }
   // NPC가 이번 합에 먼저 보구를 꺼낼 확률 (12번 · 보구 종류마다 쓰는 때)
   function npcNPProb(b){ const w=W(), e=b.e, eh=H_BY[e.hero], r=npRole(eh), fin=b.ctx.final, rd=b.round; let p;
-    if(r==='A') p=(.1+(e.hp<50?.1:0)+(fin?.1:0)+(w.hp<=35?.25:0))*npcPers(e);
+    if(r==='A') p=eh.id==='arash'&&!fin&&e.hp>=35?0:(.1+(e.hp<50?.1:0)+(fin?.1:0)+(w.hp<=35?.25:0))*npcPers(e);
     else if(r==='S') p=(.05+(100-e.hp)*.004+(fin?.08:0))*npcPers(e);
     else if(r==='D') p=fxGet(b,'en','wall')?0:(!(b.artN>0)?.05+(fin?.2:0)+(e.hp<50?.2:0):.05);
     else if(r==='F') p=fxGet(b,'en','field')?0:(rd===1?.35:rd===2?.25:.08)+(fin?.1:0);
@@ -7059,6 +7059,7 @@ const Sim = (() => {
     if(eh.id==='angra') return ch(.5)?'reflect':null;
     if(eh.id==='holmes'){ if(ch(.4)){ b.enKnow=true; return 'fire'; } return null; }
     if(!'ASF'.includes(r)) return null;
+    if(eh.id==='arash'&&!b.ctx.final&&e.hp>=35) return null; // 스텔라는 결전이거나 쓰러지기 직전에만
     return ch(Math.min(.9,(.3+(b.ctx.final?.2:0)+(e.hp<50?.15:0))*npcPers(e)))?'fire':null; }
   function npcFire(b,react){ const w=W(),h=hero(),e=b.e, ea=artOf(H_BY[e.hero]); npcMark(b);
     if(e.hero==='karna'&&!e.kavacha){ e.kavacha=1; log(`${pName(e)}${J(pName(e),이)} 황금 갑옷을 벗어 던졌다.`,'war'); }
@@ -8038,7 +8039,7 @@ const Sim = (() => {
         x.fx.push(cv(x,false)>res?{type:'pig',id,left:d,age:0,ehap:-12,lock:1}:{type:'pig',id,left:1,age:0,ehap:-4,lock:0}); } };
     // 먼저 꺼낼 확률 (플레이어 전투의 npcNPProb와 같은 기준)
     const prob=(x,r)=>{ const ro=R2(x), h=x.p.hp, id=x.h.id; let p;
-      if(ro==='A') p=(.1+(h<50?.1:0)+(final?.1:0)+(x.o.p.hp<=35?.25:0))*npcPers(x.p);
+      if(ro==='A') p=id==='arash'&&!final&&h>=35?0:(.1+(h<50?.1:0)+(final?.1:0)+(x.o.p.hp<=35?.25:0))*npcPers(x.p);
       else if(ro==='S') p=(.05+(100-h)*.004+(final?.08:0))*npcPers(x.p);
       else if(ro==='D') p=get(x,'wall')?0:(x.o.artN===0?.05+(final?.2:0)+(h<50?.2:0):.05);
       else if(ro==='F') p=get(x,'field')?0:(r===1?.35:r===2?.25:.08)+(final?.1:0);
@@ -8067,6 +8068,7 @@ const Sim = (() => {
         if(x.h.id==='angra'){ if(ch(.5)){ pay(x); react.set(x,'reflect'); } continue; }
         if(x.h.id==='holmes'){ if(ch(.4)){ pay(x); x.fx.push({type:'holmes',id:'holmes',left:1,age:0}); fire.set(x,true); } continue; }
         if(!'ASF'.includes(ro)) continue;
+        if(x.h.id==='arash'&&!final&&x.p.hp>=35) continue;
         if(ch(Math.min(.9,(.3+(final?.2:0)+(x.p.hp<50?.15:0))*npcPers(x.p)))){ pay(x); fire.set(x,true); if(ro==='F') ftag.set(x,true); if(ro==='S'&&!get(x,'self')) x.fx.push({type:'self',id:x.h.id,left:99}); } }
       // 3) 보구 판정
       const fa=fire.get(A), fb=fire.get(B);
