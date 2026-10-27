@@ -246,6 +246,7 @@ aside{display:grid;gap:18px;align-content:start}
 
 
 /* ---------- 결정 ---------- */
+.dlg.busy .choice,.dlg.busy .q-help,.dlg.busy #dFold{opacity:.4;pointer-events:none;transition:opacity .2s}
 .dlg{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;background:rgba(10,8,14,.55);padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
 @media (min-width:700px){.dlg{align-items:center}}
 .sheet{width:100%;max-width:560px;max-height:calc(100% - 20px);overflow:auto;background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--gold);border-radius:var(--r);padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:rise .28s ease-out}
@@ -10449,7 +10450,7 @@ function enterGame(fresh){
 }
 try{document.getElementById('heroCount').textContent=Sim.HEROES.length;}catch(e){}
 function loop(){ cancelAnimationFrame(raf); last=performance.now(); const f=t=>{ const dt=Math.min(.25,(t-last)/1000); last=t; Sim.tick(dt); prog(); raf=requestAnimationFrame(f); }; raf=requestAnimationFrame(f); }
-function prog(){ const S=Sim.S; if(!S) return; $('#gProg').style.width=(Sim.yearProgress()*100).toFixed(1)+'%'; }
+function prog(){ const S=Sim.S; if(!S) return; busyCheck(); $('#gProg').style.width=(Sim.yearProgress()*100).toFixed(1)+'%'; }
 function stamp(e){ return e.n? `${e.a}세 · 제${e.n}일${e.tod?' '+e.tod:''}` : `${e.a}세 · ${e.y}`; }
 let group=null, groupKey='';
 const BREAK=['n','night','sys','note','dead','q'];
@@ -10507,7 +10508,7 @@ function syncCtrl(){
 document.querySelectorAll('.ctrl [data-sp]').forEach(b=>b.onclick=()=>{Sim.S.speed=+b.dataset.sp;syncCtrl();});
 $('#pauseBtn').onclick=()=>{infoHeld=false;Sim.S.paused=!Sim.S.paused;syncCtrl();};
 $('#autoBtn').onclick=()=>{Sim.S.auto=!Sim.S.auto;syncCtrl(); const d=Sim.S.pending; if(d){ autoNote(d); if(Sim.S.auto&&!noAuto(d)&&!dFolded()) scheduleAuto(); else clearTimeout(autoTimer); }};
-$('#exitBtn').onclick=()=>{ cfxEnd(true); if(Sim.S&&Sim.S.dead&&Sim.S.pending){ Sim.resolve(Sim.autoChoice(Sim.S.pending),''); return; } const sv=Sim.snapshot(); if(sv) store.set(K_SAVE,sv); cancelAnimationFrame(raf); clearTimeout(autoTimer); showIntro(); };
+$('#exitBtn').onclick=()=>{ cfxEnd(true); $('#dlg').classList.remove('busy'); if(Sim.S&&Sim.S.dead&&Sim.S.pending){ Sim.resolve(Sim.autoChoice(Sim.S.pending),''); return; } const sv=Sim.snapshot(); if(sv) store.set(K_SAVE,sv); cancelAnimationFrame(raf); clearTimeout(autoTimer); showIntro(); };
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{$('#game').dataset.tab=b.dataset.tab;document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-pressed',x===b));window.scrollTo(0,0);});
 document.addEventListener('keydown',e=>{
   if($('#game').classList.contains('hidden')||e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return;
@@ -10689,6 +10690,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 
 /* ---- 결정 ---- */
 function showDecision(d){
+  $('#dlg').classList.remove('busy');
   const sh=$('#sheet'); sh.classList.toggle('war',!!d.war);
   { const g=!!d.war&&d.title==='성배', W=Sim.S&&Sim.S.war, dk=g&&!!W&&!!W.cupKnown&&!W.cupPure; for(const el of [sh,$('#dlg')]){ el.classList.toggle('grail',g); el.classList.toggle('dark',dk); } }
   $('#dTitle').textContent=d.title; if(d.help) $('#dTitle').insertAdjacentHTML('beforeend',`<button class="q-help" data-help="${d.help}" type="button" aria-label="보구 격돌 도움말">?</button>`); $('#dBody').textContent=d.body;
@@ -10754,7 +10756,14 @@ const noAuto=d=>!!d&&(d.input==='last'||!!d.manual);
 function autoNote(d){ const n=$('#dAuto'), man=!!(d&&d.manual); n.textContent=man?'이 장면은 직접 고릅니다. 자동 결정은 쓸 수 없습니다.':'자동 결정이 켜져 있습니다. 잠시 뒤 자동으로 고릅니다.'; n.classList.toggle('hidden',!man&&(!Sim.S.auto||!d||d.input==='last')); }
 function manualStop(d){ const man=!!(d&&d.manual); $('#autoBtn').disabled=man; if(man&&Sim.S.auto){ Sim.S.auto=false; syncCtrl(); } }
 function scheduleAuto(){ clearTimeout(autoTimer); const d=Sim.S.pending; if(!d||noAuto(d)) return; autoTimer=setTimeout(()=>{ if(!$('#info').classList.contains('hidden')||dFolded()) return; if(Sim.S.pending===d&&Sim.S.auto) choose(Sim.autoChoice(d)); }, Math.max(500,1800/Sim.S.speed)); }
-function choose(i){ clearTimeout(autoTimer); const d=Sim.S.pending; if(!d) return; $('#autoBtn').disabled=false; const txt=d.input?$('#dInput').value:''; setFold(false); $('#dlg').classList.add('hidden'); Sim.resolve(i,txt); }
+// 전투 중의 선택: 다음 합이나 전투 결과가 나올 때까지 창을 닫지 않고 기다린다 (닫혔다 다시 열리는 깜빡임을 없앤다)
+function choose(i){ clearTimeout(autoTimer); const d=Sim.S.pending; if(!d) return; $('#autoBtn').disabled=false; const txt=d.input?$('#dInput').value:''; setFold(false);
+  if(d.battle&&!d.endE) $('#dlg').classList.add('busy'); else $('#dlg').classList.add('hidden');
+  Sim.resolve(i,txt); busyCheck(); }
+function busyCheck(){ const dl=$('#dlg'); if(!dl.classList.contains('busy')) return; const S=Sim.S;
+  if(S&&S.pending) return; const w=S&&S.war;
+  if(S&&!S.dead&&w&&S.phase==='war'&&(w.battle||(w.queue&&w.queue.length)||$('#cfx'))) return;
+  dl.classList.remove('busy'); dl.classList.add('hidden'); }
 // 결정 창 잠시 접기: 고르기 전에 뒤쪽 화면(능력치, 조 현황, 기록)을 볼 수 있게 창을 내려 둔다. 접어 둔 동안은 자동 결정도 멈춘다
 const dFolded=()=>$('#dlg').classList.contains('folded');
 function setFold(on){ const dl=$('#dlg'); if(dl.classList.contains('folded')===on) return; dl.classList.toggle('folded',on); dl.setAttribute('aria-modal',on?'false':'true');
