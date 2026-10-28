@@ -5243,7 +5243,7 @@ const Sim = (() => {
   function atkKinds(h){ const k=['round']; if(canMagic(h)) k.push('magic'); if(burstSk(h)) k.push('burst'); return k; }
   const expUp=v=>(S.hero==='lancelot'&&v>0)?Math.round(v*.75):v;
   const CLS_BIAS={bow:.6,caster:0,shadow:-9,judge:-6.8,sword:-.6,lance:.2,berserk:-1.2};
-  const BIAS={baobhan:-14,melusine:-16,muramasa:10,ereshkigal:14,ishtar:-8,lancelot:-2,gilgamesh:3,superorion:6.7,arjuna:4,karna:10.5,caenis:-5,enkidu:5,artoria:2,rama:-7,solomon:-2.5,raikou:-4,asterios:1,ibaraki:0.5,chiron:-7.5,ptolemaios:-6.5,tesla:4,nobunaga:3,robin:-1.5,paracelsus:-2,circe:-2,serenity:-19,jack:-5,shuten:-1,kinghassan:1.5,lishuwen:11.5,semiramis:25,emiya:-2.5,shakespeare:-1,hundred:1,kojiro:6,holmes:-1,scathach:4,atalanta:3,spartacus:4.5,bedivere:0.5,tamamo:-2.5,salieri:-3,penthesilea:-3,diarmuid:3,achilles:-2.5,dantes:3,lanling:16,habetrot:15,quetzalcoatl:-19,kama:-6,sheba:14,constantine:18,huyan:13,yuyoku:27,nameless:14,asclepius:-2,lilith:-2,jingke:6,cursedarm:-4,sanson:20};
+  const BIAS={baobhan:-14,melusine:-16,muramasa:10,ereshkigal:14,ishtar:-8,lancelot:-2,gilgamesh:3,superorion:6.7,arjuna:4,karna:10.5,caenis:-5,enkidu:5,artoria:2,rama:-7,solomon:-2.5,raikou:-4,asterios:1,ibaraki:0.5,chiron:-7.5,ptolemaios:-6.5,tesla:4,nobunaga:3,robin:-1.5,paracelsus:-2,circe:-2,serenity:-19,jack:-5,shuten:-1,kinghassan:1.5,lishuwen:11.5,semiramis:24,emiya:-2.5,shakespeare:-1,hundred:1,kojiro:6,holmes:-1,scathach:4,atalanta:3,spartacus:4.5,bedivere:0.5,tamamo:-2.5,salieri:-3,penthesilea:-3,diarmuid:3,achilles:-2.5,dantes:3,lanling:16,habetrot:15,quetzalcoatl:-19,kama:-8,sheba:14,constantine:18,huyan:15,yuyoku:27,nameless:16,asclepius:-2,lilith:-2,jingke:6,cursedarm:-4,sanson:20};
   function clsBonus(h,P){ return h.cls==='caster'? PV(P[3])*1.2 : MAGE_BERSERK[h.id]? PV(P[3])*2.0 : h.cls==='shadow'? PV(P[1])*1.0 : 0; }
   function npcPower(p,vsMe){
     const h=H_BY[p.hero];
@@ -6410,6 +6410,11 @@ const Sim = (() => {
     const amb=b&&b.round===1&&(b.ctx.attack||b.ctx.ambushed)?ambushEdge(h)*ASN_T.amb:0;
     return Math.max(.05,Math.min(.75,ASN_T.base+d*ASN_T.k+Math.min(100,e.intel||0)*ASN_T.intel+amb)); }
   const ASN_T={base:-.04,k:.0083,intel:.004,amb:.016};
+  // 전투 중 암살 실패: 상대 서번트의 반격. 근력과 마력 중 높은 쪽 + 민첩, 감지·수호 스킬, 전투형 마스터 / 우리 내구·회피로 줄어든다
+  function asnCounter(e){ const h=hero(), P=myP(), E=npcParams(e).p.map(PV), eh=H_BY[e.hero];
+    const sk=skillsOf(eh).some(k=>ASN_A.test(k.n)||ASN_B.test(k.n)||ASN_C.test(k.n));
+    const v=9+Math.max(E[0],E[3])*1.5+E[1]+(sk?4:0)+(mGrp(e)==='combat'?3:0)-P[2]*1.2-SV(h,'evade')*.6+ri(-3,3);
+    return Math.round(Math.max(6,Math.min(32,v))); }
   const asnWord=p=>p>=.5?'승산 높음':p>=.3?'해볼 만함':'무모함';
   function infilPick(){
     const w=W(),h=hero(); const ts=alivePairs().filter(p=>p.known&&!p.ally&&!p.truce&&p.master);
@@ -7686,7 +7691,7 @@ const Sim = (() => {
     const w=W(),h=hero(),e=w.battle.e;
     const p=asnP(e,false);
     if(ch(p)){ w.battle.res='asn'; log(`${h.name}${J(h.name,이)} 적의 등 뒤로 돌아 마술사 ${e.mname}${J(e.mname,을)} 쓰러뜨렸다.`,'war'); masterKilled(e); add({will:-3}); w.kills++; S.flags.killedMaster=1; }
-    else { w.battle.res='fail'; e.alert=(e.alert||0)+2; w.exposure=clamp(w.exposure+expUp(8)); w.hp=clamp(w.hp-ri(12,22)); log(pickNR(['칼끝은 결계에 막혔다. 반격이 쏟아졌다.','결계가 생각보다 두꺼웠다. 들어가자마자 반격이 날아들었다.','문턱에서 발이 묶였다. 기다리던 함정이었다.'],'fortF'),'war'); if(w.hp<=0) myHeroDown(e); else if(ch(.2)){add({health:-10});log('당신도 다쳤다.','war');} }
+    else { w.battle.res='fail'; e.alert=(e.alert||0)+2; w.exposure=clamp(w.exposure+expUp(8)); w.hp=clamp(w.hp-asnCounter(e)); log(pickNR(['칼끝은 결계에 막혔다. 반격이 쏟아졌다.','결계가 생각보다 두꺼웠다. 들어가자마자 반격이 날아들었다.','문턱에서 발이 묶였다. 기다리던 함정이었다.'],'fortF'),'war'); if(w.hp<=0) myHeroDown(e); else if(ch(.2)){add({health:-10});log('당신도 다쳤다.','war');} }
     endBattle();
   }
   const BRES={win:'승리',mutual:'동귀어진',lose:'패배',retreat:'퇴각',fled:'상대가 물러남',draw:'승부 없음',asn:'적 마스터 암살',fail:'암살 실패',talk:'대화로 끝남'};
