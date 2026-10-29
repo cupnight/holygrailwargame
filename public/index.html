@@ -5225,7 +5225,9 @@ const Sim = (() => {
   // 공격 방식: ① 마술 ② 마력 방출 (그 밖은 기존처럼 무기로 싸운다)
   const MAGIC_ATK={morgan:1,kriemhild:1,sigurd:1,emiya:1,scathach:1,brynhild:1,fionn:1,jalter:1,amakusa:1,semiramis:1,medb:1,tesla:1,elizabeth:1};
   const BURST_IDS={artoria:1,mordred:1,charlemagne:1,arjuna:1,karna:1,brynhild:1,raikou:1,gawain:1};
-  const canMagic=h=>h.cls==='caster'||(SK[h.id]||[]).some(([n])=>/^(마술|원초의 룬|고속영창|고속신언|주술|진지작성)|영창/.test(n));
+  // 마술 공격: 캐스터, 마술 계열 스킬 보유자, 그리고 스킬 조건엔 없지만 전승상 마술을 쓰는 서번트
+  const MAGIC_X={medb:1,tesla:1,kriemhild:1,jalter:1};
+  const canMagic=h=>h.cls==='caster'||!!MAGIC_X[h.id]||(SK[h.id]||[]).some(([n])=>/^(마술|원초의 룬|고속영창|고속신언|주술|진지작성)|영창/.test(n));
   const sjNight=h=>{ const x=(SK[h.id]||[]).find(([n])=>n==='성자의 숫자'); return x?RANKV[x[1]]*1.2:0; };
   function burstSk(h){ { const g=skillsOf(h).find(x=>x.n==='성자의 숫자'); if(g) return {n:g.n,r:g.r,day:true}; } const x=skillsOf(h).find(x=>/^마력방출/.test(x.n)); return x&&{n:x.n,r:x.r}; }
   const MG={bcost:3,mrS:1.2,mrD:.04,dodge:.5,bR:.02,npc:true};
