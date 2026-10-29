@@ -7696,7 +7696,8 @@ const Sim = (() => {
   function roundFactor(won,ctx){
     const {h,eh,MP,EP,w,e,b,bonus,kind}=ctx, pv=PV, f=[];
     const er=i=>e.revealed?EP[i]:'';
-    const rk=(hh,n)=>(skillsOf(hh).find(x=>x.n===n)||{}).r||'';
+    const rk=(hh,n)=>hh===eh&&!e.revealed?'':(skillsOf(hh).find(x=>x.n===n)||{}).r||'';
+    const en=n=>e.revealed?n:'???'; // 진명을 모르면 상대 스킬은 이름도 ???
     const top=hh=>{ const W={power:1.2,div:.8,mad:.8,rally:.8}; let best=null,bv=0,sum=0; for(const x of skillsOf(hh)){ const wt=W[x.k]; if(!wt) continue; const v=RANKV[x.r]*wt; sum+=v; if(v>bv){bv=v;best=x.n;} } return {n:best,sum}; };
     const S2=(n,r)=>({n,r});
     f.push({v:(pv(MP[0])-pv(EP[2]))*2.5,pos:`서번트의 ${BJ('근력',MP[0],'이')} 상대의 ${BJ('내구',er(2),'을')} 뚫었다`,neg:`상대의 ${BJ('내구',er(2),'을')} 뚫지 못했다`,me:S2('근력',MP[0]),op:S2('내구',er(2))});
@@ -7705,10 +7706,10 @@ const Sim = (() => {
     f.push({v:(pv(MP[3])-pv(EP[3]))*1.4+clsBonus(h,MP)-clsBonus(eh,EP),pos:`서번트의 ${BJ('마력',MP[3],'이')} 상대의 ${BK('마력',er(3))}을 압도했다`.replace(/」을 압도/,()=>'」'+jk(er(3)||'마력','을')+' 압도'),neg:`상대의 ${BK('마력',er(3))}에 밀렸다`,me:S2('마력',MP[3]),op:S2('마력',er(3))});
     f.push({v:(pv(MP[4])-pv(EP[4]))*1.5,pos:`서번트의 ${BJ('행운',MP[4],'이')} 따랐다`,neg:`상대의 ${BJ('행운',er(4),'이')} 따랐다`,me:S2('행운',MP[4]),op:S2('행운',er(4))});
     const ts=top(h), te=top(eh);
-    if(ts.n||te.n) f.push({v:ts.sum-te.sum,pos:ts.n?`서번트의 ${BJ(ts.n,rk(h,ts.n),'이')} 빛을 발했다`:'',neg:te.n?`상대의 ${BK(te.n,rk(eh,te.n))}에 밀렸다`:'',learn:te.n,me:ts.n?S2(ts.n,rk(h,ts.n)):null,op:te.n?S2(te.n,rk(eh,te.n)):null});
+    if(ts.n||te.n) f.push({v:ts.sum-te.sum,pos:ts.n?`서번트의 ${BJ(ts.n,rk(h,ts.n),'이')} 빛을 발했다`:'',neg:te.n?`상대의 ${BK(en(te.n),rk(eh,te.n))}에 밀렸다`:'',learn:e.revealed&&te.n,me:ts.n?S2(ts.n,rk(h,ts.n)):null,op:te.n?S2(en(te.n),rk(eh,te.n)):null});
     const eM=edgeV(h,w.hp,b.round,b.ctx.defend), eE=edgeV(eh,e.hp,b.round,false);
     if(eM){ const n=EDGE[h.id].n; f.push({v:eM,pos:`서번트의 ${BJ(n,rk(h,n),'이')} 승부를 갈랐다`,neg:'',me:S2(n,rk(h,n))}); }
-    if(eE){ const n=EDGE[eh.id].n; f.push({v:-eE,pos:'',neg:`상대의 ${BK(n,rk(eh,n))}에 밀렸다`,learn:n,op:S2(n,rk(eh,n))}); }
+    if(eE){ const n=EDGE[eh.id].n; f.push({v:-eE,pos:'',neg:`상대의 ${BK(en(n),rk(eh,n))}에 밀렸다`,learn:e.revealed&&n,op:S2(en(n),rk(eh,n))}); }
     f.push({v:(w.trust-50)*.15,pos:w.trust>=80?'「유대」가 승부를 갈랐다':`당신과 서번트의 「신뢰」가 힘이 되었다`,neg:`「신뢰」가 따라 주지 않았다`});
     if(e.intel>=40) f.push({v:e.intel*.1-2,pos:`미리 모은 「정보」가 길을 열었다`,neg:''});
     if(w.sm<15) f.push({v:-(w.sm<=0?30:10),pos:'',neg:`바닥난 「서번트 마력」이 발목을 잡았다`});
@@ -7747,7 +7748,7 @@ const Sim = (() => {
     log(`${who} · 스킬 「${sk.n} ${sk.r}」. ${sk.x}.`,mine?'skill':'eskill');
     if(!mine&&e){ learnSkill(e,sk.n); }
   }
-  function revealSkills(t,why,n){ const h=H_BY[t.hero]; const unk=skillsOf(h).filter(x=>!(t.skKnown||[]).includes(x.n)); if(!unk.length) return; const pickN=shuffle(unk).slice(0,n||2); pickN.forEach(x=>learnSkill(t,x.n)); log(`${why||''}${pName(t)}의 스킬: ${pickN.map(x=>`「${x.n} ${x.r}」`).join(', ')}.`,'war'); }
+  function revealSkills(t,why,n){ const h=H_BY[t.hero]; const unk=skillsOf(h).filter(x=>!(t.skKnown||[]).includes(x.n)); if(!unk.length) return; const pickN=shuffle(unk).slice(0,n||2); if(!t.revealed){ log(`${why||''}${pName(t)}의 스킬: ${pickN.map(()=>'「???」').join(', ')}. 정체를 모르니 무엇인지 알 수 없다.`,'war'); return; } pickN.forEach(x=>learnSkill(t,x.n)); log(`${why||''}${pName(t)}의 스킬: ${pickN.map(x=>`「${x.n} ${x.r}」`).join(', ')}.`,'war'); }
   function battleTalk(){
     const w=W(),h=hero(),b=w.battle,e=b.e; b.talked=true;
     log(`당신: “${pick(MY_TALK)}”`,'me');
