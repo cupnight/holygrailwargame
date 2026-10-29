@@ -5179,7 +5179,7 @@ const Sim = (() => {
     if(h.id==='enkidu') return {p:_cu(morphAlloc(MORPH_PTS[t],'balance')),tier:t};
     return {p:_cu(h.s.map((r,i)=> i<4? rankShift(r,TIER_MOD[t][i]) : r)),tier:t};
   }
-  function heroBase(P,hp){const s=P.map(PV);return (78+(s[0]+s[1]+s[2]+s[3])*1.4+s[4]*1.0)*(.55+.45*hp/100);}
+  function heroBase(P,hp){const s=P.map(PV);return (78+s[0]*1.7+(s[1]+s[2]+s[3])*1.4+s[4]*1.9)*(.55+.45*hp/100);}
   function myPower(ctx={}){
     const w=W(),h=hero();
     let p=heroBase(myParams().p,w.battle&&(w.battle.sealBuff===w.battle.round||w.battle.mad>=w.battle.round)?100:w.hp)+clsBonus(h,myParams().p)-6+w.trust*.15+S.st.mana*.12+(ctx.e?ctx.e.intel*.1:0)+(ctx.defend?w.fort*.2*fortRead(ctx.e)*(ctx.breach?.5:1):0);
@@ -5229,7 +5229,7 @@ const Sim = (() => {
     const cl=(x,a,b)=>Math.max(a,Math.min(b,x)), agi=(PV(P[1])-PV(O[1]))*.02;
     if(kind==='magic') return cl(1+(PV(P[3])-PV(O[3]))*.04+agi*.5,.7,1.35)*(1-Math.min(.4,mrOf(dh)*MG.mrD));
     if(kind==='burst'){ const bs=burstSk(ah); const on=bs&&!(bs.day&&night); return cl(1+((PV(P[0])+PV(P[3]))/2-PV(O[2]))*.04+agi,.7,1.35)*(on?1+RANKV[bs.r]*MG.bR:1); }
-    return cl(1+(PV(P[0])-PV(O[2]))*.04+agi,.7,1.35);
+    return cl(1+(PV(P[0])-PV(O[2]))*.08+agi,.6,1.6);
   }
   // 이 공격 방식이 얼마나 유리한지 대략 매긴다(자동 진행과 NPC가 고를 때)
   function atkVal(kind,ah,P,dh,O,night){
@@ -5245,7 +5245,7 @@ const Sim = (() => {
   // 클래스 고유 보너스 (플레이어·NPC 공통). r: 합 번호, def: 거처를 지키는 싸움인가
   function clsEdge(h,r,def,breach){ return h.cls==='berserk'?5 : h.cls==='caster'?(def?(breach?6:12):5) : h.cls==='lance'?3 : h.cls==='bow'&&r!=null&&r<=2?7 : 0; }
   // 물러나기 성공 (플레이어·NPC 공통)
-  const fleeP=(h,P)=>h.sp==='escape'?1:Math.min(.95,.35+PV(P[1])*.1+SV(h,'ride')*.03+SV(h,'evade')*.02);
+  const fleeP=(h,P)=>h.sp==='escape'?1:Math.min(.95,.45+PV(P[1])*.05+SV(h,'ride')*.03+SV(h,'evade')*.02);
   function npcPower(p,vsMe,r,atk){
     const h=H_BY[p.hero];
     let v=heroBase(npcParams(p).p,p.hp)+clsBonus(h,npcParams(p).p)+p.pw*.32;
@@ -7605,7 +7605,7 @@ const Sim = (() => {
   const BK=(n,r)=>`「${n}${r?' '+r:''}」`;
   const BJ=(n,r,t)=>BK(n,r)+jk(r||n,t);
   // 민첩 회피: 5% + (내 민첩 − 상대 민첩) × 1.5%, 3%~18%
-  const dodgeP=(r,o)=>Math.max(.03,Math.min(.18,.05+(PV(r)-PV(o))*.015));
+  const dodgeP=(r,o)=>Math.max(.03,Math.min(.15,.05+(PV(r)-PV(o))*.012));
   function roundFactor(won,ctx){
     const {h,eh,MP,EP,w,e,b,bonus,kind}=ctx, pv=PV, f=[];
     const er=i=>e.revealed?EP[i]:'';
