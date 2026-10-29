@@ -6326,7 +6326,10 @@ const Sim = (() => {
     }
     if(w.halt>0) ch_.forEach(c=>{ if(/^(습격한다|고지에서 저격한다|거처에 잠입한다|감독자의 령주)$/.test(c.t)){ c.off=true; c.auto=false; c.d='감독자의 령주에 묶여 있다'; } });
     w.resumeAt=(w.queue.length||w.battle)?null:'night';
-    if(w.coal&&w.coal.d===w.day&&!w.coal.strike&&!w.coal.hide) ch_.forEach(c=>{ if(!/^(진지를 지킨다|숨죽이고 지낸다|쉰다|공방을 짓는다)$/.test(c.t)){ c.off=true; c.auto=false; c.d='연합이 오늘 밤 들이닥친다. 거처를 비울 수 없다'; } });
+    // 연합에 맞설 준비를 한 밤: 수비 행동만. 성배의 부름으로 막혀 있던 수비 행동도 연합이 거처로 오므로 다시 연다
+    if(w.coal&&w.coal.d===w.day&&!w.coal.strike&&!w.coal.hide) ch_.forEach(c=>{ if(!/^(진지를 지킨다|숨죽이고 지낸다|쉰다|공방을 짓는다)$/.test(c.t)){ c.off=true; c.auto=false; c.d='연합이 오늘 밤 들이닥친다. 거처를 비울 수 없다'; } else if(c.off){ c.off=false; c.d='연합이 오늘 밤 들이닥친다. 거처에서 맞선다'; } });
+    // 어떤 겹침으로든 고를 수 있는 행동이 하나도 없으면 쉬는 것만큼은 열어 둔다
+    if(ch_.every(c=>c.off)) ch_.forEach(c=>{ if(c.t==='쉰다'){ c.off=false; c.d='할 수 있는 게 없다. 상처와 마력을 회복한다'; } });
     decide({title:`제${w.day}일 · 밤`,body:statusBody('밤'),war:true,choices:ch_.map(c=>({...c,f:()=>{c.f();w.queue.push(()=>npcNight(),()=>threat(),()=>warEvent(),()=>dawn());}}))});
     if(w.resumeAt){ LASTWAR=serial(); H.save(); }
   }
