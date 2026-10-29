@@ -5190,9 +5190,8 @@ const Sim = (() => {
     if(w.battle&&w.battle.round===1&&(ctx.attack||ctx.ambushed)) p+=ambushEdge(h);
     p+=edgeV(h,w.hp,w.battle?w.battle.round:null,ctx.defend);
     p+=SV(h,'power')*1.2+SV(h,'div')*.8+SV(h,'mad')*.8+SV(h,'rally')*.8+(ctx.attack?SV(h,'ride')*.8:0)+(w.battle&&w.battle.round>=2?SV(h,'insight')*.9:0);
-    if(SV(h,'avenge')) p+=(100-w.hp)*.03*SV(h,'avenge');
-    if(h.sp==='avenge') p+=(100-w.hp)*.3;
-    if(h.sp==='gate') p+=14+(w.hp<50?10:0);
+    if(SV(h,'avenge')) p+=(100-w.hp)*.045*SV(h,'avenge');
+    if(h.sp==='gate') p+=7+(w.hp<50?5:0);
     p+=(BIAS[h.id]||0);
     if(ctx.defend) p+=5*wsF()*fortRead(ctx.e)*(ctx.breach?.5:1); if(ctx.trap) p-=8;
     p+=(CLS_BIAS[h.cls]||0);
@@ -5257,9 +5256,8 @@ const Sim = (() => {
     const bt=vsMe&&W().battle, rd=bt?W().battle.round:r, att=bt?!!W().battle.ctx.defend:!!atk;
     v+=SV(h,'power')*1.2+SV(h,'div')*.8+SV(h,'mad')*.8+SV(h,'rally')*.8+(rd>=2?SV(h,'insight')*.9:0)+(att?SV(h,'ride')*.8:0);
     v+=clsEdge(h,rd,bt?!!W().battle.ctx.attack:false,false);
-    if(SV(h,'avenge')) v+=(100-p.hp)*.03*SV(h,'avenge');
-    if(h.sp==='avenge') v+=(100-p.hp)*.3;
-    if(h.sp==='gate') v+=14+(p.hp<50?10:0);
+    if(SV(h,'avenge')) v+=(100-p.hp)*.045*SV(h,'avenge');
+    if(h.sp==='gate') v+=7+(p.hp<50?5:0);
     v+=(BIAS[h.id]||0);
     if(p.mHurt>0) v-=8;
     if(S.war&&S.war.tod==='밤'&&(SK[h.id]||[]).some(([n])=>n==='성자의 숫자')) v-=SV(h,'power')*1.2;
@@ -6883,8 +6881,8 @@ const Sim = (() => {
   // 시트 '보구 격돌 규칙'의 노란 칸 값
   const NPK={rank:8,mana:3,seal:15,known:8,low:-6,trust:4,rnd:10,step:3,focus:0,pierce:8,pMin:.6,pMax:1,winTake:.1,offset:.3,dodgeHalf:.5,
     barrier:.8,
-    fDur:.7,fMin:2,fMax:4,fMana:70,fImm:.5,fHap:6,fCost:3,
-    wDur:.3,wMin:1,wMax:3,wTake:.7,wCost:2,wCounter:8,wReady:.3,wReact:.5,
+    fDur:.7,fMin:2,fMax:4,fMana:70,fImm:.7,fHap:6,fCost:3,
+    wDur:.3,wMin:1,wMax:3,wTake:.6,wCost:2,wCounter:8,wReady:.3,wReact:.5,
     sDur:.5,sMin:1,sMax:3,sCost:2,sWeak:.5};
   const SCV={p:1,a:2,c:3,n:3,w:4};
   const VAR_SC={lubu:'pac',davinci:'pa'};
@@ -6915,7 +6913,7 @@ const Sim = (() => {
   const WALL_SP={jeanne:{take:1,guard:1},leonidas:{take:.6,noRaid:1,bvBig:5},boudica:{bvAll:5,rev:1}};
   function fxHap(b,f,own){ // own: 효과를 가진 쪽의 합에 더하는 값 / 아니면 상대 쪽에 더하는 값
     if(f.start&&b.round<f.start) return 0;
-    if(f.type==='field'){ const sp=FIELD_SP[f.id]||{}; if(own){ const v=sp.hap!=null?sp.hap:NPK.fHap; return typeof v==='function'?v(f):v; } return sp.ehap||0; }
+    if(f.type==='field'){ const sp=FIELD_SP[f.id]||{}; if(own){ const v=sp.hap!=null?sp.hap:3+npRV(H_BY[f.id]); return typeof v==='function'?v(f):v; } return sp.ehap||0; }
     if(f.type==='counter') return own?NPK.wCounter:0;
     if(f.type==='sup'){ const sp=SUP_SP[f.id]||{}; if(own) return sp.hap||0; return (sp.ehap||0)*(f.id==='salieri'&&npSide(b,npOther(f.side)).h.id==='mozart'?2:1); }
     if(f.type==='holmes') return own?5:0;
@@ -7089,8 +7087,8 @@ const Sim = (() => {
     caligula:'펼칠 때 보구 피해의 60%를 준다. 그 합에 상대의 기세가 크게 꺾이고, 상대는 물러나거나 피할 수 없다'};
   function npInfo(h,who){ const me=who==='me', p=me||!who?null:who, r=npRole(h), sc=npSc(h), a=artOf(h), L=[];
     const P=me?myParams().p:p?npcParams(p).p:h.s;
-    const mv=PV(P[3]), dur={F:Math.min(NPK.fMax,npDur(mv,NPK.fDur,NPK.fMin,NPK.fMax)+((me?S.st.mana>=NPK.fMana:p&&p.pw>=74)?1:0)),
-      D:npDur(PV(P[2])+mv,NPK.wDur,NPK.wMin,NPK.wMax), X:npDur(mv,NPK.sDur,NPK.sMin,NPK.sMax)};
+    const mv=(PV(P[3])+npRV(h))/2, dur={F:Math.min(NPK.fMax,npDur(mv,NPK.fDur,NPK.fMin,NPK.fMax)+((me?S.st.mana>=NPK.fMana:p&&p.pw>=74)?1:0)),
+      D:npDur(PV(P[2])+npRV(h),NPK.wDur,NPK.wMin,NPK.wMax), X:npDur(mv,NPK.sDur,NPK.sMin,NPK.sMax)};
     const shown=VAR_SC[h.id]?scPick(h,'a'):sc, kind=SC_KO[shown]||'대인보구';
     if(a.r==='-') L.push(`랭크가 없는 기술이라 근력·민첩 중 높은 쪽인 ${rvL(npRV(h))}로 가정한다`);
     else if(a.r.includes('~')) L.push(`랭크 ${a.r} · 격돌에서는 ${rvL(npRV(h))}로 가정한다`);
@@ -7195,7 +7193,7 @@ const Sim = (() => {
   const pct=p=>Math.round(p*100)+'%';
 
   /* 영역 (7번) */
-  function npFieldDur(b,side){ const s=npSide(b,side); let d=npDur(PV(s.P[3]),NPK.fDur,NPK.fMin,NPK.fMax);
+  function npFieldDur(b,side){ const s=npSide(b,side); let d=npDur((PV(s.P[3])+npRV(s.h))/2,NPK.fDur,NPK.fMin,NPK.fMax);
     if(s.me?S.st.mana>=NPK.fMana:s.e.pw>=74) d=Math.min(NPK.fMax,d+1); return d; }
   function npFieldUp(b,side,cv){ const s=npSide(b,side), nm=artOf(s.h).n.split(' - ').pop(), who=s.me?s.h.name:pName(b.e);
     const old=fxGet(b,side,'field'); if(old) fxDrop(b,old);
@@ -7215,7 +7213,7 @@ const Sim = (() => {
     b.npHoldN=(b.npHoldN||0)+1; }
 
   /* 방벽 (8번) */
-  function npWallDur(b,side){ const s=npSide(b,side); return npDur(PV(s.P[2])+PV(s.P[3]),NPK.wDur,NPK.wMin,NPK.wMax); }
+  function npWallDur(b,side){ const s=npSide(b,side); return npDur(PV(s.P[2])+npRV(s.h),NPK.wDur,NPK.wMin,NPK.wMax); }
   function npWallUp(b,side){ const s=npSide(b,side), nm=artOf(s.h).n.split(' - ').pop(), who=s.me?s.h.name:pName(b.e);
     const old=fxGet(b,side,'wall'); if(old) fxDrop(b,old);
     const d=npWallDur(b,side); fxL(b).push({side,type:'wall',id:s.h.id,left:d,age:0,bv:npBV(b,side),cost:s.me?NPK.wCost:0});
@@ -7384,7 +7382,7 @@ const Sim = (() => {
   // 메데이아의 단검: 계약이 흔들린 쪽의 스테이터스가 1랭크 내려간다
   function npCurse(side,arr){ const b=S.war&&S.war.battle; if(b&&b.fx&&b.fx.length&&fxGet(b,npOther(side),'curse')) return arr.map(r=>r==='-'?r:rankShift(r,-1)); return arr; }
   /* 보조 보구 (9번) */
-  function npSupDur(b,side){ return npDur(PV(npSide(b,side).P[3]),NPK.sDur,NPK.sMin,NPK.sMax); }
+  function npSupDur(b,side){ return npDur((PV(npSide(b,side).P[3])+npRV(npSide(b,side).h))/2,NPK.sDur,NPK.sMin,NPK.sMax); }
   function npSupUp(b,side){ const s=npSide(b,side), w=W(), e=b.e, sp=SUP_SP[s.h.id]||{}, im=sp.imm||{}, nm=artOf(s.h).n.split(' - ').pop(), who=s.me?s.h.name:pName(e), other=npOther(side);
     if(s.me){ w_npLog(b,artOf(s.h)); b.supNow=b.round; if(sp.will) b.andersenUsed=1; }
     log(`${who}${J(who,이)} 「${nm}」${J(nm,을)} 펼쳤다.`,s.me?'war':'loss');
@@ -7482,7 +7480,7 @@ const Sim = (() => {
     const MP=myParams().p, EP=npcParams(e).p, cl=(x,a,b)=>Math.max(a,Math.min(b,x));
     const night=w.tod==='밤', atkK=kind==='magic'||kind==='burst'?kind:'round';
     let eK='round'; if(MG.npc&&!enNP){ let bv=-9; for(const k of atkKinds(eh2)){ const v=atkVal(k,eh2,EP,h,MP,night); if(v>bv+.02){bv=v;eK=k;} } } b.eK=eK;
-    const agi=(PV(MP[1])-PV(EP[1]))*.02, outM=atkM(atkK,h,MP,eh2,EP,night)*(b.ctx.raid?.6:1)*(h.sp==='gate'?1.12:1)*(h.id==='enkidu'&&w.morph==='atk'?1.15:1)*npTakeM(b,'en')*npDealM(b,'me'), inM=atkM(eK,eh2,EP,h,MP,night)*(b.ctx.raid?.8:1)*(h.id==='enkidu'&&w.morph==='def'?.85:1)*(eh2.sp==='gate'?1.12:1)*npTakeM(b,'me')*npDealM(b,'en');
+    const agi=(PV(MP[1])-PV(EP[1]))*.02, outM=atkM(atkK,h,MP,eh2,EP,night)*(b.ctx.raid?.6:1)*(h.sp==='gate'?1.06:1)*(h.id==='enkidu'&&w.morph==='atk'?1.15:1)*npTakeM(b,'en')*npDealM(b,'me'), inM=atkM(eK,eh2,EP,h,MP,night)*(b.ctx.raid?.8:1)*(h.id==='enkidu'&&w.morph==='def'?.85:1)*(eh2.sp==='gate'?1.06:1)*npTakeM(b,'me')*npDealM(b,'en');
     const hp0=w.hp;
     const go=(sel)=>{
     const NX=npPre(sel); myNP=NX.myNP; enNP=NX.enNP; const _h0=w.hp,_e0=e.hp;
@@ -8123,7 +8121,7 @@ const Sim = (() => {
     const dealM=x=>{ const su=get(x,'sup'); if(su&&su.id==='andersen') return 1; return su&&(SUP_SP[su.id]||{}).deal||1; };
     const hap=(x,r)=>{ let v=0;
       for(const f of x.fx){ if(f.start&&r<f.start) continue;
-        if(f.type==='field'){ const sp=FIELD_SP[f.id]||{}, h_=sp.hap!=null?sp.hap:NPK.fHap; v+=typeof h_==='function'?h_(f):h_; }
+        if(f.type==='field'){ const sp=FIELD_SP[f.id]||{}, h_=sp.hap!=null?sp.hap:3+npRV(H_BY[f.id]); v+=typeof h_==='function'?h_(f):h_; }
         else if(f.type==='counter') v+=NPK.wCounter; else if(f.type==='sup') v+=(SUP_SP[f.id]||{}).hap||0; else if(f.type==='holmes') v+=5; else if(f.type==='rev') v+=f.v;
         else if(f.type==='self'){ const hp=x.p.hp; v+=f.id==='spartacus'?Math.min(10,(100-hp)*.12):f.id==='hijikata'?(hp<=50?(50-hp)*.2:0):5; } }
       for(const f of x.o.fx){ if(f.start&&r<f.start) continue;
@@ -8137,12 +8135,12 @@ const Sim = (() => {
     const pay=x=>{ x.p.sm=Math.max(0,npcSmOf(x.p)-npcCost(x.p)); x.artN++; if(x.h.id==='karna') x.p.kavacha=1; };
     const fieldUp=(x,c)=>{ const old=get(x,'field'); if(old) drop(x,old); const of=get(x.o,'field');
       if(of){ const D=c-of.cv; if(Math.abs(D)<NPK.pierce){ drop(x.o,of); return; } if(D<0) return; drop(x.o,of); }
-      let d=dur(Pm(x),NPK.fDur,NPK.fMin,NPK.fMax); if(x.p.pw>=74) d=Math.min(NPK.fMax,d+1); x.fx.push({type:'field',id:x.h.id,left:d,age:0,cv:c}); };
+      let d=dur((Pm(x)+npRV(x.h))/2,NPK.fDur,NPK.fMin,NPK.fMax); if(x.p.pw>=74) d=Math.min(NPK.fMax,d+1); x.fx.push({type:'field',id:x.h.id,left:d,age:0,cv:c}); };
     const bv=x=>{ const sp=WALL_SP[x.h.id]||{}; return npRV(x.h)*NPK.rank+Pm(x)*NPK.mana+(sp.bvAll||0)+(sp.bvBig&&SCV[scBase(x.o.h)]>=2?sp.bvBig:0)+cvSp(x); };
-    const wallUp=x=>{ const old=get(x,'wall'); if(old) drop(x,old); x.fx.push({type:'wall',id:x.h.id,left:dur(PV(x.P[2])+Pm(x),NPK.wDur,NPK.wMin,NPK.wMax),age:0,bv:bv(x)}); };
+    const wallUp=x=>{ const old=get(x,'wall'); if(old) drop(x,old); x.fx.push({type:'wall',id:x.h.id,left:dur(PV(x.P[2])+npRV(x.h),NPK.wDur,NPK.wMin,NPK.wMax),age:0,bv:bv(x)}); };
     const supUp=x=>{ const sp=SUP_SP[x.h.id]||{}, im=sp.imm||{}; if(im.heal) x.p.hp=clamp(x.p.hp+im.heal*K); if(im.sm) x.p.sm=clamp(npcSmOf(x.p)+im.sm); if(im.np) hit(x.o,base(x)*im.np);
-      x.fx.push({type:'sup',id:x.h.id,left:dur(Pm(x),NPK.sDur,NPK.sMin,NPK.sMax),age:0}); };
-    const special=x=>{ const id=x.h.id, o=x.o, d=dur(Pm(x),NPK.sDur,NPK.sMin,NPK.sMax);
+      x.fx.push({type:'sup',id:x.h.id,left:dur((Pm(x)+npRV(x.h))/2,NPK.sDur,NPK.sMin,NPK.sMax),age:0}); };
+    const special=x=>{ const id=x.h.id, o=x.o, d=dur((Pm(x)+npRV(x.h))/2,NPK.sDur,NPK.sMin,NPK.sMax);
       if(id==='medea'){ hit(o,base(x)*.2); o.fx=o.fx.filter(f=>!['field','wall','sup','holmes','reflect','pig'].includes(f.type)); x.fx=x.fx.filter(f=>f.type!=='pig'); if(!get(x,'curse')) x.fx.push({type:'curse',id,left:99}); }
       else if(id==='angra') x.fx.push({type:'reflect',id,left:d,age:0});
       else if(id==='holmes') x.fx.push({type:'holmes',id,left:d,age:0});
