@@ -294,6 +294,12 @@ aside{display:grid;gap:18px;align-content:start}
 .sheet h2{font-family:var(--f-display);font-size:26px}
 .sheet .body{font-family:var(--f-story);font-size:17px;line-height:1.8;margin:10px 0 16px;white-space:pre-line}
 .sheet.summon .body{font-size:15px;line-height:1.7}
+.sheet .body.res{display:grid;gap:8px;white-space:normal}
+.sheet .body.res .rpick{font-family:var(--f-ui);font-size:12.5px;color:var(--gold2)}
+.sheet .body.res .rtx{white-space:pre-line}
+.sheet .body.res .rtx.enemy{color:#e6a2a8}
+.sheet .body.res .rchip .delta{margin-top:0}
+.sheet .body.res .rchip .delta span{font-size:12.5px;padding:2px 9px}
 .vs .side.full{grid-column:1/-1}
 .vs .who2 small{font-family:var(--f-body,inherit);font-size:12px;color:var(--dim);margin-left:6px}
 .vs .np2.dim{color:var(--dim)}
@@ -11304,7 +11310,7 @@ function showDecision(d){
   $('#dlg').classList.remove('busy');
   const sh=$('#sheet'); sh.classList.toggle('war',!!d.war);
   { const g=!!d.war&&d.title==='성배', W=Sim.S&&Sim.S.war, dk=g&&!!W&&!!W.cupKnown&&!W.cupPure; for(const el of [sh,$('#dlg')]){ el.classList.toggle('grail',g); el.classList.toggle('dark',dk); } }
-  $('#dTitle').textContent=d.title; if(d.help) $('#dTitle').insertAdjacentHTML('beforeend',`<button class="q-help" data-help="${d.help}" type="button" aria-label="보구 격돌 도움말">?</button>`); $('#dBody').textContent=d.body;
+  $('#dTitle').textContent=d.title; if(d.help) $('#dTitle').insertAdjacentHTML('beforeend',`<button class="q-help" data-help="${d.help}" type="button" aria-label="보구 격돌 도움말">?</button>`); $('#dBody').textContent=d.body; $('#dBody').classList.remove('res');
   const rc=$('#dRecent'); rc.innerHTML=''; rc.classList.add('hidden');
   const vs=$('#dVs'); vs.innerHTML=''; vs.classList.add('hidden');
   if(d.battle&&Sim.S.war&&(Sim.S.war.battle||d.endE)){ vs.innerHTML=vsHtml(d.endE); vs.classList.remove('hidden'); }
@@ -11314,6 +11320,18 @@ function showDecision(d){
     const S=Sim.S, L=S.log; const cur=L[L.length-1]; let k=L.length-1, items=[];
     while(k>=0&&items.length<40){ const e=L[k]; if(!cur||e.n!==cur.n||e.tod!==cur.tod) break; if(e.k==='night') break; items.unshift(e); k--; }
     if(d.battle){ let st=0; for(let i=items.length-1;i>=0;i--){ if(/거처에 들이닥쳤다|결계를 두드렸다|마주쳤다|마주 섰다|먼저 와 있었다/.test(items[i].t)){ st=i; break; } } items=items.slice(Math.max(0,st)); } items=items.slice(-24);
+    // 결과 팝업: 마지막 선택 뒤에 쌓인 결과·판정·변화는 본문에서 크게 보여 주고, '지금까지'에서는 빼서 겹치지 않게 한다
+    if(d.res){ let qi=-1; for(let i=items.length-1;i>=0;i--) if(items[i].k==='q'){ qi=i; break; }
+      const tail=qi>=0?items.slice(qi+1):[];
+      if(tail.length){ const bd=$('#dBody'); bd.textContent=''; bd.classList.add('res');
+        tail.forEach(e=>{ const el=document.createElement('div');
+          if(e.k==='delta'||e.k==='check'){ el.className='rchip'; el.appendChild(chipBox(e)); }
+          else { el.className='rtx '+(e.k||''); el.textContent=e.t; }
+          bd.appendChild(el); });
+        items=items.slice(0,qi+1);
+        if(items.length<=1){ const pk=document.createElement('div'); pk.className='rpick'; pk.textContent='→ '+(items[0]&&items[0].pick||''); bd.prepend(pk); items=[]; }
+      } else items=[];
+    }
     if(items.length){
       const hd=document.createElement('div'); hd.className='rh'; hd.textContent=d.battle?'이번 전투':'지금까지'; rc.appendChild(hd);
       items.forEach(e=>{ const el=document.createElement('div');
