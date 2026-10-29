@@ -8317,7 +8317,7 @@ const Sim = (() => {
   }
   // NPC 밤 행동: 클래스 행동 / 쉰다 / 숨죽이고 지낸다 / 정보를 모은다 / 싸우러 나간다 (플레이어 밤 행동과 같은 값)
   // 성향별 쉬는 기준: [쉴 확률, 마력이 이 아래면, 체력이 이 아래면, 숨죽이는 체력 기준]
-  const REST_TAC={defensive:[.8,55,65,50],cunning:[.7,50,60,45],naive:[.6,40,50,35],proud:[.4,35,45,30],hunter:[.4,35,45,30],desperate:[.35,30,40,25],reckless:[.25,25,35,20]};
+  const REST_TAC={defensive:[.8,80,90,75],cunning:[.7,75,85,70],naive:[.6,65,75,60],proud:[.4,60,70,55],hunter:[.4,60,70,55],desperate:[.35,55,65,50],reckless:[.25,50,60,45]};
   function npcNight(){
     const w=W(); if(w.ended) return; w.nf=[]; for(const p of w.pairs){ p.nAct=null; p.rest=false; }
     for(const p of w.pairs){ if(p.alive&&!p.master&&p.stray>0){ p.stray--; if(p.stray<=0){p.alive=false;pairOut(p,'주인을 잃고 사라졌다');if(w.stray===p)w.stray=null;log(`주인 잃은 ${pName(p)}${J(pName(p),이)} 끝내 사라졌다.`);} } }
