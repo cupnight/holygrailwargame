@@ -5259,9 +5259,9 @@ const Sim = (() => {
   // 바닥권 보완: 실제 전투 계산식으로 '전투 점수'를 매긴다 (플레이어·NPC 공통, 화면에는 보이지 않음)
   //  ① 힘 합계: 기본 힘 + 클래스 보정 + 스킬 힘 + 고유 효과 + 클래스 고유 보너스(합 1~4 평균) + 방해
   //  ② 피해 비율: 모든 서번트를 상대로 주는 피해 ÷ 받는 피해 (근력·내구·민첩·회피·공격 방식)
-  //  ③ 물러나기 성공률  ④ 보구 피해(랭크 × 공격·영역형 1, 강화·약화·자기강화형 0.5, 정보·특수형 0.25)  ④' 보구 버티기(회복·방벽형의 랭크)  ⑤ 버티기 스킬(전투속행 + 회복·재생은 합쳐 6까지)  ⑥ 대마력  ⑦ 마력 부담(합마다 드는 마력 + 보구 비용 ÷ 10)  ⑧ 기척차단(기습·표적 회피)
+  //  ③ 물러나기 성공률  ④ 보구 피해(랭크 × 공격·영역형 1, 강화·약화·자기강화형 0.5, 정보·특수형 0.25)  ④' 보구 버티기(회복·방벽형의 랭크)  ⑤ 버티기 스킬(전투속행은 있으면 4, 회복·재생은 합쳐 6까지)  ⑥ 대마력  ⑦ 마력 부담(합마다 드는 마력 + 보구 비용 ÷ 10)  ⑧ 기척차단(기습·표적 회피)
   // 가중치는 보정을 끈 시뮬레이션 129명(NPC끼리도 피해 그대로·NPC 밤 행동 규칙)에서 이 아홉 값만으로 맞춘 것(평균 25 환산, R² 0.73). 기준선 22에 못 미치는 만큼 ÷1.5를 보정으로 준다(최대 15)
-  const MECH_W={"c":-142.43,"pw":1.324,"dr":20.885,"fl":12.507,"np":3.465,"ns":4.741,"sv":1.392,"mr":0.099,"mn":-2.745,"st":1.902,"T":22,"per":1.5};
+  const MECH_W={"c":-137.51,"pw":1.297,"dr":21.943,"fl":10.512,"np":3.382,"ns":4.579,"sv":1.523,"mr":0.295,"mn":-2.77,"st":2.008,"T":22,"per":1.5};
   const MECH={}, UNDER={};
   function mechF(h){ if(MECH[h.id]) return MECH[h.id]; const P=h.s, av=a=>a.reduce((x,y)=>x+y,0)/a.length;
     const pw=heroBase(P,100)+clsBonus(h,P)+SV(h,'power')*1.2+SV(h,'div')*.8+SV(h,'mad')*.8+SV(h,'rally')*.8+SV(h,'insight')*.9*.75+SV(h,'ride')*.4+SV(h,'sabotage')*1.1+SV(h,'avenge')*40*.045+(h.sp==='gate'?7:0)
@@ -5270,7 +5270,7 @@ const Sim = (() => {
     const hit=(x,XP,o,OP)=>{ const k=bk(x,XP,o,OP); return atkM(k,x,XP,o,OP,false)*(1-dodgeP(OP[1],XP[1])*(k==='magic'?MG.dodge:1))*(1-Math.min(.35,SV(o,'evade')*.035)); };
     const os=HEROES.filter(o=>o!==h), dr=Math.log(av(os.map(o=>hit(h,P,o,o.s)))/av(os.map(o=>hit(o,o.s,h,P))));
     const rl=npRole(h), rv=npRV(h);
-    return MECH[h.id]={pw,dr,fl:fleeP(h,P,false),np:rv*({A:1,F:1,B:.5,W:.5,S:.5,X:.25}[rl]||0),ns:'HD'.includes(rl)?rv:0,sv:SV(h,'survive')+Math.min(6,SV(h,'heal')+SV(h,'regen')*.5),mr:SV(h,'mr'),st:SV(h,'stealth'),
+    return MECH[h.id]={pw,dr,fl:fleeP(h,P,false),np:rv*({A:1,F:1,B:.5,W:.5,S:.5,X:.25}[rl]||0),ns:'HD'.includes(rl)?rv:0,sv:(SV(h,'survive')?4:0)+Math.min(6,SV(h,'heal')+SV(h,'regen')*.5),mr:SV(h,'mr'),st:SV(h,'stealth'),
       mn:(4.5*(h.cls==='berserk'?1.4:1)+(SV(h,'mad')?1:0)+(SV(h,'power')>=10?1:0))*(SV(h,'ind')?.8:1)*(h.cls==='caster'?.85:1)+npCostM(h)*(22+npRV(h)*3)*(h.cls==='berserk'?1.4:1)/10}; }
   function mechScore(h){ const f=mechF(h), W_=MECH_W; return W_.c+f.pw*W_.pw+f.dr*W_.dr+f.fl*W_.fl+f.np*W_.np+f.ns*W_.ns+f.sv*W_.sv+f.mr*W_.mr+f.mn*W_.mn+f.st*W_.st; }
   function underdog(h){ if(UNDER[h.id]!=null) return UNDER[h.id]; return UNDER[h.id]=Math.min(15,Math.max(0,MECH_W.T-mechScore(h))/MECH_W.per); }
