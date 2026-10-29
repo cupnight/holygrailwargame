@@ -5186,14 +5186,15 @@ const Sim = (() => {
   function myPower(ctx={}){
     const w=W(),h=hero();
     let p=heroBase(myParams().p,w.battle&&(w.battle.sealBuff===w.battle.round||w.battle.mad>=w.battle.round)?100:w.hp)+clsBonus(h,myParams().p)-6+w.trust*.15+S.st.mana*.12+(ctx.e?ctx.e.intel*.1:0)+(ctx.defend?w.fort*.2*fortRead(ctx.e)*(ctx.breach?.5:1):0);
-    p+=clsEdge(h,w.battle?w.battle.round:null,ctx.defend,ctx.breach); if(h.cls==='berserk'&&w.trust<DIST) p-=6;
+    p+=clsEdge(h,w.battle?w.battle.round:null,ctx.defend,ctx.breach,w.workshop); if(h.cls==='berserk'&&w.trust<DIST) p-=6;
     if(w.battle&&w.battle.round===1&&(ctx.attack||ctx.ambushed)) p+=ambushEdge(h);
     p+=edgeV(h,w.hp,w.battle?w.battle.round:null,ctx.defend);
     p+=SV(h,'power')*1.2+SV(h,'div')*.8+SV(h,'mad')*.8+SV(h,'rally')*.8+(ctx.attack?SV(h,'ride')*.8:0)+(w.battle&&w.battle.round>=2?SV(h,'insight')*.9:0);
     if(SV(h,'avenge')) p+=(100-w.hp)*.045*SV(h,'avenge');
     if(h.sp==='gate') p+=7+(w.hp<50?5:0);
     p+=(BIAS[h.id]||0);
-    if(ctx.knight) p+=6; if(ctx.lure&&w.battle&&w.battle.round<=2) p+=6; if(ctx.e&&w.mark===ctx.e.i) p+=8;
+    p+=underdog(h);
+    if(ctx.e&&w.mark===ctx.e.i) p+=8;
     if(ctx.defend) p+=5*wsF()*fortRead(ctx.e)*(ctx.breach?.5:1); if(ctx.trap) p-=8;
     p+=(CLS_BIAS[h.cls]||0);
     if(w.tod==='밤'&&(SK[h.id]||[]).some(([n])=>n==='성자의 숫자')) p-=SV(h,'power')*1.2; // 성자의 숫자: 해가 있을 때만
@@ -5248,15 +5249,20 @@ const Sim = (() => {
   const BIAS={};
   function clsBonus(h,P){ return h.cls==='caster'? PV(P[3])*1.2 : MAGE_BERSERK[h.id]? PV(P[3])*2.0 : h.cls==='shadow'? PV(P[1])*1.0 : 0; }
   // 클래스 고유 보너스 (플레이어·NPC 공통). r: 합 번호, def: 거처를 지키는 싸움인가
-  function clsEdge(h,r,def,breach){ return h.cls==='caster'?(def&&!breach?4:0) : h.cls==='bow'&&r!=null&&r<=2?7 : 0; }
+  function clsEdge(h,r,def,breach,ws){ return h.cls==='caster'?(def&&!breach?(ws?12:4):0) : h.cls==='bow'&&r!=null&&r<=2?7 : 0; }
   // 물러나기 성공 (플레이어·NPC 공통)
   const fleeP=(h,P)=>h.sp==='escape'?1:Math.min(.95,.45+PV(P[1])*.05+SV(h,'ride')*.03+SV(h,'evade')*.02);
+  // 바닥권 보완: 스테이터스 + 스킬 랭크의 절반 + 보구 랭크로 점수를 매겨, 30에 못 미치는 만큼 × 0.8을 힘에 더한다 (플레이어·NPC 공통, 화면에는 보이지 않음)
+  const UNDER={};
+  function underdog(h){ if(UNDER[h.id]!=null) return UNDER[h.id];
+    const sc=h.s.reduce((a,r)=>a+(PV(r)||0),0)+(SK[h.id]||[]).reduce((a,[n,r])=>a+(RANKV[r]||0),0)*.5+npRV(h);
+    return UNDER[h.id]=Math.max(0,30-sc)*.8; }
   function npcPower(p,vsMe,r,atk){
     const h=H_BY[p.hero];
     let v=heroBase(npcParams(p).p,p.hp)+clsBonus(h,npcParams(p).p)+p.pw*.32;
     const bt=vsMe&&W().battle, rd=bt?W().battle.round:r, att=bt?!!W().battle.ctx.defend:!!atk;
     v+=SV(h,'power')*1.2+SV(h,'div')*.8+SV(h,'mad')*.8+SV(h,'rally')*.8+(rd>=2?SV(h,'insight')*.9:0)+(att?SV(h,'ride')*.8:0);
-    v+=clsEdge(h,rd,bt?!!W().battle.ctx.attack:false,false);
+    v+=clsEdge(h,rd,bt?!!W().battle.ctx.attack:false,false,p.workshop)+(att&&rd===1?ambushEdge(h):0)+underdog(h);
     if(SV(h,'avenge')) v+=(100-p.hp)*.045*SV(h,'avenge');
     if(h.sp==='gate') v+=7+(p.hp<50?5:0);
     v+=(BIAS[h.id]||0);
@@ -6377,7 +6383,7 @@ const Sim = (() => {
 
   // 캐스터: 공방을 짓는다
   // 결계를 읽힌 정도: 같은 조에게 여러 번 막히면 그 조는 술식을 읽어 낸다
-  const eWsB=e=>e.cls==='caster'&&!(e.noWs>=W().day)&&(e.workshop||W().day>=3)?(e.workshop?10:6):0;
+  const eWsB=e=>e.workshop&&!(e.noWs>=W().day)?5:0;
   const fortRead=e=>[1,.7,.4,.1][Math.min(3,(e&&e.fortRead)||0)];
   function wsF(){ const w=W(); return !w||!w.workshop?0:(w.fort>=30?1:.5); }
   function workshopDo(){
@@ -6511,8 +6517,6 @@ const Sim = (() => {
       ch_.push({t:'마력을 모은다 · 조금만',d:'서번트 마력이 조금 찬다. 사람들이 조금 지친다',auto:amb&&w.sm<35,f:()=>w.queue.push(()=>log(gatherDo(false),'war'))});
       ch_.push({t:'마력을 모은다 · 크게',d:'서번트 마력이 가득 찬다. 사람이 쓰러지고, 성당교회가 주목한다',auto:amb&&w.sm<20,f:()=>w.queue.push(()=>log(gatherDo(true),'loss'))});
     }
-    if(h.cls==='sword'&&ts.length) ch_.push({t:'결투를 청한다',d:'기사의 예법으로 한 조를 불러낸다. 상대는 물러날 수 없고, 정면 승부에서 조금 더 강하다',auto:w.hp>55&&w.sm>=20,f:()=>classPick('duel')});
-    if(h.cls==='lance'&&ts.length) ch_.push({t:'도발한다',d:'한 조를 유리한 곳으로 끌어낸다. 상대는 물러날 수 없고, 첫 두 합을 쥔다',auto:w.hp>55&&w.sm>=20,f:()=>classPick('lure')});
     if(h.cls==='avenger') ch_.push({t:'복수의 표적을 정한다',d:w.mark?`지금 표적: ${pName(w.pairs.find(p=>p.i===w.mark)||{})} 조`:'한 조를 표적으로 정한다. 그 조와 싸울 때 강해진다',off:!alivePairs().some(p=>p.known&&!p.ally),auto:!w.mark,f:()=>classPick('mark')});
     if(h.cls==='shadow') ch_.push({t:'거처에 잠입한다',d:w.sm<15?'서번트 마력이 모자라다':ts.length?'서번트를 피해 마스터를 노린다':'거처를 아는 적이 없다',off:!ts.length||w.sm<15,auto:ts.length>0&&w.sm>=25,f:()=>infilPick()});
     if(h.cls==='judge'){
@@ -6631,10 +6635,10 @@ const Sim = (() => {
     e.provoked=2; return '폭약은 터졌지만 거처는 비어 있었다. 눈치챈 것이다. 이제 저쪽도 우리를 노린다.'; }
   // 세이버·랜서·어벤저의 밤 행동
   function classPick(k){ const w=W(); const ts=alivePairs().filter(p=>p.known&&!p.ally&&!p.truce&&(k==='mark'||p.master));
-    const T={duel:['결투를 청한다','누구에게 결투를 청할 것인가.'],lure:['도발한다','누구를 끌어낼 것인가.'],mark:['복수의 표적을 정한다','누구를 표적으로 삼을 것인가.']}[k];
+    const T={mark:['복수의 표적을 정한다','누구를 표적으로 삼을 것인가.']}[k];
     decide({title:T[0],body:T[1],war:true,choices:[...ts.map(p=>({t:`${pName(p)} 조`,d:`${p.arche} ${p.mname} · ${hpWord(p.hp)}`,auto:true,f:()=>{
       if(k==='mark'){ w.mark=p.i; return `${pName(p)} 조를 표적으로 정했다. 그 조와 마주치면 원한이 칼끝에 실린다.`; }
-      w.queue.unshift(()=>battle(p,k==='duel'?{attack:true,forced:true,knight:true}:{attack:true,forced:true,lure:true})); return ''; }})),{t:'그만둔다',d:'오늘 밤은 하지 않는다',f:()=>'생각을 접었다.'}]}); }
+      return ''; }})),{t:'그만둔다',d:'오늘 밤은 하지 않는다',f:()=>'생각을 접었다.'}]}); }
   function attackPick(){
     const w=W(); const ts=alivePairs().filter(p=>p.known&&!p.ally&&!p.truce);
     decide({title:'누구를 칠 것인가',body:'거처를 아는 적.',war:true,choices:ts.map(p=>({t:`${pName(p)} 조`,d:`${p.arche} ${p.mname} · ${hpWord(p.hp)}`,auto:true,f:()=>{w.queue.unshift(()=>battle(p,{attack:true}))}}))});
@@ -7478,7 +7482,7 @@ const Sim = (() => {
     if(SV(h,'slayer')&&(PV(npcParams(e).p[0])>=4||eh2.cls==='berserk'||(skillsOf(h).some(x=>x.n==='용살자')&&npIsDragon(b,'en')))) sab+=SV(h,'slayer')*1.2;
     skillFlavor(h,mN0(h),b,true); skillFlavor(eh2,pName(e),b,false,e);
     if(h.sp==='gate'&&w.hp<50&&!b.gateSerious){ b.gateSerious=true; log(pickNR(['길가메시의 얼굴에서 웃음이 사라졌다. “좋다. 조금은 진심을 보여 주지.” 황금빛 문이 하늘을 메웠다.','“잡종 주제에 나를 다치게 하다니.” 등 뒤의 문이 셀 수 없이 열렸다.'],'gateS'),'war'); }
-    b.dodged=null; b.judgedNow=b.judged; b.sealNow=b.sealBuff===b.round; const P=myPower({e,defend:b.ctx.defend,judged:b.judged,attack:b.ctx.attack,trap:b.ctx.trap,breach:b.ctx.breach,knight:b.ctx.knight,lure:b.ctx.lure})+bonus+mBon(b)+(b.ctx.final&&w.altar==='me'?6:0)+(b.ctx.final&&w.riteDone?6:0)+(b.ctx.raid?12:0)+initB(b)+(b.mad>=b.round?12:0)+(b.aron?8:0)+(rnd()*36-18)-eSab-(w.sm<=0?30:w.sm<15?10:0)+npFxP(b,'me'); b.judged=false;
+    b.dodged=null; b.judgedNow=b.judged; b.sealNow=b.sealBuff===b.round; const P=myPower({e,defend:b.ctx.defend,judged:b.judged,attack:b.ctx.attack,trap:b.ctx.trap,breach:b.ctx.breach})+bonus+mBon(b)+(b.ctx.final&&w.altar==='me'?6:0)+(b.ctx.final&&w.riteDone?6:0)+(b.ctx.raid?12:0)+initB(b)+(b.mad>=b.round?12:0)+(b.aron?8:0)+(rnd()*36-18)-eSab-(w.sm<=0?30:w.sm<15?10:0)+npFxP(b,'me'); b.judged=false;
     let E=npcPower(e,true)-eMal(b)+(rnd()*36-18)+(b.ctx.hunted?(w.hid?HUNT_E/2:HUNT_E):0)+(b.ctx.final&&e.altar?6:0)+(b.ctx.claim&&b.ctx.attack&&e.altarPre?10:0)+(e.tac==='reckless'?6:0)+npcAct(b,e)+npcInitB(b)+(b.ctx.hostage&&b.round<=2?10:0)-sab+(b.ctx.attack?eWsB(e):0);
     E+=npFxP(b,'en'); { const _c=Math.round((3+ri(0,3))*(H_BY[e.hero].cls==='berserk'?1.4:1)); e.sm=Math.max(0,npcSmOf(e)-_c); if(e.master&&e.seals>1&&e.sm<15){ e.seals--; e.sm=clamp(e.sm+60); log(`${pName(e)}의 마스터가 령주를 긁었다. 흐려지던 윤곽이 다시 짙어졌다.`,'seal'); } E-=e.sm<=0?30:e.sm<15?10:0; }
     if(S.dead) return;
@@ -8262,7 +8266,6 @@ const Sim = (() => {
         else if(r==='bad'&&(th.cls==='bow'||SV(th,'insight')>=4)) a.hp=clamp(a.hp-ri(6,14));
         if((r==='great'||r==='ok')&&seenOf(a,t)&&ch(.4)) log(`밤하늘을 가르는 한 줄기 빛이 보였다. ${pName(a)} 조가 ${pName(t)} 조를 저격했다는 소문이다.`);
         continue; }
-      if((a.cls==='sword'||a.cls==='lance')&&ch(0.25)){ a.scoutEdge=1; continue; } // 결투를 청한다 · 도발한다: 다음 싸움의 첫 합을 쥔다
       if(a.cls==='avenger'&&!a.mark&&ch(0.4)){ a.mark=pick(ts).i; continue; } // 복수의 표적을 정한다
       if(a.cls==='rider'&&ch(0.25)){ // 탈것을 타고 정찰한다
         a.scoutEdge=1;
@@ -8289,7 +8292,6 @@ const Sim = (() => {
         if((r==='great'||r==='ok')&&seenOf(a,t)&&ch(.5)) log(`감독자의 령주가 밤하늘에 빛났다는 소문이다. ${pName(t)} 조의 움직임이 묶였다.`);
         continue; }
     }
-    for(const p of cs) if(p.workshop&&p.alive) p.hp=clamp(p.hp+2);
   }
   function npcNight(){
     const w=W(); if(w.ended) return; w.nf=[];
@@ -8331,7 +8333,7 @@ const Sim = (() => {
     }
     for(const p of w.pairs) if(p.alive){ p.sm=clamp(npcSmOf(p)+12+p.pw*.08+(p.rest?15:0)); if(p.rest){ p.hp=clamp(p.hp+3); }
       p.rest=p.master&&p.sm<40&&ch(Math.min(.9,({defensive:.8,cunning:.7,naive:.6,proud:.4,hunter:.4,desperate:.35,reckless:.25}[p.tac]||.5)*(p.hp<40?1.3:1)));
-      if(p.noRegen>0) p.noRegen--; else p.hp=clamp(p.hp+ri(2,5)+p.pw*.04+SV(H_BY[p.hero],'regen')+SV(H_BY[p.hero],'heal')*.6+(p.altar?3:0)-(w.mud>0?2:0)); }
+      if(p.noRegen>0) p.noRegen--; else p.hp=clamp(p.hp+2+p.pw*.06+SV(H_BY[p.hero],'regen')+SV(H_BY[p.hero],'heal')*.6+(p.workshop?2:0)+(p.altar?3:0)-(w.mud>0?2:0)); }
     for(const p of w.pairs){ if(p.halt>0)p.halt--; if(p.truceN>0)p.truceN--; if(p.mHurt>0)p.mHurt--; if(p.provoked>0)p.provoked--; }
   }
   function threat(){
