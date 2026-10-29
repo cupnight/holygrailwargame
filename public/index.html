@@ -6453,7 +6453,7 @@ const Sim = (() => {
   // 전투 중 암살: 민첩·기척차단과 상대 서번트의 감지·수호가 크게 작용한다. 기습한 첫 합에는 조금 쉬워진다
   function asnP(e,est){ const b=W().battle; return asnTot(asnReach(e,est),npcGuard(e,hero(),myP(),'battle',!!(b&&b.ctx.attack))); }
   function asnReach(e,est){ const w=W(),h=hero(),P=myP(),b=w.battle, kc=KCR(h);
-    const d=P[1]*2.5+(kc?RANKV[kc]*2:0)+P[4]+(h.sp==='assassin'?12:0)-((est?6:asnFoe(e,'battle',b))+asnAlert(e)*4);
+    const d=P[1]*2.5+(kc?RANKV[kc]*2:0)+P[4]-((est?6:asnFoe(e,'battle',b))+asnAlert(e)*4);
     const amb=b&&b.round===1&&(b.ctx.attack||b.ctx.ambushed)?ambushEdge(h)*ASN_T.amb:0;
     return Math.max(.05,Math.min(.75,ASN_T.base+d*ASN_T.k+Math.min(100,e.intel||0)*ASN_T.intel+amb)); }
   const ASN_T={base:-.04,k:.0083,intel:.004,amb:.016};
@@ -6482,7 +6482,7 @@ const Sim = (() => {
   const addKnow=(a,t,v)=>{ if(!a||!t||a===t) return; a.know=a.know||{}; a.know[t.i]=Math.min(100,(a.know[t.i]||0)+v); };
   // NPC 어새신의 전투 중 마스터 암살 (위 asnP와 같은 식). X: 어새신 스테이터스, d: 막는 쪽 {mdef, foe(감지·수호), alert, pw, intel}
   function asnPOf(X,xh,d,amb){ const kc=KCR(xh);
-    const v=X[1]*2.5+(kc?RANKV[kc]*2:0)+X[4]+(xh.sp==='assassin'?12:0)-(d.mdef+d.foe+Math.min(4,d.alert||0)*4+d.pw*.1);
+    const v=X[1]*2.5+(kc?RANKV[kc]*2:0)+X[4]-(d.mdef+d.foe+Math.min(4,d.alert||0)*4+d.pw*.1);
     return Math.max(.05,Math.min(.75,ASN_T.base+v*ASN_T.k+Math.min(100,d.intel||0)*ASN_T.intel+(amb?ambushEdge(xh)*ASN_T.amb:0))); }
   // 전투 중 암살 실패: 상대 서번트의 반격. 근력과 마력 중 높은 쪽 + 민첩, 감지·수호 스킬, 전투형 마스터 / 우리 내구·회피로 줄어든다
   function asnCounter(e){ const h=hero(), P=myP(), E=npcParams(e).p.map(PV), eh=H_BY[e.hero];
