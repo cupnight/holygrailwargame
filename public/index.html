@@ -7667,7 +7667,7 @@ const Sim = (() => {
     }
     if(w.hp<=0){ myHeroDown(e); return endBattle(); }
     if(e.hp<=0){ defeatNpc(e,'우리'); if(!e.alive||!fin) return endBattle(); }
-    { const r=npcRetreat(b,e); if(r){ b.res='fled'; log(r==='seal'?`${eN}${J(eN,이)} 령주의 힘으로 눈앞에서 사라졌다.`:e.aid==='merc'?`${e.mname}: “계약서에 목숨값은 없었습니다.” ${eN}${J(eN,이)} 물러났다.`:`${eN}${J(eN,이)} 상처를 안고 어둠 속으로 물러났다.`,'war'); return endBattle(); } }
+    { const r=npcRetreat(b,e); if(r){ b.res='fled'; log(r==='seal'?`${eN}${J(eN,이)} 령주의 힘으로 눈앞에서 사라졌다.`:r==='asn'?pickNR([`일이 틀어지자 ${eN}${J(eN,은)} 미련 없이 그림자 속으로 녹아들었다.`,`${eN}${J(eN,은)} 더 싸우지 않았다. 기척이 한순간에 끊겼다.`,`암살자는 정면에서 싸우지 않는다. ${eN}${J(eN,이)} 어둠 속으로 물러났다.`],'asnRun'):e.aid==='merc'?`${e.mname}: “계약서에 목숨값은 없었습니다.” ${eN}${J(eN,이)} 물러났다.`:`${eN}${J(eN,이)} 상처를 안고 어둠 속으로 물러났다.`,'war'); return endBattle(); } }
     if(!fin&&b.round>=b.maxR){ log(pick(['새벽이 가까워졌다. 양쪽 모두 무기를 거두었다.','멀리서 사이렌이 울렸다. 오늘 밤은 여기까지다.','성당교회의 은폐반이 다가오는 기척에 서로 물러났다.']),'war'); return endBattle(); }
     b.round++; soon(()=>battleRound());
     };
@@ -8143,6 +8143,7 @@ const Sim = (() => {
     if(H_BY[e.hero].cls==='shadow'&&b.round<=2&&!b.eAsnTried&&w.heroAlive&&!b.ctx.final&&!npGuard(b)){ const eh=H_BY[e.hero], E=npcParams(e).p.map(PV), h=hero(), P=myP();
       const reach=asnPOf(E,eh,{mdef:0,foe:asnSk(h,'battle',!!b.ctx.defend)+(fxGet(b,'me','wall')||fxGet(b,'me','field')?6:0),alert:w.asnAlert,pw:0,intel:w.exposure},b.round===1&&(b.ctx.defend||b.ctx.ambushed)), g=myGuard(eh,E,'battle',!!b.ctx.defend);
       if(asnTot(reach,g)>=.3&&ch(.6)){ b.eAsnTried=true; const ro=asnRoll(reach,g);
+        if(ro!=='ok') b.eAsnFail=true; // 암살이 틀어진 어새신은 물러날 궁리를 한다
         if(ro==='block'){ w.asnAlert=(w.asnAlert||0)+2; if(g.k==='magic'){ e.hp=clamp(e.hp-12); log('당신의 마술이 적 어새신을 밀어냈다.','war'); } else if(g.k==='home') log('결계가 적 어새신의 칼날을 튕겨 냈다.','war'); else log('당신은 서번트를 불렀다. 칼끝이 닿기 직전에 막혔다.','war'); }
         else if(ro==='ok'){ add({health:-ri(20,30)}); log('적 어새신이 합이 엇갈린 틈에 서번트를 지나쳐 당신에게 닿았다. 칼날이 깊이 들어왔다.','loss'); if(S.st.health<=0){ S.flags.war='dead'; die('어새신의 암습'); } else { b.res='eAsn'; b.endNow=true; } }
         else { const sk=skillsOf(h).some(k=>ASN_A.test(k.n)||ASN_B.test(k.n)||ASN_C.test(k.n)); e.hp=clamp(e.hp-Math.round(Math.max(6,Math.min(32,9+asnStrike(P)+(sk?4:0)-E[2]*1.2-SV(eh,'evade')*.6+ri(-3,3))))); w.asnAlert=(w.asnAlert||0)+2; log('적 어새신의 칼날이 당신 앞에서 막혔다. 서번트의 반격이 그 몸을 베었다.','war'); } } }
@@ -8172,12 +8173,15 @@ const Sim = (() => {
     if(e.aid==='sibling'&&w.hp<20&&!b.spared&&!b.ctx.final){ b.spared=true; b.endNow=true; log(`${e.mname}${J(e.mname,이)} 마지막 일격을 거두었다. “…오늘은 여기까지.”`,'war'); }
     return bonus;
   }
+  // 암살이 틀어져 싸움이 벌어진 어새신: 합마다 (이 값 × 도주 성공률) 확률로 물러난다. 플레이어 전투·NPC끼리 같은 값
+  const ASN_FLEE=.8;
   function npcRetreat(b,e){
     if(npLocked(b,'en')) return false;
     const st=STYLE[e.aid]||{retreat:25,rp:.4};
     if(b.ctx.final||b.ctx.forced) return false;
     if(b.eMad>=b.round) return false;
     if(e.master&&e.seals>0&&['priest','mother','student','veteran','ghost','eighth','atlas','killer'].includes(e.aid)&&e.hp<st.retreat&&ch(.7)){ npcSeal(e,e.aid==='mother'?'살아서 돌아와':'돌아와라'); return 'seal'; }
+    if((b.ctx.asnFail||b.eAsnFail)&&e.cls==='shadow'&&ch(ASN_FLEE*Math.min(.9,fleeP(H_BY[e.hero],npcParams(e).p))-npFleeMinus(b,'en'))) return 'asn';
     if(e.hp<st.retreat&&ch(Math.min(.9,st.rp*fleeP(H_BY[e.hero],npcParams(e).p)/.6)-npFleeMinus(b,'en'))) return 'run';
     return false;
   }
@@ -8311,6 +8315,7 @@ const Sim = (() => {
       if(!final&&r<=2) for(const x of [A,B]){ if(asnWin||x.h.cls!=='shadow'||x.asnTried||!x.p.master||!x.o.p.master) continue;
         const XP=x.P.map(PV), reach=asnPOf(XP,x.h,{mdef:0,foe:asnFoe(x.o.p,'battle',null)+(get(x.o,'wall')||get(x.o,'field')?6:0),alert:asnAlert(x.o.p),pw:0,intel:npcKnow(x.p,x.o.p)},r===1&&x===A&&init), g=npcGuard(x.o.p,x.h,XP,'battle',x===A);
         if(asnTot(reach,g)>=.3&&ch(.6)){ x.asnTried=1; const ro=asnRoll(reach,g);
+          if(ro!=='ok') x.asnF=1;
           if(ro==='block'){ x.o.p.alert=(x.o.p.alert||0)+2; if(g.k==='magic') hit(x,12); else if(g.k==='servant') hit(x,Math.max(6,Math.min(32,9+asnStrike(x.o.P.map(PV))-PV(x.P[2])*1.2-SV(x.h,'evade')*.6+ri(-3,3)))); }
           else if(ro==='ok') asnWin=x; else { hit(x,Math.max(6,Math.min(32,9+asnStrike(x.o.P.map(PV))-PV(x.P[2])*1.2-SV(x.h,'evade')*.6+ri(-3,3)))); x.o.p.alert=(x.o.p.alert||0)+2; } } }
       if(asnWin) break;
@@ -8333,7 +8338,7 @@ const Sim = (() => {
         f.age=(f.age||0)+1; f.left--; if(f.left<=0){ drop(x,f); if(f.type==='wall'&&f.id==='boudica') hit(x.o,base(x)*.4); } }
       surv(A); surv(B);
       if(a.hp<=0||b.hp<=0) break;
-      if(!final){ const fl=[A,B].find(x=>x.p.hp<25&&!locked(x)&&ch(fleeP(x.h,x.P)*.45)); if(fl) break; }
+      if(!final){ const fl=[A,B].find(x=>!locked(x)&&(x.p.hp<25&&ch(fleeP(x.h,x.P)*.45)||x.asnF&&ch(ASN_FLEE*Math.min(.9,fleeP(x.h,x.P))))); if(fl) break; }
     }
     for(const x of [a,b]) if(x.madCost){ x.madCost=0; x.hp=clamp(x.hp-10); }
     if(asnWin){ const win=asnWin.p, lose=asnWin.o.p, sn=seen||ch(.5);
@@ -8538,7 +8543,7 @@ const Sim = (() => {
       const E=npcParams(p).p.map(PV), off=Math.max(-10,Math.min(12,asnAtk(th,E)-22))*1.5, det=asnSk(h,'battle',true)*1.5, cut=(lo,hi)=>Math.max(6,ri(lo,hi)+Math.round(asnStrike(E)-9.5));
       const hurt=(lo,hi)=>{ add({health:-cut(lo,hi)}); if(S.st.health<=0){ S.flags.war='dead'; die('어새신의 암습'); return true; } return false; };
       decide({title:'암습',body:`잠결에 목덜미가 서늘했다. 방 안에 누군가 있다. 기척이 전혀 없었다. 어새신이다.${p.revealed?' '+th.name+'의 기척이다.':''}`,war:true,choices:[
-        {t:`${h.name}${J(h.name,을)} 부른다`,d:det>=6?'서번트는 이런 낌새에 밝다':'서번트가 늦지 않기를',st:[{l:'신뢰',v:Math.round(w.trust)}],auto:true,f:()=>{ if(chk('신뢰',w.trust+ri(0,50)+det,55+off)&&!ch(ASN_BONUS)){ addIntel(p,25,'trail'); w.queue.unshift(()=>battle(p,{ambushed:true})); return `${h.name}${J(h.name,이)} 벽을 뚫고 들어왔다. 칼끝이 당신 목 한 치 앞에서 멈췄다.`; } if(hurt(12,22)) return ''; addIntel(p,15,'trail'); return '서번트가 닿기 전에 칼날이 먼저 지나갔다. 피가 이불을 적셨다.'; }},
+        {t:`${h.name}${J(h.name,을)} 부른다`,d:det>=6?'서번트는 이런 낌새에 밝다':'서번트가 늦지 않기를',st:[{l:'신뢰',v:Math.round(w.trust)}],auto:true,f:()=>{ if(chk('신뢰',w.trust+ri(0,50)+det,55+off)&&!ch(ASN_BONUS)){ addIntel(p,25,'trail'); w.queue.unshift(()=>battle(p,{ambushed:true,asnFail:true})); return `${h.name}${J(h.name,이)} 벽을 뚫고 들어왔다. 칼끝이 당신 목 한 치 앞에서 멈췄다.`; } if(hurt(12,22)) return ''; addIntel(p,15,'trail'); return '서번트가 닿기 전에 칼날이 먼저 지나갔다. 피가 이불을 적셨다.'; }},
         {t:'결계에 맡긴다',d:`결계 ${Math.round(w.fort)}`,f:()=>{ if(chk('결계',w.fort+ri(0,40)+wsF()*6+asnSk(h,'night',true)*.5,55+off)&&!ch(ASN_BONUS)){ addIntel(p,20,'trail'); return '결계가 비명을 지르며 칼날을 튕겨 냈다. 그림자는 창밖으로 사라졌다.'; } w.fort=clamp(w.fort-10); if(hurt(14,24)) return ''; return '결계가 종잇장처럼 찢겼다.'; }},
         {t:'마술로 반격한다',d:'마력과 정신에 기댄다',st:[{l:'마력',v:Math.round(S.st.mana)},{l:'정신',v:Math.round(S.st.will)}],off:!isMage(),f:()=>{ if(chk('마력·정신',S.st.mana+S.st.will+ri(0,40),100+off)&&!ch(ASN_BONUS)){ p.hp=clamp(p.hp-12); addIntel(p,30,'trail'); return '손끝에서 터진 마력이 그림자를 벽에 내동댕이쳤다. 그림자는 피를 흘리며 달아났다.'; } if(hurt(16,26)) return ''; return '주문이 완성되기 전에 칼날이 닿았다.'; }}]});}},
     {w:4,c:()=>W().seals===0&&!W().stealTried&&contracted().some(p=>!p.ally&&['cunning','hunter','proud'].includes(p.tac)),f:()=>{const w=W(),h=hero();w.stealTried=true;
