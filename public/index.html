@@ -8239,7 +8239,9 @@ const Sim = (() => {
       const pw=x=>{ let v=npcPower(x.p,false,r,x===A&&init)+(x.p.mark&&x.p.mark===x.o.p.i?8:0)+(x===A&&init&&!noRaid(B)?(r===1?10:r===2?5:0):0)+(x.p.workshop?6:0)+(final&&x.p.altar?6:0)+(x.p.altarFort?10:0)+gEdge(gKnow(x.p,x.o.p.hero))+(x.ex||0)+(x.madTo>=r?12:0)-sabOf(x.o)+rnd()*36-18-(x.p.sm<=0?30:x.p.sm<15?10:0)+hap(x,r);
         if(!x.sealed&&x.p.master&&x.p.seals>0&&(final&&(r===1||x.p.hp<50)||((x.p.aid==='heir'||x.p.aid==='avenger')&&x.p.hp<50))&&ch(final?.6:.4)){ x.sealed=1; x.p.seals--; v+=40; if(seen) log(`멀리서 ${pName(x.p)} 조 쪽 령주가 붉게 타올랐다.`,'seal'); }
         return v; };
-      if(r===1) for(const x of [A,B]){ x.ex=0; if(x.p.scoutEdge){ x.ex+=6; x.p.scoutEdge=0; } if(x.p.cls==='berserk'&&npcSmOf(x.p)>=10&&ch(.5)){ x.madTo=r+2; x.p.madCost=1; } }
+      if(r===1) for(const x of [A,B]){ x.ex=0; if(x.p.scoutEdge){ x.ex+=6; x.p.scoutEdge=0; } }
+      // 광화: 몰렸거나 결전일 때, 마력 10 이상이면 60% 확률로 결투당 한 번 (플레이어 전투에서 NPC가 쓰는 조건과 같다). 3합 동안 +12, 마력 ×2, 끝나면 체력 −10
+      for(const x of [A,B]) if(x.p.cls==='berserk'&&!x.madUsed&&npcSmOf(x.p)>=10&&(x.p.hp<=45||final)&&ch(.6)){ x.madUsed=1; x.madTo=r+2; x.p.madCost=1; }
       const pa=pw(A), pb=pw(B), d=pa-pb, rb=new Map([[A,a.hp],[B,b.hp]]);
       if(fa||fb){ if(!(fa&&fb)){ const x=fa?A:B, dd=x===A?-d:d; if(dd>=8) hit(x,Math.max(1,(6+dd*.3)*.8*rM(x.o)*dealM(x.o)*takeM(x)-grdD(x.h))*sgfM(x.h)); else if(dd>-8) hit(x,ri(2,5)*takeM(x)); } }
       else if(Math.abs(d)<8){ hit(A,ri(3,7)*takeM(A)); hit(B,ri(3,7)*takeM(B)); }
