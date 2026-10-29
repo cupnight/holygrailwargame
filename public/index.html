@@ -6451,7 +6451,7 @@ const Sim = (() => {
   function infilD(e,est){ const h=hero(),P=myP();
     return (P[1]*2+SV(h,'stealth')*1.5+P[4]*1.5+(e.intel||0)*.12+8)-(10+(est?6:asnFoe(e,'night'))+(e.cls==='caster'?8:0)+(e.workshop?6:0)-(e.hp<40?4:0)+asnAlert(e)*5); }
   // 전투 중 암살: 민첩·기척차단과 상대 서번트의 감지·수호가 크게 작용한다. 기습한 첫 합에는 조금 쉬워진다
-  function asnP(e,est){ const b=W().battle; return asnReach(e,est)*(1-npcGuard(e,hero(),myP(),'battle',!!(b&&b.ctx.attack)).p); }
+  function asnP(e,est){ const b=W().battle; return asnTot(asnReach(e,est),npcGuard(e,hero(),myP(),'battle',!!(b&&b.ctx.attack))); }
   function asnReach(e,est){ const w=W(),h=hero(),P=myP(),b=w.battle, kc=KCR(h);
     const d=P[1]*2.5+(kc?RANKV[kc]*2:0)+P[4]+(h.sp==='assassin'?12:0)-((est?6:asnFoe(e,'battle',b))+asnAlert(e)*4);
     const amb=b&&b.round===1&&(b.ctx.attack||b.ctx.ambushed)?ambushEdge(h)*ASN_T.amb:0;
@@ -6463,6 +6463,9 @@ const Sim = (() => {
   // 기준: 밤(거처) 서번트 55·결계 55·마술 100 / 전투 중 서번트 85·결계 70(거처를 지킬 때만)·마술 120 (+어새신 솜씨)
   // NPC의 '서번트를 부른다'는 신뢰 대신 40 + 실력×0.3, '결계'는 기본 17 + 캐스터 25 + 공방 6, '마술'은 실력×1.3 + 마스터 유형
   const GUARD_T={night:{s:55,h:55,m:100},battle:{s:85,h:70,m:120}};
+  // 전투 중 마스터 노림의 최종 성공 확률 = 닿을 확률 × (1 − 막을 확률) + 10%p (최대 85%)
+  const ASN_BONUS=.1, asnTot=(reach,g)=>Math.min(.85,reach*(1-g.p)+ASN_BONUS);
+  function asnRoll(reach,g){ if(ch(asnTot(reach,g))) return 'ok'; return ch(reach)?'block':'miss'; }
   function guardPick(o){ return o.sort((a,b)=>b.p-a.p)[0]; }
   function npcGuard(t,ah,AE,mode='battle',home=true){ const th=H_BY[t.hero], off=asnOff(ah,AE), det=asnSk(th,'battle',true)*1.5, g=mGrp(t), T=GUARD_T[mode];
     const o=[{k:'servant',p:pRoll(40+t.pw*.3+det,50,T.s+off)}];
@@ -7789,10 +7792,11 @@ const Sim = (() => {
   function assassinate(){
     const w=W(),h=hero(),e=w.battle.e;
     const reach=asnReach(e,false), g=npcGuard(e,h,myP(),'battle',!!w.battle.ctx.attack);
-    if(ch(reach)&&ch(g.p)){ w.battle.res='fail'; e.alert=(e.alert||0)+2; w.exposure=clamp(w.exposure+expUp(6));
+    const ro=asnRoll(reach,g);
+    if(ro==='block'){ w.battle.res='fail'; e.alert=(e.alert||0)+2; w.exposure=clamp(w.exposure+expUp(6));
       if(g.k==='magic'){ w.hp=clamp(w.hp-12); log('적 마스터의 마술이 우리 서번트를 밀어냈다.','war'); } else if(g.k==='home') log('적 거처의 결계가 칼날을 튕겨 냈다.','war'); else { w.hp=clamp(w.hp-asnCounter(e)); log('적 마스터가 서번트를 불러 막아 냈다. 반격이 쏟아졌다.','war'); }
       if(w.hp<=0) myHeroDown(e); endBattle(); return; }
-    if(ch(reach)){ w.battle.res='asn'; log(`${h.name}${J(h.name,이)} 적의 등 뒤로 돌아 마술사 ${e.mname}${J(e.mname,을)} 쓰러뜨렸다.`,'war'); masterKilled(e); add({will:-3}); w.kills++; S.flags.killedMaster=1; }
+    if(ro==='ok'){ w.battle.res='asn'; log(`${h.name}${J(h.name,이)} 적의 등 뒤로 돌아 마술사 ${e.mname}${J(e.mname,을)} 쓰러뜨렸다.`,'war'); masterKilled(e); add({will:-3}); w.kills++; S.flags.killedMaster=1; }
     else { w.battle.res='fail'; e.alert=(e.alert||0)+2; w.exposure=clamp(w.exposure+expUp(8)); w.hp=clamp(w.hp-asnCounter(e)); log(pickNR(['칼끝은 결계에 막혔다. 반격이 쏟아졌다.','결계가 생각보다 두꺼웠다. 들어가자마자 반격이 날아들었다.','문턱에서 발이 묶였다. 기다리던 함정이었다.'],'fortF'),'war'); if(w.hp<=0) myHeroDown(e); else if(ch(.2)){add({health:-10});log('당신도 다쳤다.','war');} }
     endBattle();
   }
@@ -8113,9 +8117,9 @@ const Sim = (() => {
     }
     if(H_BY[e.hero].cls==='shadow'&&b.round<=2&&!b.eAsnTried&&w.heroAlive&&!b.ctx.final&&!npGuard(b)){ const eh=H_BY[e.hero], E=npcParams(e).p.map(PV), h=hero(), P=myP();
       const reach=asnPOf(E,eh,{mdef:0,foe:asnSk(h,'battle',!!b.ctx.defend)+(fxGet(b,'me','wall')||fxGet(b,'me','field')?6:0),alert:w.asnAlert,pw:0,intel:w.exposure},b.round===1&&(b.ctx.defend||b.ctx.ambushed)), g=myGuard(eh,E,'battle',!!b.ctx.defend);
-      if(reach*(1-g.p)>=.3&&ch(.6)){ b.eAsnTried=true; const got=ch(reach);
-        if(got&&ch(g.p)){ w.asnAlert=(w.asnAlert||0)+2; if(g.k==='magic'){ e.hp=clamp(e.hp-12); log('당신의 마술이 적 어새신을 밀어냈다.','war'); } else if(g.k==='home') log('결계가 적 어새신의 칼날을 튕겨 냈다.','war'); else log('당신은 서번트를 불렀다. 칼끝이 닿기 직전에 막혔다.','war'); }
-        else if(got){ add({health:-ri(20,30)}); log('적 어새신이 합이 엇갈린 틈에 서번트를 지나쳐 당신에게 닿았다. 칼날이 깊이 들어왔다.','loss'); if(S.st.health<=0){ S.flags.war='dead'; die('어새신의 암습'); } else { b.res='eAsn'; b.endNow=true; } }
+      if(asnTot(reach,g)>=.3&&ch(.6)){ b.eAsnTried=true; const ro=asnRoll(reach,g);
+        if(ro==='block'){ w.asnAlert=(w.asnAlert||0)+2; if(g.k==='magic'){ e.hp=clamp(e.hp-12); log('당신의 마술이 적 어새신을 밀어냈다.','war'); } else if(g.k==='home') log('결계가 적 어새신의 칼날을 튕겨 냈다.','war'); else log('당신은 서번트를 불렀다. 칼끝이 닿기 직전에 막혔다.','war'); }
+        else if(ro==='ok'){ add({health:-ri(20,30)}); log('적 어새신이 합이 엇갈린 틈에 서번트를 지나쳐 당신에게 닿았다. 칼날이 깊이 들어왔다.','loss'); if(S.st.health<=0){ S.flags.war='dead'; die('어새신의 암습'); } else { b.res='eAsn'; b.endNow=true; } }
         else { const sk=skillsOf(h).some(k=>ASN_A.test(k.n)||ASN_B.test(k.n)||ASN_C.test(k.n)); e.hp=clamp(e.hp-Math.round(Math.max(6,Math.min(32,9+asnStrike(P)+(sk?4:0)-E[2]*1.2-SV(eh,'evade')*.6+ri(-3,3))))); w.asnAlert=(w.asnAlert||0)+2; log('적 어새신의 칼날이 당신 앞에서 막혔다. 서번트의 반격이 그 몸을 베었다.','war'); } } }
     if(e.aid==='elder') bonus+=4;
     if(e.aid==='executor'&&ch(.25)&&w.heroAlive&&!npGuard(b)){ if(chk('',S.st.mana+S.st.will+ri(0,40),90)) log(pickNR([`${e.mname}의 흑건이 당신 발밑에 꽂혔다. 한 뼘 차이였다.`,`날아든 흑건을 가까스로 피했다.`,`흑건이 결계에 튕겨 나갔다.`],'exeM'),'war'); else { add({health:-ri(5,10)}); log(pickNR([`${e.mname}${J(e.mname,이)} 던진 흑건이 당신 팔을 스쳤다.`,`흑건 세 자루가 날아들었다. 하나가 허벅지에 박혔다.`,`${e.mname}의 흑건이 어깨를 꿰뚫었다.`],'exe'),'war'); if(S.st.health<=0){ S.flags.war='dead'; die('대행자의 흑건'); return 0; } } }
@@ -8281,9 +8285,9 @@ const Sim = (() => {
       for(const x of [A,B]) if(x.p.cls==='berserk'&&!x.madUsed&&npcSmOf(x.p)>=10&&(x.p.hp<=45||final)&&ch(.6)){ x.madUsed=1; x.madTo=r+2; x.p.madCost=1; }
       if(!final&&r<=2) for(const x of [A,B]){ if(asnWin||x.h.cls!=='shadow'||x.asnTried||!x.p.master||!x.o.p.master) continue;
         const XP=x.P.map(PV), reach=asnPOf(XP,x.h,{mdef:0,foe:asnFoe(x.o.p,'battle',null)+(get(x.o,'wall')||get(x.o,'field')?6:0),alert:asnAlert(x.o.p),pw:0,intel:npcKnow(x.p,x.o.p)},r===1&&x===A&&init), g=npcGuard(x.o.p,x.h,XP,'battle',x===A);
-        if(reach*(1-g.p)>=.3&&ch(.6)){ x.asnTried=1; const got=ch(reach);
-          if(got&&ch(g.p)){ x.o.p.alert=(x.o.p.alert||0)+2; if(g.k==='magic') hit(x,12); else if(g.k==='servant') hit(x,Math.max(6,Math.min(32,9+asnStrike(x.o.P.map(PV))-PV(x.P[2])*1.2-SV(x.h,'evade')*.6+ri(-3,3)))); }
-          else if(got) asnWin=x; else { hit(x,Math.max(6,Math.min(32,9+asnStrike(x.o.P.map(PV))-PV(x.P[2])*1.2-SV(x.h,'evade')*.6+ri(-3,3)))); x.o.p.alert=(x.o.p.alert||0)+2; } } }
+        if(asnTot(reach,g)>=.3&&ch(.6)){ x.asnTried=1; const ro=asnRoll(reach,g);
+          if(ro==='block'){ x.o.p.alert=(x.o.p.alert||0)+2; if(g.k==='magic') hit(x,12); else if(g.k==='servant') hit(x,Math.max(6,Math.min(32,9+asnStrike(x.o.P.map(PV))-PV(x.P[2])*1.2-SV(x.h,'evade')*.6+ri(-3,3)))); }
+          else if(ro==='ok') asnWin=x; else { hit(x,Math.max(6,Math.min(32,9+asnStrike(x.o.P.map(PV))-PV(x.P[2])*1.2-SV(x.h,'evade')*.6+ri(-3,3)))); x.o.p.alert=(x.o.p.alert||0)+2; } } }
       if(asnWin) break;
       const pa=pw(A), pb=pw(B), d=pa-pb, rb=new Map([[A,a.hp],[B,b.hp]]);
       if(fa||fb){ if(!(fa&&fb)){ const x=fa?A:B, dd=x===A?-d:d; if(dd>=8) hit(x,Math.max(1,(6+dd*.3)*.8*rM(x.o)*dealM(x.o)*takeM(x)-grdD(x.h))*sgfM(x.h)); else if(dd>-8) hit(x,ri(2,5)*takeM(x)); } }
