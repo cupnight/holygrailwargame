@@ -5252,11 +5252,14 @@ const Sim = (() => {
   function clsEdge(h,r,def,breach,ws){ return h.cls==='caster'?(def&&!breach?(ws?12:4):0) : h.cls==='bow'&&r!=null&&r<=2?7 : 0; }
   // 물러나기 성공 (플레이어·NPC 공통)
   const fleeP=(h,P)=>h.sp==='escape'?1:Math.min(.95,.45+PV(P[1])*.05+SV(h,'ride')*.03+SV(h,'evade')*.02);
-  // 바닥권 보완: 스테이터스 + 스킬 랭크의 절반 + 보구 랭크로 점수를 매겨, 30에 못 미치는 만큼 × 0.8을 힘에 더한다 (플레이어·NPC 공통, 화면에는 보이지 않음)
+  // 바닥권 보완: 스테이터스·스킬 종류·보구 랭크·보구 역할로 '예상 승률'을 매긴다(가중치는 보정 없는 시뮬레이션 129명에서 회귀로 구함).
+  // 예상이 기준선(15)에 못 미치는 만큼을 힘으로 바꿔 더한다(최대 15). 플레이어·NPC 공통, 화면에는 보이지 않음
+  const UNDER_W={"c": -46.99, "s": [2.23, 2.62, 1.07, 4.59, 2.53], "np": 1.69, "k": {"stealth": 1.25, "evade": 0.78, "survive": 1.14, "power": 0.93, "div": 0.67, "mr": 0.34, "avenge": 3.23, "rally": 1.26, "insight": 1.2, "regen": 0.5, "heal": 1.4, "mad": 0.12, "sabotage": 1.66, "fort": -0.59}, "role": {"D": -1.59, "H": 0.07, "B": -0.78, "W": 0.14, "F": -1.57, "X": -1.03, "S": 1.39}, "per": 1.28};
   const UNDER={};
-  function underdog(h){ if(UNDER[h.id]!=null) return UNDER[h.id];
-    const sc=h.s.reduce((a,r)=>a+(PV(r)||0),0)+(SK[h.id]||[]).reduce((a,[n,r])=>a+(RANKV[r]||0),0)*.5+npRV(h);
-    return UNDER[h.id]=Math.max(0,30-sc)*.8; }
+  function underdog(h){ if(UNDER[h.id]!=null) return UNDER[h.id]; const W_=UNDER_W, r=(NPR[h.id]||{}).r;
+    let e=W_.c+h.s.reduce((a,x,i)=>a+(PV(x)||0)*W_.s[i],0)+npRV(h)*W_.np+(W_.role[r]||0);
+    for(const k in W_.k) e+=SV(h,k)*W_.k[k];
+    return UNDER[h.id]=Math.min(15,Math.max(0,15-e)/W_.per); }
   function npcPower(p,vsMe,r,atk){
     const h=H_BY[p.hero];
     let v=heroBase(npcParams(p).p,p.hp)+clsBonus(h,npcParams(p).p)+p.pw*.32;
