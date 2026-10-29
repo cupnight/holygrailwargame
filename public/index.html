@@ -6897,7 +6897,7 @@ const Sim = (() => {
   const NPK={rank:8,mana:3,seal:15,known:8,low:-6,trust:4,rnd:10,step:3,focus:0,pierce:8,pMin:.6,pMax:1,winTake:.1,offset:.3,dodgeHalf:.5,
     barrier:.8,
     fDur:.7,fMin:2,fMax:4,fMana:70,fImm:.7,fHap:6,fCost:3,
-    wDur:.3,wMin:1,wMax:3,wTake:.6,wCost:2,wCounter:8,wReady:.3,wReact:.5,
+    wDur:.3,wMin:2,wMax:4,wTake:.5,wCost:1,wCounter:8,wReady:.3,wReact:.5,
     sDur:.5,sMin:1,sMax:3,sCost:2,sWeak:.5};
   const SCV={p:1,a:2,c:3,n:3,w:4};
   const VAR_SC={lubu:'pac',davinci:'pa'};
@@ -6929,7 +6929,7 @@ const Sim = (() => {
   function fxHap(b,f,own){ // own: 효과를 가진 쪽의 합에 더하는 값 / 아니면 상대 쪽에 더하는 값
     if(f.start&&b.round<f.start) return 0;
     if(f.type==='field'){ const sp=FIELD_SP[f.id]||{}; if(own){ const v=sp.hap!=null?sp.hap:3+npRV(H_BY[f.id]); return typeof v==='function'?v(f):v; } return sp.ehap||0; }
-    if(f.type==='counter') return own?NPK.wCounter:0;
+    if(f.type==='counter') return own?(H_BY[f.id]?5+npRV(H_BY[f.id]):NPK.wCounter):0;
     if(f.type==='sup'){ const sp=SUP_SP[f.id]||{}; if(own) return sp.hap||0; return (sp.ehap||0)*(f.id==='salieri'&&npSide(b,npOther(f.side)).h.id==='mozart'?2:1); }
     if(f.type==='holmes') return own?5:0;
     if(f.type==='pig') return own?0:f.ehap;
@@ -7244,7 +7244,7 @@ const Sim = (() => {
     const fx={t:'block',side,full,me:s.me?fW:fA,en:s.me?fA:fW,shout:'me',
       h:full?`${fW.sh}${J(fW.sh,이)} 막아 냈다`:s.me?'방벽 너머로 여파가 번졌다':'보구가 방벽을 밀어붙였다',
       s:full?(s.me?'받은 보구 피해 없음':'우리 보구가 방벽에 막혔다'):s.me?(ready?'피해를 대부분 막았다':'피해를 절반 막았다'):(ready?'상대가 피해를 대부분 막았다':'상대가 피해를 절반 막았다')};
-    if(bv>=cvA){ log(`「${nm}」${J(nm,이)} 보구를 정면으로 받아 냈다. 빛이 방벽에 부딪혀 흩어졌다.`,s.me?'war':'loss',{fx}); fxL(b).push({side,type:'counter',start:b.round+1,left:1,age:0}); if(CHK){ CHK.push({txt:s.me?'방벽이 상대 보구를 완전히 막아 냈다':'상대의 방벽이 우리 보구를 완전히 막아 냈다',ok:s.me}); NX.chip=true; } b.npBlockFull=(b.npBlockFull||0)+1; }
+    if(bv>=cvA){ log(`「${nm}」${J(nm,이)} 보구를 정면으로 받아 냈다. 빛이 방벽에 부딪혀 흩어졌다.`,s.me?'war':'loss',{fx}); fxL(b).push({side,type:'counter',id:s.h.id,start:b.round+1,left:1,age:0}); if(CHK){ CHK.push({txt:s.me?'방벽이 상대 보구를 완전히 막아 냈다':'상대의 방벽이 우리 보구를 완전히 막아 냈다',ok:s.me}); NX.chip=true; } b.npBlockFull=(b.npBlockFull||0)+1; }
     else { npHit(b,side,dmg*(ready?NPK.wReady:NPK.wReact)); log(`보구가 「${nm}」${J(nm,을)} 밀어붙였다. 방벽 너머로 여파가 번졌다.`,s.me?'loss':'war',{fx}); if(CHK){ CHK.push({txt:s.me?`방벽이 보구를 ${ready?'대부분':'절반'} 막아 냈다`:`상대의 방벽이 우리 보구를 ${ready?'대부분':'절반'} 막아 냈다`,ok:s.me}); NX.chip=true; } }
     b.npBlockN=(b.npBlockN||0)+1; }
 
@@ -8137,7 +8137,7 @@ const Sim = (() => {
     const hap=(x,r)=>{ let v=0;
       for(const f of x.fx){ if(f.start&&r<f.start) continue;
         if(f.type==='field'){ const sp=FIELD_SP[f.id]||{}, h_=sp.hap!=null?sp.hap:3+npRV(H_BY[f.id]); v+=typeof h_==='function'?h_(f):h_; }
-        else if(f.type==='counter') v+=NPK.wCounter; else if(f.type==='sup') v+=(SUP_SP[f.id]||{}).hap||0; else if(f.type==='holmes') v+=5; else if(f.type==='rev') v+=f.v;
+        else if(f.type==='counter') v+=5+npRV(x.h); else if(f.type==='sup') v+=(SUP_SP[f.id]||{}).hap||0; else if(f.type==='holmes') v+=5; else if(f.type==='rev') v+=f.v;
         else if(f.type==='self'){ const hp=x.p.hp; v+=f.id==='spartacus'?Math.min(10,(100-hp)*.12):f.id==='hijikata'?(hp<=50?(50-hp)*.2:0):5; } }
       for(const f of x.o.fx){ if(f.start&&r<f.start) continue;
         if(f.type==='field') v+=(FIELD_SP[f.id]||{}).ehap||0; else if(f.type==='sup') v+=((SUP_SP[f.id]||{}).ehap||0)*(f.id==='salieri'&&x.h.id==='mozart'?2:1); else if(f.type==='pig') v+=f.ehap; else if(f.type==='curse') v-=6; }
@@ -8311,7 +8311,7 @@ const Sim = (() => {
     const done=new Set(); let reported=0;
     for(const a of act){
       if(done.has(a)||!ch(Math.min(.95,pressure*npcAggr(a)))) continue;
-      const b=act.find(x=>x!==a&&!done.has(x)&&!(x.ally&&a.ally)); if(!b) continue;
+      const b=act.find(x=>x!==a&&!done.has(x)&&!(x.ally&&a.ally)&&!ch(Math.min(.5,SV(H_BY[x.hero],'stealth')*.05))); if(!b) continue;
       done.add(a);done.add(b);
       const {win,lose}=npcFight(a,b,false,true); w.nf.push([a.i,b.i]);
       const seen=a.known||b.known||a.ally||b.ally||ch(.5);
@@ -9132,6 +9132,11 @@ const Sim = (() => {
   RIVAL["nameless"]=Object.assign(RIVAL["nameless"]||{},{"hundred":"이름 없는 어새신: “백모의 하산님…! 당신과 칼을 맞대게 될 줄은.”"});
   RIVAL["nameless"]=Object.assign(RIVAL["nameless"]||{},{"yuyoku":"이름 없는 어새신: “그림자의 하산님. …저를 지켜야 할 백성이라 하셨던 분.”"});
   RIVAL["nameless"]=Object.assign(RIVAL["nameless"]||{},{"cursedarm":"이름 없는 어새신: “주완의 하산님. 당신의 비기, 한 번 빌리겠습니다.”"});
+  // 보조(회복)·강화·방벽 보구의 크기는 보구 랭크로 정한다 (랭크 A: 펼칠 때 회복 16·합마다 7 / 기세 +8 / 방벽 경감 0.5)
+  for(const h of HEROES){ const r=(NPR[h.id]||{}).r, rv=npRV(h); if(!r) continue;
+    if(r==='H'){ const sp=SUP_SP[h.id]=SUP_SP[h.id]||{}; sp.imm=Object.assign({},sp.imm||{},{heal:6+rv*2}); sp.heal=2+rv; }
+    if(r==='B'){ const sp=SUP_SP[h.id]=SUP_SP[h.id]||{}; sp.hap=3+rv; if(sp.ehap!=null) sp.ehap=-Math.round(1+rv*.6); }
+    if(r==='D'&&WALL_SP[h.id]) delete WALL_SP[h.id].take; }
   // ---- 에필로그 연작: 위기가 몇 해에 걸쳐 이어진다 (한 생에 최대 2개 · 단계 사이 1~4년 · 에필로그 한 칸만 차지한다) ----
   const AP=()=>S.epi.arc.p;
   const arcSet=st=>{ const a=S.epi.arc; a.st=st; a.wait=ri(0,1); };
