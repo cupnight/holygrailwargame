@@ -8316,7 +8316,8 @@ const Sim = (() => {
     }
   }
   // NPC 밤 행동: 클래스 행동 / 쉰다 / 숨죽이고 지낸다 / 정보를 모은다 / 싸우러 나간다 (플레이어 밤 행동과 같은 값)
-  const REST_TAC={defensive:.8,cunning:.7,naive:.6,proud:.4,hunter:.4,desperate:.35,reckless:.25};
+  // 성향별 쉬는 기준: [쉴 확률, 마력이 이 아래면, 체력이 이 아래면, 숨죽이는 체력 기준]
+  const REST_TAC={defensive:[.8,55,65,50],cunning:[.7,50,60,45],naive:[.6,40,50,35],proud:[.4,35,45,30],hunter:[.4,35,45,30],desperate:[.35,30,40,25],reckless:[.25,25,35,20]};
   function npcNight(){
     const w=W(); if(w.ended) return; w.nf=[]; for(const p of w.pairs){ p.nAct=null; p.rest=false; }
     for(const p of w.pairs){ if(p.alive&&!p.master&&p.stray>0){ p.stray--; if(p.stray<=0){p.alive=false;pairOut(p,'주인을 잃고 사라졌다');if(w.stray===p)w.stray=null;log(`주인 잃은 ${pName(p)}${J(pName(p),이)} 끝내 사라졌다.`);} } }
@@ -8332,8 +8333,8 @@ const Sim = (() => {
     if(!truce) npcClassNight();
     const avail=truce?[]:contracted().filter(p=>!(p.halt>0)&&!(p.truceN>0));
     for(const p of avail){ if(p.nAct) continue;
-      const low=p.sm<40||p.hp<50;
-      if(p.master&&low&&ch(Math.min(.9,(REST_TAC[p.tac]||.5)*(p.hp<40?1.3:1)))){ p.nAct=(p.tac==='defensive'||p.tac==='cunning')&&p.hp<40?'hide':'rest'; p.rest=true; }
+      const [rp,smT,hpT,hideT]=REST_TAC[p.tac]||[.5,40,50,35], low=p.sm<smT||p.hp<hpT;
+      if(p.master&&low&&ch(Math.min(.9,rp*(p.hp<hpT-10?1.3:1)))){ p.nAct=p.hp<hideT?'hide':'rest'; p.rest=true; }
       else if(p.master&&w.day<=3&&(p.tac==='cunning'||p.tac==='defensive')&&ch(.3)){ p.nAct='intel'; p.scoutEdge=1; } // 정보를 모은다: 다음 싸움 첫 합 +6
       else p.nAct='out'; }
     const act=shuffle(avail.filter(p=>p.nAct==='out'));
