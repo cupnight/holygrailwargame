@@ -5183,11 +5183,8 @@ const Sim = (() => {
   function myPower(ctx={}){
     const w=W(),h=hero();
     let p=heroBase(myParams().p,w.battle&&(w.battle.sealBuff===w.battle.round||w.battle.mad>=w.battle.round)?100:w.hp)+clsBonus(h,myParams().p)-6+w.trust*.15+S.st.mana*.12+(ctx.e?ctx.e.intel*.1:0)+(ctx.defend?w.fort*.2*fortRead(ctx.e)*(ctx.breach?.5:1):0);
-    if(h.cls==='berserk') p+=5-(w.trust<DIST?6:0);
-    if(h.cls==='caster') p+=ctx.defend?(ctx.breach?6:12):5;
+    p+=clsEdge(h,w.battle?w.battle.round:null,ctx.defend,ctx.breach); if(h.cls==='berserk'&&w.trust<DIST) p-=6;
     if(w.battle&&w.battle.round===1&&(ctx.attack||ctx.ambushed)) p+=ambushEdge(h);
-    if(h.cls==='bow'&&w.battle&&w.battle.round<=2) p+=7;
-    if(h.cls==='lance') p+=3;
     p+=edgeV(h,w.hp,w.battle?w.battle.round:null,ctx.defend);
     p+=SV(h,'power')*1.2+SV(h,'div')*.8+SV(h,'mad')*.8+SV(h,'rally')*.8+(ctx.attack?SV(h,'ride')*.8:0)+(w.battle&&w.battle.round>=2?SV(h,'insight')*.9:0);
     if(SV(h,'avenge')) p+=(100-w.hp)*.03*SV(h,'avenge');
@@ -5242,13 +5239,19 @@ const Sim = (() => {
   }
   function atkKinds(h){ const k=['round']; if(canMagic(h)) k.push('magic'); if(burstSk(h)) k.push('burst'); return k; }
   const expUp=v=>(S.hero==='lancelot'&&v>0)?Math.round(v*.75):v;
-  const CLS_BIAS={bow:.6,caster:0,shadow:-9,judge:-6.8,sword:-.6,lance:.2,berserk:-1.2};
-  const BIAS={baobhan:-14,melusine:-16,muramasa:10,ereshkigal:14,ishtar:-8,lancelot:-2,gilgamesh:3,superorion:6.7,arjuna:4,karna:10.5,caenis:-5,enkidu:5,artoria:2,rama:-7,solomon:-2.5,raikou:-4,asterios:1,ibaraki:0.5,chiron:-7.5,ptolemaios:-6.5,tesla:4,nobunaga:3,robin:-1.5,paracelsus:-2,circe:-2,serenity:-19,jack:-5,shuten:-1,kinghassan:1.5,lishuwen:11.5,semiramis:24,emiya:-2.5,shakespeare:-1,hundred:1,kojiro:6,holmes:-1,scathach:4,atalanta:3,spartacus:4.5,bedivere:0.5,tamamo:-2.5,salieri:-3,penthesilea:-3,diarmuid:3,achilles:-2.5,dantes:3,lanling:16,habetrot:15,quetzalcoatl:-19,kama:-8,sheba:14,constantine:18,huyan:15,yuyoku:27,nameless:16,asclepius:-2,lilith:-2,jingke:6,cursedarm:-4,sanson:20};
+  const CLS_BIAS={};
+  const BIAS={};
   function clsBonus(h,P){ return h.cls==='caster'? PV(P[3])*1.2 : MAGE_BERSERK[h.id]? PV(P[3])*2.0 : h.cls==='shadow'? PV(P[1])*1.0 : 0; }
-  function npcPower(p,vsMe){
+  // 클래스 고유 보너스 (플레이어·NPC 공통). r: 합 번호, def: 거처를 지키는 싸움인가
+  function clsEdge(h,r,def,breach){ return h.cls==='berserk'?5 : h.cls==='caster'?(def?(breach?6:12):5) : h.cls==='lance'?3 : h.cls==='bow'&&r!=null&&r<=2?7 : 0; }
+  // 물러나기 성공 (플레이어·NPC 공통)
+  const fleeP=(h,P)=>h.sp==='escape'?1:Math.min(.95,.35+PV(P[1])*.1+SV(h,'ride')*.03+SV(h,'evade')*.02);
+  function npcPower(p,vsMe,r,atk){
     const h=H_BY[p.hero];
     let v=heroBase(npcParams(p).p,p.hp)+clsBonus(h,npcParams(p).p)+p.pw*.32;
-    v+=SV(h,'power')*1.2+SV(h,'div')*.8+SV(h,'mad')*.8+SV(h,'rally')*.8+SV(h,'insight')*.5;
+    const bt=vsMe&&W().battle, rd=bt?W().battle.round:r, att=bt?!!W().battle.ctx.defend:!!atk;
+    v+=SV(h,'power')*1.2+SV(h,'div')*.8+SV(h,'mad')*.8+SV(h,'rally')*.8+(rd>=2?SV(h,'insight')*.9:0)+(att?SV(h,'ride')*.8:0);
+    v+=clsEdge(h,rd,bt?!!W().battle.ctx.attack:false,false);
     if(SV(h,'avenge')) v+=(100-p.hp)*.03*SV(h,'avenge');
     if(h.sp==='avenge') v+=(100-p.hp)*.3;
     if(h.sp==='gate') v+=14+(p.hp<50?10:0);
@@ -7490,7 +7493,7 @@ const Sim = (() => {
       const theirSide=()=>{
       if(enNP){ const x=npBase(b,'en'); w.hp=clamp(w.hp-x);
         log(pickNR(b.eKnownHit?[`미리 알던 보구였지만 여파까지 피하지는 못했다.`,`피할 길은 열어 두었다. 그래도 ${mN}의 옷자락이 타들어 갔다.`]:[`보구의 여파가 ${mN}${J(mN,을)} 휩쓸었다.`,`${mN}${J(mN,이)} 보구의 직격을 받아 냈다. 갑옷 너머로 피가 번졌다.`,`빛이 걷히고 나서야 ${mN}의 상처가 보였다. 깊다.`],'eArtH'),'loss'); }
-      else if(d<=-8){ let dmg=Math.round((4+(-d)*.22)*inM); if(h.sp==='guard') dmg-=3; dmg=Math.round(dmg*(1-Math.min(.35,SV(h,'evade')*.035))*(h.id==='siegfried'?.82:1)*kavF(h.id,w)); w.hp=clamp(w.hp-Math.max(1,dmg));
+      else if(d<=-8){ let dmg=Math.round((6+(-d)*.3)*inM); if(h.sp==='guard') dmg-=3; dmg=Math.round(dmg*(1-Math.min(.35,SV(h,'evade')*.035))*(h.id==='siegfried'?.82:1)*kavF(h.id,w)); w.hp=clamp(w.hp-Math.max(1,dmg));
         log(pickNR([`보구를 해방한 틈을 노려 ${eN}${J(eN,이)} 파고들었다.`,`${eN}${J(eN,이)} 빛을 뚫고 나와 ${mN}에게 반격했다.`],'npCtrE'),'war'); }
       else if(d<8) w.hp=clamp(w.hp-ri(2,5));
       };
@@ -7521,7 +7524,7 @@ const Sim = (() => {
       } else if(ch(dodgeP(MP[1],EP[1])*(eK==='magic'?MG.dodge:1)*(fxGet(b,'en','holmes')?0:1))){ b.dodged='m'; e.hp=clamp(e.hp-ri(1,3));
         log(pickNR([`${mN}${J(mN,이)} 한 발 물러서며 공격을 흘려 냈다.`,`${eN}의 일격이 ${mN}의 옷자락만 스치고 지나갔다.`,`${mN}${J(mN,이)} 몸을 낮춰 공격을 아슬아슬하게 피했다.`],'dodgeM'),'war');
       } else {
-        let dmg=Math.round((4+(-d)*.22)*inM); if(h.sp==='leaf'&&w.exposure>=75&&ch(.5)){ dmg+=5; log(pickNR(['적은 서번트의 약점을 알고 있었다.','상대는 정확히 전승의 약점을 노려 왔다.','정체가 알려진 대가였다. 적의 칼끝이 약점만 노린다.'],'leaf'),'war'); } if(h.sp==='guard') dmg-=3;
+        let dmg=Math.round((6+(-d)*.3)*inM); if(h.sp==='leaf'&&w.exposure>=75&&ch(.5)){ dmg+=5; log(pickNR(['적은 서번트의 약점을 알고 있었다.','상대는 정확히 전승의 약점을 노려 왔다.','정체가 알려진 대가였다. 적의 칼끝이 약점만 노린다.'],'leaf'),'war'); } if(h.sp==='guard') dmg-=3;
         dmg=Math.round(dmg*(1-Math.min(.35,SV(h,'evade')*.035))*(h.id==='siegfried'?.82:1)*kavF(h.id,w)); w.hp=clamp(w.hp-Math.max(1,dmg)); e.hp=clamp(e.hp-ri(1,4));
         if(w.hp>0&&atkK==='magic') log(pickNR([`${mN}의 마술이 ${eN}에게 닿기 전에 흩어졌다. 그 틈으로 반격이 날아들었다.`,`영창이 끝나기 전에 ${eN}${J(eN,이)} 거리를 좁혔다. ${mN}${J(mN,이)} 피를 흘리며 물러섰다.`,`빛줄기가 빗나갔다. ${eN}의 일격이 ${mN}의 어깨를 스쳤다.`],'disMg'),'war');
         else if(w.hp>0&&eK==='magic') log(pickNR([`${eN}의 마술이 ${mN}${J(mN,을)} 덮쳤다. 피할 곳이 없었다.`,`발밑에 마법진이 열렸다. ${mN}${J(mN,이)} 불길 속에서 비틀거렸다.`,`${eN}${J(eN,이)} 짧게 영창했다. 보이지 않는 힘이 ${mN}${J(mN,을)} 벽으로 밀어붙였다.`],'disEMg'),'war');
@@ -7714,7 +7717,7 @@ const Sim = (() => {
     const w=W(),h=hero(),e=w.battle.e;
     if(!sure&&w.trust<DIST&&w.heroAlive&&ch(.3)){ log(`${h.name}${J(h.name,은)} 물러서지 않았다. 당신의 말은 들리지 않는 모양이다.`,'loss'); if(CHK) CHK.push({txt:'「불신」 탓에 서번트가 명령을 듣지 않았다',ok:false}); return clash(0); }
     w.battle.res='retreat';
-    const p=(sure||h.sp==='escape'?1:(.35+PV(myParams().p[1])*.1+SV(h,'ride')*.03+SV(h,'evade')*.02)*(w.battle.ctx.hunted?HUNT_RET:1))-(sure?0:npFleeMinus(w.battle,'me'));
+    const p=(sure?1:fleeP(h,myParams().p)*(w.battle.ctx.hunted?HUNT_RET:1))-(sure?0:npFleeMinus(w.battle,'me'));
     if(ch(p)){ log(pickNR(['어둠 속으로 빠져나왔다.','골목 몇 개를 건너뛰어 추격을 따돌렸다.','연막처럼 흩어지는 마력 속으로 몸을 숨겼다.','강 쪽으로 내달렸다. 뒤따르는 기척이 끊겼다.','지붕 위로 뛰어올라 반대편 거리로 내려섰다.'],'ret'),'war'); w.exposure=clamp(w.exposure+expUp(5)); }
     else { w.hp=clamp(w.hp-ri(18,32)); log(pickNR(['등을 보인 대가를 치렀다.','빠져나가는 등 뒤로 일격이 꽂혔다.','도망칠 틈은 없었다. 길목이 먼저 막혀 있었다.'],'retF'),'war'); if(w.hp<=0) myHeroDown(e); }
     endBattle();
@@ -8073,7 +8076,7 @@ const Sim = (() => {
     if(b.ctx.final||b.ctx.forced) return false;
     if(b.eMad>=b.round) return false;
     if(e.master&&e.seals>0&&['priest','mother','student','veteran','ghost','eighth','atlas','killer'].includes(e.aid)&&e.hp<st.retreat&&ch(.7)){ npcSeal(e,e.aid==='mother'?'살아서 돌아와':'돌아와라'); return 'seal'; }
-    if(e.hp<st.retreat&&ch(st.rp-npFleeMinus(b,'en'))) return 'run';
+    if(e.hp<st.retreat&&ch(Math.min(.9,st.rp*fleeP(H_BY[e.hero],npcParams(e).p)/.6)-npFleeMinus(b,'en'))) return 'run';
     return false;
   }
   function npcFight(a,b,final,init){ return npcDuel(a,b,final,init); }
@@ -8196,14 +8199,14 @@ const Sim = (() => {
       for(const x of [A,B]) if(fire.get(x)&&x.h.id==='georgios'&&x.o.p.hp<h0.get(x.o)) x.o.dragon=1;
       // 4) 합의 힘 겨루기 (보구를 쏜 합에는 쏜 쪽이 힘에서 밀릴 때만 받는다)
       const noRaid=y=>{ const f=get(y,'wall'); return !!(f&&(WALL_SP[f.id]||{}).noRaid); };
-      const pw=x=>{ let v=npcPower(x.p)+(x===A&&init&&!noRaid(B)?8:0)+(x.p.workshop?6:0)+(final&&x.p.altar?6:0)+(x.p.altarFort?10:0)+gEdge(gKnow(x.p,x.o.p.hero))+(x.ex||0)-sabOf(x.o)+rnd()*36-18-(x.p.sm<=0?30:x.p.sm<15?10:0)+hap(x,r);
+      const pw=x=>{ let v=npcPower(x.p,false,r,x===A&&init)+(x===A&&init&&!noRaid(B)?(r===1?10:r===2?5:0):0)+(x.p.workshop?6:0)+(final&&x.p.altar?6:0)+(x.p.altarFort?10:0)+gEdge(gKnow(x.p,x.o.p.hero))+(x.ex||0)-sabOf(x.o)+rnd()*36-18-(x.p.sm<=0?30:x.p.sm<15?10:0)+hap(x,r);
         if(!x.sealed&&x.p.master&&x.p.seals>0&&(final&&(r===1||x.p.hp<50)||((x.p.aid==='heir'||x.p.aid==='avenger')&&x.p.hp<50))&&ch(final?.6:.4)){ x.sealed=1; x.p.seals--; v+=40; if(seen) log(`멀리서 ${pName(x.p)} 조 쪽 령주가 붉게 타올랐다.`,'seal'); }
         return v; };
       if(r===1) for(const x of [A,B]){ x.ex=0; if(x.p.scoutEdge){ x.ex+=6; x.p.scoutEdge=0; } if(x.p.cls==='berserk'&&ch(.5)){ x.ex+=12; x.p.madCost=1; } }
       const pa=pw(A), pb=pw(B), d=pa-pb, rb=new Map([[A,a.hp],[B,b.hp]]);
       if(fa||fb){ if(!(fa&&fb)){ const x=fa?A:B, dd=x===A?-d:d; if(dd>=8) hit(x,(6+dd*.3)*.8*rM(x.o)*dealM(x.o)*takeM(x)); else if(dd>-8) hit(x,ri(2,5)*takeM(x)); } }
       else if(Math.abs(d)<8){ hit(A,ri(3,7)*takeM(A)); hit(B,ri(3,7)*takeM(B)); }
-      else { const [w_,l_]=d>0?[A,B]:[B,A]; hit(l_,(6+Math.abs(d)*.3)*rM(w_)*dealM(w_)*takeM(l_)); hit(w_,ri(1,4)*takeM(w_)); }
+      else { const [w_,l_]=d>0?[A,B]:[B,A]; if(ch(dodgeP(l_.P[1],w_.P[1])*(w_.k==='magic'?MG.dodge:1))){ hit(l_,ri(1,3)); } else { hit(l_,(6+Math.abs(d)*.3)*rM(w_)*dealM(w_)*takeM(l_)); hit(w_,ri(1,4)*takeM(w_)); } }
       // 베르그 아베스타 (먼저 펼침): 받은 합 피해를 되돌린다
       for(const x of [A,B]){ const lost=rb.get(x)-x.p.hp; if(lost>0&&get(x,'reflect')) x.o.p.hp=clamp(x.o.p.hp-lost); }
       // 아라쉬: 쏘면 소멸
@@ -8219,7 +8222,7 @@ const Sim = (() => {
         f.age=(f.age||0)+1; f.left--; if(f.left<=0){ drop(x,f); if(f.type==='wall'&&f.id==='boudica') hit(x.o,base(x)*.4); } }
       surv(A); surv(B);
       if(a.hp<=0||b.hp<=0) break;
-      if(!final){ const fl=[A,B].find(x=>x.p.hp<25&&!locked(x)&&ch(.35)); if(fl) break; }
+      if(!final){ const fl=[A,B].find(x=>x.p.hp<25&&!locked(x)&&ch(fleeP(x.h,x.P)*.45)); if(fl) break; }
     }
     for(const x of [a,b]) if(x.madCost){ x.madCost=0; x.hp=clamp(x.hp-8); }
     const [win,lose]=a.hp===b.hp?(ch(.5)?[a,b]:[b,a]):a.hp>b.hp?[a,b]:[b,a];
@@ -8543,7 +8546,9 @@ const Sim = (() => {
     const w=S.war; if(!w||w.winner) return null;
     let rest=w.pairs.filter(p=>p.alive&&p.master); const n=rest.length, d0=Math.min(14,w.day||1); let k=0;
     while(rest.length>1){
-      const [a,b]=shuffle(rest), pa=npcPower(a)+rnd()*40, pb=npcPower(b)+rnd()*40, lose=pa>=pb?b:a;
+      // 남은 조끼리도 같은 합 전투 규칙으로 싸운다 (기록에는 남기지 않는다)
+      const [a,b]=shuffle(rest), kn=[a.known,b.known,a.ally,b.ally]; a.known=b.known=a.ally=b.ally=false;
+      let lose; try{ lose=npcFight(a,b,true).lose; } finally { [a.known,b.known,a.ally,b.ally]=kn; }
       k++; const d=Math.min(14,d0+Math.ceil((14-d0)*k/(n-1)));
       lose.alive=false; lose.hp=0; if(!lose.out) lose.out={d,tod:d>=14||d===d0?'밤':(ch(.5)?'낮':'밤'),why,by:0};
       rest=rest.filter(p=>p!==lose);
