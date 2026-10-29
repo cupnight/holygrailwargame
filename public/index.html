@@ -6463,7 +6463,7 @@ const Sim = (() => {
   // 기준: 밤(거처) 서번트 55·결계 55·마술 100 / 전투 중 서번트 85·결계 70(거처를 지킬 때만)·마술 120 (+어새신 솜씨)
   // NPC의 '서번트를 부른다'는 신뢰 대신 40 + 실력×0.3, '결계'는 기본 17 + 캐스터 25 + 공방 6, '마술'은 실력×1.3 + 마스터 유형
   const GUARD_T={night:{s:55,h:55,m:100},battle:{s:85,h:70,m:120}};
-  // 전투 중 마스터 노림의 최종 성공 확률 = 닿을 확률 × (1 − 막을 확률) + 10%p (최대 85%)
+  // 마스터 노림의 최종 성공 확률 = 닿을 확률 × (1 − 막을 확률) + 10%p (최대 85%). 밤 잠입·밤 '암습' 사건도 막아 낸 뒤 10%p만큼 뚫린다
   const ASN_BONUS=.1, asnTot=(reach,g)=>Math.min(.85,reach*(1-g.p)+ASN_BONUS);
   function asnRoll(reach,g){ if(ch(asnTot(reach,g))) return 'ok'; return ch(reach)?'block':'miss'; }
   function guardPick(o){ return o.sort((a,b)=>b.p-a.p)[0]; }
@@ -6498,7 +6498,7 @@ const Sim = (() => {
   function infilDo(e){
     const w=W(),h=hero(),eN=pName(e); smUse(14); w.roamed=true;
     let r=contest(infilD(e,false),26,'서번트의 민첩·기척차단'); e.alert=(e.alert||0)+(r==='fail'||r==='bad'?2:1);
-    if(r==='great'){ const g=npcGuard(e,h,myP(),'night'); if(ch(g.p)){ r='ok'; if(g.k==='magic') w.hp=clamp(w.hp-12); log(g.k==='magic'?'적 마스터의 마술이 우리 서번트를 밀어냈다.':g.k==='home'?'적 거처의 결계가 칼날을 튕겨 냈다.':'적 마스터가 서번트를 불러 막아 냈다.','war'); } }
+    if(r==='great'){ const g=npcGuard(e,h,myP(),'night'); if(!ch(Math.min(.85,1-g.p+ASN_BONUS))){ r='ok'; if(g.k==='magic') w.hp=clamp(w.hp-12); log(g.k==='magic'?'적 마스터의 마술이 우리 서번트를 밀어냈다.':g.k==='home'?'적 거처의 결계가 칼날을 튕겨 냈다.':'적 마스터가 서번트를 불러 막아 냈다.','war'); } }
     if(r==='great'&&ch(.65)){ e.mHurt=3; e.hp=clamp(e.hp-ri(15,22)); return `${h.name}${J(h.name,이)} ${e.mname}의 목 앞까지 닿았지만, 마지막 순간 결계가 울렸다. 마스터는 크게 다친 채 달아났다.`; }
     if(r==='great'){ log(`${h.name}${J(h.name,이)} 결계의 틈으로 스며들었다. ${e.mname}${J(e.mname,은)} 마지막까지 아무것도 알아차리지 못했다.`,'war'); add({will:-3}); masterKilled(e); return ''; }
     if(r==='ok'){ revealPair(e,'거처에서 엿들은 대화로 알아냈다. '); revealSkills(e,'거처에서 엿보았다. ',2); e.hp=clamp(e.hp-ri(8,15)); addIntel(e,20,'trail');
@@ -8351,7 +8351,7 @@ const Sim = (() => {
         // 밤 잠입과 같은 판정 재료 (우리 쪽 infilD와 같은 식. NPC끼리는 모아 둔 정보가 없다)
         const d=(A[1]*2+SV(ah,'stealth')*1.5+A[4]*1.5+npcKnow(a,t)*.12+8)-(10+asnFoe(t,'night')+(t.cls==='caster'?8:0)+(t.workshop?6:0)-(t.hp<40?4:0)+asnAlert(t)*5);
         let r=contest(d,26); t.alert=(t.alert||0)+(r==='fail'||r==='bad'?2:1); addKnow(a,t,25);
-        if(r==='great'){ const g=npcGuard(t,ah,A,'night'); if(ch(g.p)){ r='ok'; if(g.k==='magic') a.hp=clamp(a.hp-12); } } // 마스터의 대응으로 막으면 마스터에게는 닿지 못한다
+        if(r==='great'){ const g=npcGuard(t,ah,A,'night'); if(!ch(Math.min(.85,1-g.p+ASN_BONUS))){ r='ok'; if(g.k==='magic') a.hp=clamp(a.hp-12); } } // 마스터의 대응으로 막으면 마스터에게는 닿지 못한다
         if(r==='great'&&ch(.65)){ t.mHurt=3; t.hp=clamp(t.hp-ri(15,22)); }
         else if(r==='great') mKill(t,a,'서번트를 피해 거처에 숨어들었다');
         else if(r==='ok'){ t.mHurt=2; t.hp=clamp(t.hp-ri(8,15)); }
@@ -8513,9 +8513,9 @@ const Sim = (() => {
       const E=npcParams(p).p.map(PV), off=Math.max(-10,Math.min(12,asnAtk(th,E)-22))*1.5, det=asnSk(h,'battle',true)*1.5, cut=(lo,hi)=>Math.max(6,ri(lo,hi)+Math.round(asnStrike(E)-9.5));
       const hurt=(lo,hi)=>{ add({health:-cut(lo,hi)}); if(S.st.health<=0){ S.flags.war='dead'; die('어새신의 암습'); return true; } return false; };
       decide({title:'암습',body:`잠결에 목덜미가 서늘했다. 방 안에 누군가 있다. 기척이 전혀 없었다. 어새신이다.${p.revealed?' '+th.name+'의 기척이다.':''}`,war:true,choices:[
-        {t:`${h.name}${J(h.name,을)} 부른다`,d:det>=6?'서번트는 이런 낌새에 밝다':'서번트가 늦지 않기를',st:[{l:'신뢰',v:Math.round(w.trust)}],auto:true,f:()=>{ if(chk('신뢰',w.trust+ri(0,50)+det,55+off)){ addIntel(p,25,'trail'); w.queue.unshift(()=>battle(p,{ambushed:true})); return `${h.name}${J(h.name,이)} 벽을 뚫고 들어왔다. 칼끝이 당신 목 한 치 앞에서 멈췄다.`; } if(hurt(12,22)) return ''; addIntel(p,15,'trail'); return '서번트가 닿기 전에 칼날이 먼저 지나갔다. 피가 이불을 적셨다.'; }},
-        {t:'결계에 맡긴다',d:`결계 ${Math.round(w.fort)}`,f:()=>{ if(chk('결계',w.fort+ri(0,40)+wsF()*6+asnSk(h,'night',true)*.5,55+off)){ addIntel(p,20,'trail'); return '결계가 비명을 지르며 칼날을 튕겨 냈다. 그림자는 창밖으로 사라졌다.'; } w.fort=clamp(w.fort-10); if(hurt(14,24)) return ''; return '결계가 종잇장처럼 찢겼다.'; }},
-        {t:'마술로 반격한다',d:'마력과 정신에 기댄다',st:[{l:'마력',v:Math.round(S.st.mana)},{l:'정신',v:Math.round(S.st.will)}],off:!isMage(),f:()=>{ if(chk('마력·정신',S.st.mana+S.st.will+ri(0,40),100+off)){ p.hp=clamp(p.hp-12); addIntel(p,30,'trail'); return '손끝에서 터진 마력이 그림자를 벽에 내동댕이쳤다. 그림자는 피를 흘리며 달아났다.'; } if(hurt(16,26)) return ''; return '주문이 완성되기 전에 칼날이 닿았다.'; }}]});}},
+        {t:`${h.name}${J(h.name,을)} 부른다`,d:det>=6?'서번트는 이런 낌새에 밝다':'서번트가 늦지 않기를',st:[{l:'신뢰',v:Math.round(w.trust)}],auto:true,f:()=>{ if(chk('신뢰',w.trust+ri(0,50)+det,55+off)&&!ch(ASN_BONUS)){ addIntel(p,25,'trail'); w.queue.unshift(()=>battle(p,{ambushed:true})); return `${h.name}${J(h.name,이)} 벽을 뚫고 들어왔다. 칼끝이 당신 목 한 치 앞에서 멈췄다.`; } if(hurt(12,22)) return ''; addIntel(p,15,'trail'); return '서번트가 닿기 전에 칼날이 먼저 지나갔다. 피가 이불을 적셨다.'; }},
+        {t:'결계에 맡긴다',d:`결계 ${Math.round(w.fort)}`,f:()=>{ if(chk('결계',w.fort+ri(0,40)+wsF()*6+asnSk(h,'night',true)*.5,55+off)&&!ch(ASN_BONUS)){ addIntel(p,20,'trail'); return '결계가 비명을 지르며 칼날을 튕겨 냈다. 그림자는 창밖으로 사라졌다.'; } w.fort=clamp(w.fort-10); if(hurt(14,24)) return ''; return '결계가 종잇장처럼 찢겼다.'; }},
+        {t:'마술로 반격한다',d:'마력과 정신에 기댄다',st:[{l:'마력',v:Math.round(S.st.mana)},{l:'정신',v:Math.round(S.st.will)}],off:!isMage(),f:()=>{ if(chk('마력·정신',S.st.mana+S.st.will+ri(0,40),100+off)&&!ch(ASN_BONUS)){ p.hp=clamp(p.hp-12); addIntel(p,30,'trail'); return '손끝에서 터진 마력이 그림자를 벽에 내동댕이쳤다. 그림자는 피를 흘리며 달아났다.'; } if(hurt(16,26)) return ''; return '주문이 완성되기 전에 칼날이 닿았다.'; }}]});}},
     {w:4,c:()=>W().seals===0&&!W().stealTried&&contracted().some(p=>!p.ally&&['cunning','hunter','proud'].includes(p.tac)),f:()=>{const w=W(),h=hero();w.stealTried=true;
       const p=pick(contracted().filter(p=>!p.ally&&['cunning','hunter','proud'].includes(p.tac)));
       log(`${p.mname}${J(p.mname,이)} 결계 밖에서 ${h.name}에게 말을 걸었다. “령주 하나 없는 주인 밑에 있을 이유가 있나? 나와 계약하지. 내 령주는 아직 남아 있다.”`,'enemy');
