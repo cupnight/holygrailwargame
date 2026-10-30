@@ -6333,6 +6333,9 @@ const Sim = (() => {
     if(!w.heroAlive){ if(w.sheltered) w.queue.push(()=>npcNight(),()=>outNightRisk(),()=>dawn()); else outNightDecision(); return; }
     nightDecision();
   }
+  // 밤 행동의 상대 고르기에서 '그만둔다': 그날 밤 흐름을 거두고 밤 행동 선택으로 돌아간다
+  function nightBack(){ const w=W(); if(w.nightSteps){ const st=w.nightSteps; w.queue=w.queue.filter(f=>!st.includes(f)); w.nightSteps=null; } nightDecision(); return ''; }
+  const BACK={t:'그만둔다',d:'다른 행동을 고른다',f:()=>nightBack()};
   function nightDecision(){
     const w=W(), h=hero();
     const unknown=alivePairs().filter(p=>p.intel<80||!p.known);
@@ -6369,7 +6372,7 @@ const Sim = (() => {
     { const dc=ch_.find(c=>c.duelGo&&!c.off); if(dc){ dc.auto=true; ch_.forEach(c=>{ if(c!==dc&&!c.off){ c.off=true; c.auto=false; c.d='약속된 결판이 있다. 오늘 밤은 그쪽으로 간다'; } }); } }
     // 어떤 겹침으로든 고를 수 있는 행동이 하나도 없으면 숨죽이고 지내는 것만큼은 열어 둔다
     if(ch_.every(c=>c.off)) ch_.forEach(c=>{ if(c.t==='숨죽이고 지낸다'){ c.off=false; c.d='할 수 있는 게 없다. 불을 끄고 상처와 마력을 회복한다'; } });
-    decide({title:`제${w.day}일 · 밤`,body:statusBody('밤'),war:true,choices:ch_.map(c=>({...c,f:()=>{c.f();w.queue.push(()=>npcNight(),()=>threat(),()=>warEvent(),()=>dawn());}}))});
+    decide({title:`제${w.day}일 · 밤`,body:statusBody('밤'),war:true,choices:ch_.map(c=>({...c,f:()=>{c.f();const st=[()=>npcNight(),()=>threat(),()=>warEvent(),()=>dawn()];w.nightSteps=st;w.queue.push(...st);}}))});
     if(w.resumeAt){ LASTWAR=serial(); H.save(); }
   }
   /* ---------- 클래스 전용 밤 행동 ---------- */
@@ -6399,7 +6402,7 @@ const Sim = (() => {
     ts.forEach(p=>{ const est=!p.revealed, dS=snipeD(p,'sv',est), dM=snipeD(p,'m',est), strong=npcPower(p)>myS+15;
       cs.push({t:`${pName(p)} 조 · 서번트를 노린다`,d:`${oddsTxt(dS,est)} · 민첩과 저격 솜씨로 겨룬다`,auto:!strong&&!h.traits.includes('야망'),f:()=>snipeDo(p,'sv')});
       cs.push({t:`${pName(p)} 조 · 마스터 ${p.mname}${J(p.mname,을)} 노린다`,d:`${oddsTxt(dM,est)} · 서번트의 엄호와 마스터의 대비를 뚫어야 한다`,auto:strong||h.traits.includes('야망'),f:()=>snipeDo(p,'m')}); });
-    cs.push({t:'활을 거둔다',d:'오늘 밤은 쏘지 않는다',f:()=>{smRegen(2);return '사선을 정리하고 거처로 돌아왔다.';}});
+    cs.push({...BACK,t:'활을 거둔다'});
     decide({title:'고지에서 저격한다',body:`${h.name}${J(h.name,이)} 도시에서 가장 높은 곳에 자리를 잡았다. 누구를 노릴 것인가.`,war:true,choices:cs});
   }
   function snipeDo(e,kind){
@@ -6520,7 +6523,7 @@ const Sim = (() => {
   function infilPick(){
     const w=W(),h=hero(); const ts=alivePairs().filter(p=>p.known&&!p.ally&&!p.truce&&p.master);
     decide({title:'거처에 잠입한다',body:`${h.name}${J(h.name,이)} 기척을 지웠다. 어느 마스터의 거처로 들어갈 것인가.`,war:true,choices:[...ts.map(p=>{const est=!p.revealed,d=infilD(p,est);return {t:`${pName(p)} 조 · ${p.mname}`,d:`${oddsTxt(d,est)} · ${p.arche}`,auto:d>=0,f:()=>infilDo(p)};}),
-      {t:'물러난다',d:'오늘 밤은 들어가지 않는다',f:()=>'기척을 지운 채 거처로 돌아왔다.'}]});
+      {...BACK,t:'물러난다'}]});
   }
   function infilDo(e){
     const w=W(),h=hero(),eN=pName(e); smUse(14); w.roamed=true;
@@ -6544,7 +6547,7 @@ const Sim = (() => {
       cs.push({t:`정지 명령 · ${pName(p)} 조`,d:`${o} · 이틀 동안 누구도 습격하지 못하게 묶는다`,auto:npcPower(p)>myPower()+10,f:()=>rulerDo(p,'halt')});
       cs.push({t:`소환 명령 · ${pName(p)} 조`,d:`${o} · 결투로 불러낸다. 성공하면 상대는 도망칠 수 없다`,auto:npcPower(p)<myPower()-5,f:()=>rulerDo(p,'call')});
       if(p.hp<=50) cs.push({t:`퇴거 명령 · ${pName(p)} 조`,d:`${o} · 크게 다친 서번트를 전장에서 몰아낸다`,auto:true,f:()=>rulerDo(p,'expel')}); });
-    cs.push({t:'아껴 둔다',d:`감독자 령주 ${w.rSeals}획 남음`,f:()=>'령주를 쓰지 않았다.'});
+    cs.push({...BACK,t:'아껴 둔다',d:`감독자 령주 ${w.rSeals}획 남음 · 다른 행동을 고른다`});
     decide({title:'감독자의 령주',body:`${h.name}${J(h.name,은)} 이 전쟁의 모든 서번트에게 내릴 수 있는 령주를 따로 지니고 있다. 남은 것은 ${w.rSeals}획.`,war:true,choices:cs});
   }
   function rulerDo(e,k){
@@ -6564,7 +6567,7 @@ const Sim = (() => {
     decide({title:'진명을 간파한다',body:'마주친 적 하나의 이름을 읽어 낸다.',war:true,choices:[...ts.map(p=>({t:`${cn(p)} 조`,d:`${oddsTxt(revealD(p),true)} · 정보 ${Math.round(p.intel)}`,auto:true,f:()=>{ const r=contest(revealD(p),14,'서번트의 진명간파·행운');
         if(r==='great'||r==='ok'){ revealPair(p,'진명간파. '); if(r==='great') revealArt(p,'이름과 함께 보구까지 떠올랐다. '); return ''; }
         addIntel(p,15); return r==='fail'?'이름은 끝내 떠오르지 않았다. 단서만 몇 가지 남았다.':'상대의 정체가 짙은 안개처럼 흐려졌다. 무언가가 진명을 가리고 있다.'; }})),
-      {t:'그만둔다',f:()=>''}]});
+      {...BACK}]});
   }
   function revelationDo(){
     const w=W(),h=hero(),P=myP(); const sc=SV(h,'insight')*2+P[4]*3+rnd()*20;
@@ -6696,7 +6699,7 @@ const Sim = (() => {
   // 상대 거처의 공방 상태 (상대 조에는 결계 수치가 따로 없다. 거처의 방비는 공방과 캐스터 여부로 정해진다)
   function wsTxt(p){ const w=W(); if(p.noWs>=w.day) return `공방 무력화 · ${p.noWs-w.day+1}일 남음`; if(p.workshop) return '공방 완성'; if((p.wsProg||0)>0) return `공방 짓는 중 ${Math.round(p.wsProg)}/100`; return '공방 없음'; }
   function unravelPick(){ const w=W(); const ts=alivePairs().filter(p=>p.known&&!p.ally&&!p.truce&&p.master&&p.cls==='caster');
-    decide({title:'적의 결계를 풀러 간다',body:'어느 거처의 술식을 풀 것인가.',war:true,choices:[...ts.map(p=>({t:`${pName(p)} 조 · ${p.mname}`,d:`${oddsTxt(unravelD(p),false)} · ${wsTxt(p)}`,auto:unravelD(p)>=0,f:()=>unravelDo(p)})),{t:'그만둔다',d:'오늘 밤은 가지 않는다',f:()=>'외투를 다시 걸었다.'}]}); }
+    decide({title:'적의 결계를 풀러 간다',body:'어느 거처의 술식을 풀 것인가.',war:true,choices:[...ts.map(p=>({t:`${pName(p)} 조 · ${p.mname}`,d:`${oddsTxt(unravelD(p),false)} · ${wsTxt(p)}`,auto:unravelD(p)>=0,f:()=>unravelDo(p)})),{...BACK}]}); }
   function unravelDo(e){ const w=W(); w.roamed=true; const r=contest(unravelD(e),14,'마력·지식'); e.alert=(e.alert||0)+(r==='fail'||r==='bad'?2:1);
     if(r==='great'||r==='ok'){ const big=r==='great'; if(big){ e.workshop=false; e.wsProg=Math.round((e.wsProg||100)*.3); } e.noWs=w.day+(big?3:1); addIntel(e,15,'trail');
       return big?`${e.mname}의 공방 술식을 뿌리째 풀어 냈다. 며칠 동안 그 거처는 그냥 건물이다.`:`결계의 바깥 몇 겹을 풀어 냈다. 하루쯤은 그 거처의 힘이 약해져 있을 것이다.`; }
@@ -6705,7 +6708,7 @@ const Sim = (() => {
   // 마스터의 현대식 파괴: 재산을 들여 폭약을 쓴다. 결계 두께와 상관없다
   function blastP(e){ const eh=H_BY[e.hero]; return Math.max(.1,Math.min(.8,.3+S.st.will*.003+(e.intel||0)*.003-e.pw*.003-(skillsOf(eh).some(k=>ASN_A.test(k.n))?.15:0))); }
   function blastPick(){ const ts=alivePairs().filter(p=>p.known&&!p.ally&&!p.truce&&p.master);
-    decide({title:'거처를 폭파한다',body:'마술과 상관없는 수단이다. 크게 소란이 날 것이다.',war:true,choices:[...ts.map(p=>({t:`${pName(p)} 조 · ${p.mname}`,d:`${asnWord(blastP(p))} · ${wsTxt(p)} · 정보 ${Math.round(p.intel)}`,auto:blastP(p)>=.5,f:()=>blastDo(p)})),{t:'그만둔다',d:'오늘 밤은 하지 않는다',f:()=>'계획서를 접었다.'}]}); }
+    decide({title:'거처를 폭파한다',body:'마술과 상관없는 수단이다. 크게 소란이 날 것이다.',war:true,choices:[...ts.map(p=>({t:`${pName(p)} 조 · ${p.mname}`,d:`${asnWord(blastP(p))} · ${wsTxt(p)} · 정보 ${Math.round(p.intel)}`,auto:blastP(p)>=.5,f:()=>blastDo(p)})),{...BACK}]}); }
   function blastDo(e){ const w=W(); w.roamed=true; add({wealth:-15}); w.heat=(w.heat||0)+2; w.exposure=clamp(w.exposure+expUp(15));
     if(ch(blastP(e))){ const ws=e.workshop; e.workshop=false; e.wsProg=Math.round((e.wsProg||0)*.3); e.noWs=w.day+3; e.mHurt=2; e.hp=clamp(e.hp-ri(5,12)); addIntel(e,20,'trail');
       if(ch(.1)){ log(`자정 무렵, ${e.mname}의 거처가 폭음과 함께 내려앉았다. 잔해 속에서 마술사는 끝내 나오지 못했다.`,'war'); masterKilled(e); return ''; }
@@ -6716,10 +6719,10 @@ const Sim = (() => {
     const T={mark:['복수의 표적을 정한다','누구를 표적으로 삼을 것인가.']}[k];
     decide({title:T[0],body:T[1],war:true,choices:[...ts.map(p=>({t:`${pName(p)} 조`,d:`${p.arche} ${p.mname} · ${hpWord(p.hp)}`,auto:true,f:()=>{
       if(k==='mark'){ w.mark=p.i; return `${pName(p)} 조를 표적으로 정했다. 그 조와 마주치면 원한이 칼끝에 실린다.`; }
-      return ''; }})),{t:'그만둔다',d:'오늘 밤은 하지 않는다',f:()=>'생각을 접었다.'}]}); }
+      return ''; }})),{...BACK}]}); }
   function attackPick(){
     const w=W(); const ts=alivePairs().filter(p=>p.known&&!p.ally&&!p.truce);
-    decide({title:'누구를 칠 것인가',body:'거처를 아는 적.',war:true,choices:ts.map(p=>({t:`${pName(p)} 조`,d:`${p.arche} ${p.mname} · ${hpWord(p.hp)}`,auto:true,f:()=>{w.queue.unshift(()=>battle(p,{attack:true}))}}))});
+    decide({title:'누구를 칠 것인가',body:'거처를 아는 적.',war:true,choices:[...ts.map(p=>({t:`${pName(p)} 조`,d:`${p.arche} ${p.mname} · ${hpWord(p.hp)}`,auto:true,f:()=>{w.queue.unshift(()=>battle(p,{attack:true}))}})),{...BACK}]});
   }
   function allyPick(){
     const w=W(); const ts=alivePairs().filter(p=>p.known&&!p.ally);
@@ -6727,7 +6730,7 @@ const Sim = (() => {
       const pc=(p.aid==='executor'?-1:p.aid==='democrat'?.2:0)+.3+(p.tac==='naive'||p.tac==='desperate'?.3:0)+(p.tac==='proud'?-.2:0)+S.st.bond/400+(p.hp<50?.15:0)+(p.sym||p.friendly?.2:0);
       if(ch(pc)){p.ally=true;S.flags.allyName=p.mname;allyConfide(p);wrec('ally',`${cn(p)} 조 ${p.mname}${J(p.mname,과)} 동맹`,{p:p.i});log(`${p.mname}${J(p.mname,이)} 동맹을 받아들였다. 마지막 둘이 남을 때까지만.`,'war');}
       else{log(`${p.mname}${J(p.mname,은)} 답 대신 사신을 돌려보냈다. 당신 거처가 알려졌다.`,'war');W().exposure=clamp(W().exposure+expUp(10));}
-    })}})), {t:'그만둔다',auto:true,f:()=>{}}]});
+    })}})), {...BACK}]});
   }
 
   /* ---------- 전투 ---------- */
