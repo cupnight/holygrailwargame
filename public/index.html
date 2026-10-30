@@ -6348,12 +6348,11 @@ const Sim = (() => {
     ch_.push({t:'진지를 지킨다',d:`결계 ${Math.round(w.fort)}. 습격받으면 유리하다`,auto:w.hp<45,f:()=>{w.prepDay=w.day;w.queue.push(()=>{const g=ri(6,12)+(h.cls==='caster'?10:0)+SV(h,'fort');w.fort=clamp(w.fort+g);w.hp=clamp(w.hp+3);log('결계 안에서 밤을 지켰다.');})}});
     ch_.push({t:`${h.name}${J(h.name,과)} 이야기한다`,d:'신뢰가 오른다',auto:w.trust<40,f:()=>{w.queue.push(()=>talk())}});
     if(!ally&&targets.length&&!allyBlock()) ch_.push({t:'동맹을 제안한다',d:'거처를 아는 상대에게',f:()=>allyPick()});
-    ch_.push({t:'쉰다',d:'싸우러 나가지 않고 상처와 마력을 회복한다',auto:w.hp<50||w.sm<35,f:()=>{w.queue.push(()=>{log('아무 데도 나가지 않고 쉬었다.');w.hp=clamp(w.hp+12+S.st.mana*.1);w.sm=clamp(w.sm+10+S.st.mana*.1);})}});
-    ch_.push({t:'숨죽이고 지낸다',d:'습격받을 확률이 줄고 상처와 마력이 조금 회복된다',auto:w.sm<25,f:()=>{w.hid=true;w.queue.push(()=>{log('불을 끄고 결계 안에서 밤을 보냈다.');w.hp=clamp(w.hp+6+S.st.mana*.05);w.sm=clamp(w.sm+6);})}});
+    ch_.push({t:'숨죽이고 지낸다',d:'습격받을 확률이 줄고 상처와 마력이 조금 회복된다',auto:w.hp<50||w.sm<35,f:()=>{w.hid=true;w.queue.push(()=>{log('불을 끄고 결계 안에서 밤을 보냈다.');w.hp=clamp(w.hp+6+S.st.mana*.05);w.sm=clamp(w.sm+6);})}});
     classActs(ch_);
     huntNight(ch_); darkNight(ch_);
     if(w.heroAlive&&altarLive()){
-      ch_.forEach(c=>{ if(/^(진지를 지킨다|숨죽이고 지낸다|쉰다)$/.test(c.t)){ c.off=true; c.auto=false; c.d='성배의 부름에 결계가 흔들린다. 거처에 틀어박혀 있을 수 없다'; } });
+      ch_.forEach(c=>{ if(/^(진지를 지킨다|숨죽이고 지낸다)$/.test(c.t)){ c.off=true; c.auto=false; c.d='성배의 부름에 결계가 흔들린다. 거처에 틀어박혀 있을 수 없다'; } });
       const pre=altarFoes().find(p=>p.altarPre);
       ch_.unshift({t:w.altarPre?'성배의 자리를 지킨다':'성배가 강림할 자리로 간다',d:w.altarPre?'자리를 노리고 오는 조와 결계 안에서 맞선다. 이기면 최종전에서 유리하다':pre?`${pName(pre)} 조가 먼저 자리를 다져 두었다. 그 요새를 친다. 이기면 최종전에서 유리하다`:'자리를 노리는 조와 반드시 맞붙는다. 이기면 최종전에서 유리하다',
         auto:!!w.altarPre||(w.hp>=50&&w.sm>=30),f:()=>{ w.altarGo=w.day; w.queue.push(()=>altarBattle()); }});
@@ -6362,9 +6361,9 @@ const Sim = (() => {
     if(w.halt>0) ch_.forEach(c=>{ if(/^(습격한다|고지에서 저격한다|거처에 잠입한다|감독자의 령주)$/.test(c.t)){ c.off=true; c.auto=false; c.d='감독자의 령주에 묶여 있다'; } });
     w.resumeAt=(w.queue.length||w.battle)?null:'night';
     // 연합에 맞설 준비를 한 밤: 수비 행동만. 성배의 부름으로 막혀 있던 수비 행동도 연합이 거처로 오므로 다시 연다
-    if(w.coal&&w.coal.d===w.day&&!w.coal.strike&&!w.coal.hide) ch_.forEach(c=>{ if(!/^(진지를 지킨다|숨죽이고 지낸다|쉰다|공방을 짓는다)$/.test(c.t)){ c.off=true; c.auto=false; c.d='연합이 오늘 밤 들이닥친다. 거처를 비울 수 없다'; } else if(c.off){ c.off=false; c.d='연합이 오늘 밤 들이닥친다. 거처에서 맞선다'; } });
-    // 어떤 겹침으로든 고를 수 있는 행동이 하나도 없으면 쉬는 것만큼은 열어 둔다
-    if(ch_.every(c=>c.off)) ch_.forEach(c=>{ if(c.t==='쉰다'){ c.off=false; c.d='할 수 있는 게 없다. 상처와 마력을 회복한다'; } });
+    if(w.coal&&w.coal.d===w.day&&!w.coal.strike&&!w.coal.hide) ch_.forEach(c=>{ if(!/^(진지를 지킨다|숨죽이고 지낸다|공방을 짓는다)$/.test(c.t)){ c.off=true; c.auto=false; c.d='연합이 오늘 밤 들이닥친다. 거처를 비울 수 없다'; } else if(c.off){ c.off=false; c.d='연합이 오늘 밤 들이닥친다. 거처에서 맞선다'; } });
+    // 어떤 겹침으로든 고를 수 있는 행동이 하나도 없으면 숨죽이고 지내는 것만큼은 열어 둔다
+    if(ch_.every(c=>c.off)) ch_.forEach(c=>{ if(c.t==='숨죽이고 지낸다'){ c.off=false; c.d='할 수 있는 게 없다. 불을 끄고 상처와 마력을 회복한다'; } });
     decide({title:`제${w.day}일 · 밤`,body:statusBody('밤'),war:true,choices:ch_.map(c=>({...c,f:()=>{c.f();w.queue.push(()=>npcNight(),()=>threat(),()=>warEvent(),()=>dawn());}}))});
     if(w.resumeAt){ LASTWAR=serial(); H.save(); }
   }
@@ -8396,7 +8395,7 @@ const Sim = (() => {
         a.nAct='class'; continue; }
     }
   }
-  // NPC 밤 행동: 클래스 행동 / 쉰다 / 숨죽이고 지낸다 / 정보를 모은다 / 싸우러 나간다 (플레이어 밤 행동과 같은 값)
+  // NPC 밤 행동: 클래스 행동 / 쉰다(NPC만) / 숨죽이고 지낸다 / 정보를 모은다 / 싸우러 나간다 (쉰다 말고는 플레이어 밤 행동과 같은 값)
   // 성향별 쉬는 기준: [쉴 확률, 마력이 이 아래면, 체력이 이 아래면, 숨죽이는 체력 기준]
   const REST_TAC={defensive:[.8,80,90,75],cunning:[.7,75,85,70],naive:[.6,65,75,60],proud:[.4,60,70,55],hunter:[.4,60,70,55],desperate:[.35,55,65,50],reckless:[.25,50,60,45]};
   function npcNight(){
