@@ -5587,7 +5587,9 @@ const Sim = (() => {
     c.bossDown=by==='me'?'me':by&&by.i?by.i:'npc'; log(`${pName(u)}${J(pName(u),이)} 무너졌다. 성배를 감싸던 진흙이 한순간 멎었다.`,'war'); return true; }
   // 전투가 끝난 뒤: 함께 싸운 조가 남은 몫을 친다
   function cxAfterBattle(b){ const w=W(), e=b.e; if(!e||!e.cx) return; const comp=(b.ctx.comp||[]).map(i=>pairBy(i)).filter(p=>p&&p.alive);
-    for(const p of comp.slice(0,2)){ if(!e.alive) break; cxNpcVs(p,e,true); } }
+    for(const p of comp.slice(0,2)){ if(!e.alive) break; cxNpcVs(p,e,true); }
+    // 공동전의 결말은 그 싸움을 이끈 쪽이 정한다: 동행이 막타를 쳐도 내가 살아 있으면 내 결말로
+    const c=CXW(); if(e.cx==='boss'&&!e.alive&&c&&c.bossDown&&c.bossDown!=='me'&&w.heroAlive) c.bossDown='me'; }
   // NPC 조 하나와 그림자 · 보스의 싸움 (플레이어가 없는 곳)
   function cxNpcVs(p,u,withMe){ const c=CXW(), seen=withMe||p.known||p.ally;
     if(u.cx==='boss'&&p.cxKey&&p.hp>40&&ch(.5)){ p.hp=clamp(p.hp-40); u.hp=u.hp-60; if(seen) log(`${pName(p)}${J(pName(p),이)} 성배의 원한을 제 몸으로 받아냈다.`,'war'); if(u.hp<=0&&!u.phase2){ u.phase2=true; u.hp=CXB.hp2+u.hp; } }
