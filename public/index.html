@@ -6338,7 +6338,7 @@ const Sim = (() => {
     if(w.coal&&w.coal.d===w.day&&w.coal.strike){ const t=w.pairs.find(p=>p.i===w.coal.a);
       decide({title:`제${w.day}일 · 밤`,body:statusBody('밤'),war:true,choices:[{t:`${t?pName(t):'연합의 한'} 조를 먼저 친다`,d:'오늘 밤 한 조를 먼저 습격한다. 연합의 발이 묶인다',auto:true,f:()=>{ w.queue.push(()=>npcNight(),()=>threat(),()=>warEvent(),()=>dawn()); }}]}); return; }
     const ch_=[];
-    if(w.duel&&w.duel.alive) ch_.push({t:`${pName(w.duel)} 조와 결판을 낸다`,d:'약속된 싸움',auto:true,f:()=>{const p=w.duel;w.duel=null;w.queue.push(()=>battle(p,{attack:true,duel:true}))}});
+    if(w.duel&&w.duel.alive) ch_.push({t:`${pName(w.duel)} 조와 결판을 낸다`,d:'약속된 싸움',auto:true,duelGo:true,f:()=>{const p=w.duel;w.duel=null;w.queue.push(()=>battle(p,{attack:true,duel:true}))}});
     ch_.push({t:'정찰을 나간다',d:unknown.length?'적의 정체와 거처를 알아낸다':'더 알아낼 상대가 없다',...(SCOUT_CLS(h)&&unknown.length?{adv:'up',advTxt:SCOUT_CLS(h).b}:{}),off:!unknown.length,auto:unknown.length&&targets.length<1,f:()=>{w.queue.push(()=>scout())}});
     if(h.cls==='rider'&&w.heroAlive) ch_.push({t:'탈것을 타고 정찰한다',d:!unknown.length?'더 알아낼 상대가 없다':w.sm<15?'서번트 마력이 모자라다':'도시를 가로질러 훨씬 많은 것을 알아낸다. 대신 눈에 띄고, 들킬 수 있다 [노출 +12 · 서번트 마력 −8]',adv:'up',advTxt:'라이더 전용',off:!unknown.length||w.sm<15,f:()=>{w.queue.push(()=>rideScout())}});
     ch_.push({t:'습격한다',d:w.sm<20?`서번트 마력 ${Math.round(w.sm)} · 싸울 힘이 모자라다`:targets.length?'거처를 아는 적을 친다':'칠 수 있는 적이 없다',off:!targets.length||w.sm<20,auto:targets.length>0&&w.hp>55&&!w.duel,f:()=>attackPick()});
@@ -6362,6 +6362,8 @@ const Sim = (() => {
     w.resumeAt=(w.queue.length||w.battle)?null:'night';
     // 연합에 맞설 준비를 한 밤: 수비 행동만. 성배의 부름으로 막혀 있던 수비 행동도 연합이 거처로 오므로 다시 연다
     if(w.coal&&w.coal.d===w.day&&!w.coal.strike&&!w.coal.hide) ch_.forEach(c=>{ if(!/^(진지를 지킨다|숨죽이고 지낸다|공방을 짓는다)$/.test(c.t)){ c.off=true; c.auto=false; c.d='연합이 오늘 밤 들이닥친다. 거처를 비울 수 없다'; } else if(c.off){ c.off=false; c.d='연합이 오늘 밤 들이닥친다. 거처에서 맞선다'; } });
+    // 결판을 내기로 약속한 밤(교단·서번트의 고집·결투장 등): 그 싸움 말고는 고를 수 없다
+    { const dc=ch_.find(c=>c.duelGo&&!c.off); if(dc){ dc.auto=true; ch_.forEach(c=>{ if(c!==dc&&!c.off){ c.off=true; c.auto=false; c.d='약속된 결판이 있다. 오늘 밤은 그쪽으로 간다'; } }); } }
     // 어떤 겹침으로든 고를 수 있는 행동이 하나도 없으면 숨죽이고 지내는 것만큼은 열어 둔다
     if(ch_.every(c=>c.off)) ch_.forEach(c=>{ if(c.t==='숨죽이고 지낸다'){ c.off=false; c.d='할 수 있는 게 없다. 불을 끄고 상처와 마력을 회복한다'; } });
     decide({title:`제${w.day}일 · 밤`,body:statusBody('밤'),war:true,choices:ch_.map(c=>({...c,f:()=>{c.f();w.queue.push(()=>npcNight(),()=>threat(),()=>warEvent(),()=>dawn());}}))});
