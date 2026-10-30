@@ -6693,8 +6693,10 @@ const Sim = (() => {
   }
   // 마스터의 술식 해체: 마력·지식 대 상대 마술사의 실력과 공방
   function unravelD(e){ return S.st.mana*.15+S.st.lore*.12-(e.pw*.15+(mGrp(e)==='ortho'?4:0)+(e.workshop?6:0)+(e.cls==='caster'?4:0)+asnAlert(e)*3); }
+  // 상대 거처의 공방 상태 (상대 조에는 결계 수치가 따로 없다. 거처의 방비는 공방과 캐스터 여부로 정해진다)
+  function wsTxt(p){ const w=W(); if(p.noWs>=w.day) return `공방 무력화 · ${p.noWs-w.day+1}일 남음`; if(p.workshop) return '공방 완성'; if((p.wsProg||0)>0) return `공방 짓는 중 ${Math.round(p.wsProg)}/100`; return '공방 없음'; }
   function unravelPick(){ const w=W(); const ts=alivePairs().filter(p=>p.known&&!p.ally&&!p.truce&&p.master&&p.cls==='caster');
-    decide({title:'적의 결계를 풀러 간다',body:'어느 거처의 술식을 풀 것인가.',war:true,choices:[...ts.map(p=>({t:`${pName(p)} 조 · ${p.mname}`,d:`${oddsTxt(unravelD(p),false)} · ${p.workshop?'공방이 있다':'진지만 있다'}`,auto:unravelD(p)>=0,f:()=>unravelDo(p)})),{t:'그만둔다',d:'오늘 밤은 가지 않는다',f:()=>'외투를 다시 걸었다.'}]}); }
+    decide({title:'적의 결계를 풀러 간다',body:'어느 거처의 술식을 풀 것인가.',war:true,choices:[...ts.map(p=>({t:`${pName(p)} 조 · ${p.mname}`,d:`${oddsTxt(unravelD(p),false)} · ${wsTxt(p)}`,auto:unravelD(p)>=0,f:()=>unravelDo(p)})),{t:'그만둔다',d:'오늘 밤은 가지 않는다',f:()=>'외투를 다시 걸었다.'}]}); }
   function unravelDo(e){ const w=W(); w.roamed=true; const r=contest(unravelD(e),14,'마력·지식'); e.alert=(e.alert||0)+(r==='fail'||r==='bad'?2:1);
     if(r==='great'||r==='ok'){ const big=r==='great'; if(big){ e.workshop=false; e.wsProg=Math.round((e.wsProg||100)*.3); } e.noWs=w.day+(big?3:1); addIntel(e,15,'trail');
       return big?`${e.mname}의 공방 술식을 뿌리째 풀어 냈다. 며칠 동안 그 거처는 그냥 건물이다.`:`결계의 바깥 몇 겹을 풀어 냈다. 하루쯤은 그 거처의 힘이 약해져 있을 것이다.`; }
@@ -6703,7 +6705,7 @@ const Sim = (() => {
   // 마스터의 현대식 파괴: 재산을 들여 폭약을 쓴다. 결계 두께와 상관없다
   function blastP(e){ const eh=H_BY[e.hero]; return Math.max(.1,Math.min(.8,.3+S.st.will*.003+(e.intel||0)*.003-e.pw*.003-(skillsOf(eh).some(k=>ASN_A.test(k.n))?.15:0))); }
   function blastPick(){ const ts=alivePairs().filter(p=>p.known&&!p.ally&&!p.truce&&p.master);
-    decide({title:'거처를 폭파한다',body:'마술과 상관없는 수단이다. 크게 소란이 날 것이다.',war:true,choices:[...ts.map(p=>({t:`${pName(p)} 조 · ${p.mname}`,d:`${asnWord(blastP(p))} · 정보 ${Math.round(p.intel)}`,auto:blastP(p)>=.5,f:()=>blastDo(p)})),{t:'그만둔다',d:'오늘 밤은 하지 않는다',f:()=>'계획서를 접었다.'}]}); }
+    decide({title:'거처를 폭파한다',body:'마술과 상관없는 수단이다. 크게 소란이 날 것이다.',war:true,choices:[...ts.map(p=>({t:`${pName(p)} 조 · ${p.mname}`,d:`${asnWord(blastP(p))} · ${wsTxt(p)} · 정보 ${Math.round(p.intel)}`,auto:blastP(p)>=.5,f:()=>blastDo(p)})),{t:'그만둔다',d:'오늘 밤은 하지 않는다',f:()=>'계획서를 접었다.'}]}); }
   function blastDo(e){ const w=W(); w.roamed=true; add({wealth:-15}); w.heat=(w.heat||0)+2; w.exposure=clamp(w.exposure+expUp(15));
     if(ch(blastP(e))){ const ws=e.workshop; e.workshop=false; e.wsProg=Math.round((e.wsProg||0)*.3); e.noWs=w.day+3; e.mHurt=2; e.hp=clamp(e.hp-ri(5,12)); addIntel(e,20,'trail');
       if(ch(.1)){ log(`자정 무렵, ${e.mname}의 거처가 폭음과 함께 내려앉았다. 잔해 속에서 마술사는 끝내 나오지 못했다.`,'war'); masterKilled(e); return ''; }
