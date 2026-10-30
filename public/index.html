@@ -4171,7 +4171,6 @@ const Sim = (() => {
   let HOLD=false; // 화면 연출(격돌 등)이 도는 동안 잠시 멈춘다. 저장하지 않는다
   function setHold(v){ HOLD=!!v; }
   // 성배전쟁은 하루에 기록이 많아 같은 배속이면 삶보다 훨씬 길게 느껴진다: 4배속 · 8배속에서는 전쟁을 더 빨리 넘긴다
-  const WAR_SPD={1:1,2:2,4:6,8:16};
   function tick(dt){
     if(!S||S.dead||S.pending||S.paused||HOLD) return;
     if(S._resume){ const r=S._resume; S._resume=null; resumeAt(r); if(S.pending) return; }
@@ -4179,7 +4178,7 @@ const Sim = (() => {
     if(S.phase==='life'){
       S.clock+=sp; const spy=LEN[S.len].spy;
       if(S.clock>=spy){S.clock-=spy; advanceYear();}
-    } else if(S.phase==='war'){ warTick(dt*(WAR_SPD[S.speed]||S.speed)); }
+    } else if(S.phase==='war'){ warTick(sp); }
     else if(S.phase==='epi'){ epiTick(sp); }
     achCheck();
   }
@@ -11584,7 +11583,7 @@ function renderChoices(d){
 const noAuto=d=>!!d&&(d.input==='last'||!!d.manual);
 function autoNote(d){ const n=$('#dAuto'), man=!!(d&&d.manual); n.textContent=man?'이 장면은 직접 고릅니다. 자동 결정은 쓸 수 없습니다.':'자동 결정이 켜져 있습니다. 잠시 뒤 자동으로 고릅니다.'; n.classList.toggle('hidden',!man&&(!Sim.S.auto||!d||d.input==='last')); }
 function manualStop(d){ const man=!!(d&&d.manual); $('#autoBtn').disabled=man; if(man&&Sim.S.auto){ Sim.S.auto=false; syncCtrl(); } }
-function scheduleAuto(){ clearTimeout(autoTimer); const d=Sim.S.pending; if(!d||noAuto(d)) return; autoTimer=setTimeout(()=>{ if(!$('#info').classList.contains('hidden')||dFolded()) return; if(Sim.S.pending===d&&Sim.S.auto) choose(Sim.autoChoice(d)); }, Math.max(Sim.S.phase==='war'&&Sim.S.speed>=8?300:500,1800/Sim.S.speed)); }
+function scheduleAuto(){ clearTimeout(autoTimer); const d=Sim.S.pending; if(!d||noAuto(d)) return; autoTimer=setTimeout(()=>{ if(!$('#info').classList.contains('hidden')||dFolded()) return; if(Sim.S.pending===d&&Sim.S.auto) choose(Sim.autoChoice(d)); }, Math.max(500,1800/Sim.S.speed)); }
 // 전투 중의 선택: 다음 합이나 전투 결과가 나올 때까지 창을 닫지 않고 기다린다 (닫혔다 다시 열리는 깜빡임을 없앤다)
 function choose(i){ clearTimeout(autoTimer); const d=Sim.S.pending; if(!d) return; $('#autoBtn').disabled=false; const txt=d.input?$('#dInput').value:''; setFold(false);
   if(d.battle&&!d.endE) $('#dlg').classList.add('busy'); else $('#dlg').classList.add('hidden');
