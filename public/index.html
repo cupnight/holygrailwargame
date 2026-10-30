@@ -3932,7 +3932,7 @@ const Sim = (() => {
     {id:'shared',cat:'성배전쟁의 끝',n:'함께 빈 소원',d:'동맹과 함께 성배에 소원을 빌었다',t:()=>S.flags.war==='shared'},
     {id:'yield',cat:'성배전쟁의 끝',n:'넘겨준 잔',d:'마지막에 남은 동맹에게 성배를 양보했다',t:()=>!!S.flags.yieldAlly},
     {id:'stay',cat:'성배전쟁의 끝',n:'영웅이 남은 세상',d:'서번트가 이 세계에 남았다',t:()=>!!S.flags.stay},
-    {id:'dark',cat:'성배전쟁의 끝',n:'검은 잔',d:'검은 성배에 소원을 빌었다',t:()=>GRAIL()&&!!S.flags.wishText&&WV().cupPure===false},
+    {id:'dark',cat:'성배전쟁의 끝',n:'검은 잔',d:'검은 성배에 소원을 빌었다',t:()=>GRAIL()&&!!S.flags.wishText&&!S.flags.brokeCup&&WV().cupPure===false},
     {id:'fast',cat:'성배전쟁의 끝',n:'일주일 안의 기적',d:'7일째가 되기 전에 성배를 쥐었다',t:()=>GRAIL()&&WV().day>0&&WV().day<7},
     {id:'refused',cat:'성배전쟁의 끝',n:'손등을 거둔 자',d:'령주를 받고도 전쟁을 거부했다',t:()=>S.flags.war==='refused'},
     {id:'kill1',cat:'싸움',n:'첫 격파',d:'적 서번트를 처음으로 쓰러뜨렸다',t:()=>(WV().kills||0)>=1},
@@ -9489,10 +9489,10 @@ const Sim = (() => {
         {t:'말을 건다',f:()=>{add({bond:3});return '그 사람은 잠시 당신을 보더니 말했다. “고마워요. 덕분에 살았어요. 아니, 덕분에 죽을 뻔했나.”'}},
         {t:'모른 척한다',auto:true,f:()=>'커피가 식을 때까지 창밖만 보았다.'}]})},
     // ---- 성배전쟁의 결과가 이어지는 에필로그 (w: 뽑힐 가중치) ----
-    {id:'wish_after',w:3,c:()=>GRAIL()&&!!S.flags.wishText,f:()=>decide({title:'이루어진 소원',body:`그 겨울 성배에 빌었던 소원 — ‘${S.flags.wishText}’. ${WV().cupPure===false?'소원은 이루어졌다. 다만 당신이 바란 모양과는 조금 달랐다.':'소원은 이루어졌고, 세상은 그 일을 아무렇지 않게 받아들였다.'} 그 뒤로 몇 해가 흘렀다.`,choices:[
+    {id:'wish_after',w:3,c:()=>GRAIL()&&!!S.flags.wishText&&!S.flags.brokeCup,f:()=>decide({title:'이루어진 소원',body:`그 겨울 성배에 빌었던 소원 — ‘${S.flags.wishText}’. ${WV().cupPure===false?'소원은 이루어졌다. 다만 당신이 바란 모양과는 조금 달랐다.':'소원은 이루어졌고, 세상은 그 일을 아무렇지 않게 받아들였다.'} 그 뒤로 몇 해가 흘렀다.`,choices:[
       {t:'그것을 지키며 산다',auto:true,f:()=>{add({will:3,bond:2});return '소원이 남긴 것을 하루하루 돌보았다. 성배가 준 것은 시작뿐이었다.'}},
       {t:'대가를 헤아려 본다',f:()=>{add({lore:3,will:-1});return '성배가 무엇을 가져가고 무엇을 주었는지 공책에 적었다. 계산은 끝내 맞지 않았다.'}}]})},
-    {id:'dark_after',w:3,c:()=>GRAIL()&&WV().cupPure===false,f:()=>decide({title:'검은 잔의 그늘',body:'뉴스 한 귀퉁이에 이상한 사건이 실렸다. 그 겨울 검은 성배에 빈 소원이 비틀린 채, 아직도 조금씩 번지고 있다.',choices:[
+    {id:'dark_after',w:3,c:()=>GRAIL()&&WV().cupPure===false&&!S.flags.brokeCup,f:()=>decide({title:'검은 잔의 그늘',body:'뉴스 한 귀퉁이에 이상한 사건이 실렸다. 그 겨울 검은 성배에 빈 소원이 비틀린 채, 아직도 조금씩 번지고 있다.',choices:[
       {t:'바로잡으려 한다',f:()=>{add({will:4,health:-4,mana:2});lean('judge',1);return '몇 년에 걸쳐 그 비틀림을 하나씩 풀었다. 다 풀지는 못했다.'}},
       {t:'모른 척한다',auto:true,f:()=>{add({will:-4});lean('cruel',1);return '채널을 돌렸다. 그 뒤로 뉴스를 잘 보지 않게 되었다.'}}]})},
     {id:'shared_half',w:3,c:()=>S.flags.war==='shared'&&!!S.flags.sharedWith,f:()=>decide({title:'반쪽의 소원',body:`${S.flags.sharedWith}에게서 연락이 왔다. 성배를 나눈 두 소원은 정말로 반쯤씩만 이루어졌다고 했다.`,choices:[
