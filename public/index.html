@@ -563,16 +563,13 @@ aside{display:grid;gap:18px;align-content:start}
 .set-head h2{margin:0}
 .set-x{background:none;border:0;color:var(--dim);font-size:26px;line-height:1;cursor:pointer;padding:2px 6px;border-radius:6px}
 .set-x:hover{color:var(--text);background:var(--panel2)}
-.set-sec{padding:16px 0;border-top:1px solid var(--line)}
-.set-sec:first-child{border-top:0;padding-top:10px}
-.set-sec h3{margin:0 0 4px;font-family:var(--f-ui);font-size:15.5px;font-weight:700;color:var(--text)}
-.set-sec p{margin:0 0 10px;font-family:var(--f-ui);font-size:13px;line-height:1.6;color:var(--dim)}
-.set-sec .set-more{background:none;border:0;padding:0;margin-left:4px;color:var(--gold2);font:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--ink)}
-.seg button{background:none;border:0;border-radius:0;margin:0;box-shadow:none;border-left:1px solid var(--line);padding:9px 8px;font-family:var(--f-ui);font-size:13.5px;color:var(--dim);cursor:pointer}
-.seg button:first-child{border-left:0}
-.seg button:hover{color:var(--text)}
-.seg button[aria-pressed="true"]{background:var(--gold);color:#1a1408;font-weight:700}
+.set-head{padding-bottom:12px;border-bottom:1px solid var(--line)}
+.set-sec{padding:16px 0;border-bottom:1px solid var(--line)}
+.set-sec:last-child{border-bottom:0;padding-bottom:4px}
+.set-sec.hidden{display:none}
+.set-sec .pn-btn{margin-bottom:10px}
+.set-sec p{margin:0;font-family:var(--f-ui);font-size:13px;line-height:1.65;color:var(--dim)}
+.set-sec .set-more{background:none;border:0;padding:0;margin-left:2px;color:var(--gold2);font:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .pn-btn.set::before{-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3Cpath d='M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3Cpath d='M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1'/%3E%3C/svg%3E") center/contain no-repeat}
 .pn-btn.inst::before{-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4v11M7 10l5 5 5-5M5 20h14'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4v11M7 10l5 5 5-5M5 20h14'/%3E%3C/svg%3E") center/contain no-repeat}
 .pn-btn.hidden{display:none}
@@ -806,7 +803,7 @@ html.birth-on,html.birth-on body{overflow:hidden}
 <!-- 끝 -->
 <section id="ending" class="wrap hidden"></section>
 
-<div class="dlg hidden" id="setDlg" role="dialog" aria-modal="true" aria-label="설정" style="z-index:55"><div class="sheet info set-sheet"><div class="set-head"><h2>설정</h2><button class="set-x" id="setX" type="button" aria-label="닫기">×</button></div><div id="setList"></div><div class="hidden" aria-hidden="true"><span class="pn-pair hidden" id="statPair"><button class="pn-btn st" id="statBtn" type="button"></button></span><span class="pn-pair hidden" id="ghostPair"><button class="pn-btn st gh" id="ghostBtn" type="button"></button></span><button class="pn-btn st fx" id="fxBtn" type="button"></button><button class="pn-btn st fx" id="cfxBtn" type="button"></button><button class="pn-btn st fx" id="sfxBtn" type="button"></button></div></div></div>
+<div class="dlg hidden" id="setDlg" role="dialog" aria-modal="true" aria-label="설정" style="z-index:55"><div class="sheet info set-sheet"><div class="set-head"><h2>설정</h2><button class="set-x" id="setX" type="button" aria-label="닫기">×</button></div><div class="set-list"><div class="set-sec hidden" id="statPair"><button class="pn-btn st" id="statBtn" type="button"></button><p><span>한 생이 끝날 때 게임 결과를 익명으로 보내, 엔딩 화면의 전체 플레이어 기록과 도감·업적 비율에 보탭니다. 이름이나 직접 쓴 문장은 보내지 않습니다.</span> <button class="set-more" type="button" data-h="stat">자세히</button></p></div><div class="set-sec hidden" id="ghostPair"><button class="pn-btn st gh" id="ghostBtn" type="button"></button><p><span>다른 플레이어의 성배전쟁에서 살아남은 조가 가끔 여덟 번째 조로 끼어듭니다. 끄면 내 전쟁에는 나오지 않지만, 내 조를 보내는 것은 계속할 수 있습니다.</span> <button class="set-more" type="button" data-h="ghost">자세히</button></p></div><div class="set-sec"><button class="pn-btn st fx" id="fxBtn" type="button"></button><p>새 삶을 시작할 때 아이가 태어나는 장면을 보여 줍니다. 끄면 장면 없이 바로 이름 짓기로 넘어갑니다.</p></div><div class="set-sec"><button class="pn-btn st fx" id="cfxBtn" type="button"></button><p>두 보구가 격돌하는 순간, 보구 종류마다 정해진 문양이 맞부딪치는 짧은 장면을 보여 줍니다.</p></div><div class="set-sec"><button class="pn-btn st fx" id="sfxBtn" type="button"></button><p>령주를 쓸 때 손등의 문양이 떠오르고, 쓰는 한 획이 타올라 빛가루로 흩어지는 장면을 보여 줍니다.</p></div></div></div></div>
 <div class="dlg hidden" id="info" role="dialog" aria-modal="true" style="z-index:60"><div class="sheet info"><div id="infoBody"></div><div class="choices" style="margin-top:16px"><button class="choice" id="infoClose"><span class="ct">닫기</span></button></div></div></div>
 <div class="dlg hidden" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dTitle">
   <button class="dpill" id="dPill" type="button" aria-label="펼치기"><i class="dp-dot" aria-hidden="true"></i><span class="dp-t" id="dPillT"></span><span class="dp-e">펼치기 ▴</span></button>
@@ -11198,24 +11195,10 @@ function showPatch(){ const seen=store.get(K_PATCH);
   $('#infoBody').innerHTML=html; infoHeld=false; $('#info').classList.remove('hidden'); store.set(K_PATCH,PATCH[0].v); patchSync(); }
 $('#patchBtn').onclick=()=>showPatch();
 // 설정 창: 켜고 끄는 항목을 모아 둔다 (기간 한정 픽업은 시작 화면에 그대로)
-// 항목마다 제목·설명·켜기/끄기. 실제 저장·안내는 원래 버튼(숨겨 둔 #statBtn 등)의 동작을 그대로 쓴다
-const SETS=[
-  {btn:'statBtn',pair:'statPair',t:'익명 통계 보내기',d:'한 생이 끝날 때 게임 결과를 익명으로 보내, 엔딩 화면의 전체 플레이어 기록과 도감·업적 비율에 보탭니다. 이름이나 직접 쓴 문장은 보내지 않습니다.',help:'stat'},
-  {btn:'ghostBtn',pair:'ghostPair',t:'다른 플레이어의 조 만나기',d:'다른 플레이어의 성배전쟁에서 살아남은 조가 가끔 여덟 번째 조로 끼어듭니다. 끄면 내 전쟁에는 나오지 않지만, 내 조를 보내는 것은 계속할 수 있습니다.',help:'ghost'},
-  {btn:'fxBtn',t:'시작 연출',d:'새 삶을 시작할 때 아이가 태어나는 장면을 보여 줍니다. 끄면 장면 없이 바로 이름 짓기로 넘어갑니다.'},
-  {btn:'cfxBtn',t:'격돌 연출',d:'두 보구가 격돌하는 순간, 보구 종류마다 정해진 문양이 맞부딪치는 짧은 장면을 보여 줍니다.'},
-  {btn:'sfxBtn',t:'령주 연출',d:'령주를 쓸 때 손등의 문양이 떠오르고, 쓰는 한 획이 타올라 빛가루로 흩어지는 장면을 보여 줍니다.'}];
-function setRender(){ const box=$('#setList'); box.innerHTML='';
-  for(const it of SETS){ const b=$('#'+it.btn); if(!b) continue; if(it.pair&&$('#'+it.pair).classList.contains('hidden')) continue;
-    const on=b.getAttribute('aria-pressed')!=='false';
-    const sec=document.createElement('div'); sec.className='set-sec';
-    sec.innerHTML=`<h3></h3><p></p><div class="seg" role="group"><button type="button" data-v="1" aria-pressed="${on}">켜기</button><button type="button" data-v="0" aria-pressed="${!on}">끄기</button></div>`;
-    sec.querySelector('h3').textContent=it.t; sec.querySelector('p').textContent=it.d;
-    if(it.help){ const m=document.createElement('button'); m.type='button'; m.className='set-more'; m.textContent='자세히'; m.onclick=()=>showHelp(it.help); sec.querySelector('p').appendChild(m); }
-    sec.querySelectorAll('.seg button').forEach(x=>x.onclick=()=>{ const want=x.dataset.v==='1', now=b.getAttribute('aria-pressed')!=='false'; if(want!==now){ TOAST_QUIET=true; try{ b.click(); } finally{ TOAST_QUIET=false; } } setRender(); });
-    box.appendChild(sec); }
-  if(typeof trNode==='function') trNode(box); }
-function setOpen(){ setRender(); $('#setDlg').classList.remove('hidden'); const f=$('#setDlg .seg button[aria-pressed="true"]'); if(f) f.focus({preventScroll:true}); }
+// 설정 창: 항목마다 원래의 켜고 끄는 칩 + 설명. 창 안에서 바꿀 때는 칩에 바로 보이므로 안내 토스트를 띄우지 않는다
+document.querySelectorAll('#setDlg .set-more').forEach(b=>b.onclick=()=>showHelp(b.dataset.h));
+$('#setDlg').addEventListener('click',e=>{ if(e.target.closest('.set-sec .pn-btn')){ TOAST_QUIET=true; setTimeout(()=>{ TOAST_QUIET=false; },0); } },true);
+function setOpen(){ $('#setDlg').classList.remove('hidden'); const f=$('#setDlg .set-sec:not(.hidden) .pn-btn'); if(f) f.focus({preventScroll:true}); }
 function setClose(){ $('#setDlg').classList.add('hidden'); }
 $('#setBtn').onclick=setOpen;
 document.addEventListener('click',e=>{ if(e.target.closest('#setX')||e.target.id==='setDlg') setClose(); });
