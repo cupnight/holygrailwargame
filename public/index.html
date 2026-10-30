@@ -298,6 +298,7 @@ aside{display:grid;gap:18px;align-content:start}
 .sheet .body.res .rpick{font-family:var(--f-ui);font-size:12.5px;color:var(--gold2)}
 .sheet .body.res .rtx{white-space:pre-line}
 .sheet .body.res .rtx.enemy{color:#e6a2a8}
+.sheet .body.res .rtx.voice{color:var(--gold2)}
 .sheet .body.res .rchip .delta{margin-top:0}
 .sheet .body.res .rchip .delta span{font-size:12.5px;padding:2px 9px}
 .vs .side.full{grid-column:1/-1}
@@ -4116,12 +4117,14 @@ const Sim = (() => {
     const d=S.pending; if(!d) return;
     const c=d.choices[i]; if(!c||c.off) return;
     S.pending=null; S.resumeEv=null; if(S.war) S.war.resumeAt=null;
+    const mk0=S.log[S.log.length-1]; // 결과 창에 이 선택으로 생긴 기록만 담기 위한 표시
     if(!d.input && !d.silent) log(d.qbody||d.body,'q',{title:d.title,pick:c.t});
     if(d.input){ const t=(text||'').trim(); if(t){ if(d.input==='last') S.lastWords=t; else if(d.input==='wish'){ if(c.wish){ S.flags.myWish=t; log(`당신의 소원: “${t}”`,'voice'); } } else {S.notes.push({a:S.age,q:d.body,t}); log('남긴 생각: “'+t+'”','note');} } }
     let rr=null; tracked(()=>{ const r=c.f?c.f(text):null; rr=r; if(typeof r==='string'&&r) log(r,c.k||'ev'); });
     // 전쟁 중 선택 사건의 결과는 닫기만 있는 창으로 한 번 더 보여 준다 (전투 메뉴·밤낮 메뉴처럼 결과 문장이 없는 선택은 제외)
     if(S&&!S.dead&&!S.pending&&S.phase==='war'&&d.war&&!d.silent&&!d.battle&&typeof rr==='string'&&rr)
-      decide({title:d.title,body:[rr,LASTCHK,LASTDELTA].filter(Boolean).join('\n'),war:true,silent:true,res:true,choices:[{t:'닫기',auto:true,f:()=>null}]});
+      { const i0=mk0?S.log.lastIndexOf(mk0):-1, got=(i0>=0?S.log.slice(i0+1):[]).filter(e=>e.k!=='q'&&e.k!=='night').map(e=>({t:e.t,k:e.k}));
+      decide({title:d.title,body:[rr,LASTCHK,LASTDELTA].filter(Boolean).join('\n'),war:true,silent:true,res:true,resLog:got.length?got:null,resPick:d.input?null:c.t,choices:[{t:'닫기',auto:true,f:()=>null}]}); }
     achCheck();
     if(S&&!S.dead&&!S.pending&&(S.phase==='life'||S.phase==='epi')) H.save();
     H.change();
@@ -11443,7 +11446,16 @@ function showDecision(d){
     while(k>=0&&items.length<40){ const e=L[k]; if(!cur||e.n!==cur.n||e.tod!==cur.tod) break; if(e.k==='night') break; items.unshift(e); k--; }
     if(d.battle){ let st=0; for(let i=items.length-1;i>=0;i--){ if(/거처에 들이닥쳤다|결계를 두드렸다|마주쳤다|마주 섰다|먼저 와 있었다/.test(items[i].t)){ st=i; break; } } items=items.slice(Math.max(0,st)); } items=items.slice(-24);
     // 결과 팝업: 마지막 선택 뒤에 쌓인 결과·판정·변화는 본문에서 크게 보여 주고, '지금까지'에서는 빼서 겹치지 않게 한다
-    if(d.res){ let qi=-1; for(let i=items.length-1;i>=0;i--) if(items[i].k==='q'){ qi=i; break; }
+    if(d.res&&d.resLog){ // 이 선택으로 생긴 기록만 본문에 (지금까지 칸은 띄우지 않는다)
+      const bd=$('#dBody'); bd.textContent=''; bd.classList.add('res');
+      if(d.resPick){ const pk=document.createElement('div'); pk.className='rpick'; pk.textContent='→ '+d.resPick; bd.appendChild(pk); }
+      d.resLog.forEach(e=>{ const el=document.createElement('div');
+        if(e.k==='delta'||e.k==='check'){ el.className='rchip'; el.appendChild(chipBox(e)); }
+        else { el.className='rtx '+(e.k||''); el.textContent=e.t; }
+        bd.appendChild(el); });
+      items=[];
+    }
+    else if(d.res){ let qi=-1; for(let i=items.length-1;i>=0;i--) if(items[i].k==='q'){ qi=i; break; }
       const tail=qi>=0?items.slice(qi+1):[];
       if(tail.length){ const bd=$('#dBody'); bd.textContent=''; bd.classList.add('res');
         tail.forEach(e=>{ const el=document.createElement('div');
