@@ -4170,6 +4170,8 @@ const Sim = (() => {
 
   let HOLD=false; // 화면 연출(격돌 등)이 도는 동안 잠시 멈춘다. 저장하지 않는다
   function setHold(v){ HOLD=!!v; }
+  // 성배전쟁은 하루에 기록이 많아 같은 배속이면 삶보다 훨씬 길게 느껴진다: 4배속 · 8배속에서는 전쟁을 더 빨리 넘긴다
+  const WAR_SPD={1:1,2:2,4:6,8:16};
   function tick(dt){
     if(!S||S.dead||S.pending||S.paused||HOLD) return;
     if(S._resume){ const r=S._resume; S._resume=null; resumeAt(r); if(S.pending) return; }
@@ -4177,7 +4179,7 @@ const Sim = (() => {
     if(S.phase==='life'){
       S.clock+=sp; const spy=LEN[S.len].spy;
       if(S.clock>=spy){S.clock-=spy; advanceYear();}
-    } else if(S.phase==='war'){ warTick(sp); }
+    } else if(S.phase==='war'){ warTick(dt*(WAR_SPD[S.speed]||S.speed)); }
     else if(S.phase==='epi'){ epiTick(sp); }
     achCheck();
   }
@@ -7471,7 +7473,7 @@ const Sim = (() => {
     w.heroAlive=false; w.hp=0; w.myOut={d:w.day,tod:w.tod,why:'스텔라를 쏘고 소멸했다'}; wrec('mine',`${h.name}${J(h.name,이)} 스텔라를 쏘고 소멸했다`);
     if(contracted().length===0){ S.flags.war='victor'; w.ended=true; w.queue=[]; endBattle(); finale(null); return; }
     S.flags.war='lost'; mark('loss'); if(w.battle) w.battle.res=e.alive?'lose':'mutual';
-    if(contracted().length>1&&!w.final) afterLoss(); else w.out=true;
+    if(contracted().length>1&&!w.final){ w.out=true; w.lossAsk=true; } else w.out=true;
     return endBattle(); }
   // 보구를 거두고 피한다: side가 상대 보구를 피한다
   function npDodge(b,NX,side){ const w=W(),h=hero(),e=b.e, eN=pName(e), mN=h.name, other=npOther(side);
@@ -7723,7 +7725,7 @@ const Sim = (() => {
     w.heroAlive=false; w.hp=0; w.arsNova=true; S.flags.arsNova=1; w.myOut={d:w.day,tod:w.tod,why:'아르스 노바로 자신을 지웠다'}; wrec('mine',`${h.name}${J(h.name,이)} 아르스 노바로 자신을 지웠다`);
     if(contracted().length===0){ S.flags.war='victor'; w.ended=true; w.queue=[]; endBattle(); finale(null); return; }
     S.flags.war='lost'; mark('loss');
-    if(contracted().length>1&&!w.final) afterLoss(); else w.out=true;
+    if(contracted().length>1&&!w.final){ w.out=true; w.lossAsk=true; } else w.out=true;
     return endBattle();
   }
   // 전투 한 합에서 승부를 가른 요인을 골라 칩으로 보여 준다
@@ -7880,11 +7882,12 @@ const Sim = (() => {
     if(b&&b.e&&!w.ended){ w.queue.unshift(()=>battleClose(b)); return; }
     checkEnd(); }
   // 전투가 끝나면 바로 닫지 않고, 경과를 확인한 뒤 닫는다
-  function battleClose(b){ const w=W(); if(w.ended||S.dead) return; if(S.pending){ checkEnd(); return; } const e=b.e;
+  const lossAsk=()=>{ const w=W(); if(w.lossAsk&&!w.ended&&!S.dead&&!w.heroAlive){ w.lossAsk=false; w.queue.unshift(()=>afterLoss()); } else w.lossAsk=false; };
+  function battleClose(b){ const w=W(); if(w.ended||S.dead){ w.lossAsk=false; return; } if(S.pending){ checkEnd(); lossAsk(); return; } const e=b.e;
     const res=e.alive?(BRES[b.res]||'승부 없음'):(b.res==='win'?'승리':b.res==='mutual'?'동귀어진':'상대 소멸');
     const foe=!e.alive?'상대 소멸':!e.master&&b.res==='asn'?'상대 마스터 사망':`상대 ${hpWord(e.hp)}`;
     const me=!w.heroAlive?'우리 서번트 소멸':`우리 ${hpWord(w.hp)}`;
-    decide({title:`${pName(e)} · 전투 종료`,body:`${res} · ${foe} · ${me}`,war:true,battle:true,endE:e,silent:true,choices:[{t:'닫기',auto:true,f:()=>{ checkEnd(); return null; }}]}); }
+    decide({title:`${pName(e)} · 전투 종료`,body:`${res} · ${foe} · ${me}`,war:true,battle:true,endE:e,silent:true,choices:[{t:'닫기',auto:true,f:()=>{ checkEnd(); lossAsk(); return null; }}]}); }
   function berserkCheck(){
     const w=W(),h=hero();
     if(h.cls==='berserk'&&w.trust<35&&w.heroAlive&&ch(.35)){ w.civ=(w.civ||0)+1; S.flags.civ=(S.flags.civ||0)+1; log(`${h.name}${J(h.name,이)} 멈추지 않았다. 다음 날 아침 뉴스에 상가 건물 붕괴 사고가 나왔다.`,'loss'); add({will:-4}); }
@@ -8053,7 +8056,8 @@ const Sim = (() => {
     else log(pick([`${h.name}${J(h.name,은)} 마지막까지 당신을 보지 않았다.`,sayV(h,'cold'),`${h.name}${J(h.name,은)} 아무 말 없이 빛으로 흩어졌다.`]),'voice');
     log(pick(['손등이 서늘해졌다. 계약의 끈이 끊어졌다.','빛의 입자가 밤공기 속으로 흩어졌다. 손을 뻗었지만 잡히는 것은 없었다.','남은 것은 바닥에 떨어진 마력의 잔광뿐이었다.']),'loss');
     if(ch(.3-S.st.will/500+(e&&e.tac==='hunter'?.15:0))){ S.flags.war='dead'; die(`${cn(e)} 조의 습격`); return; }
-    if(contracted().length>1&&!w.final) afterLoss(); else w.out=true;
+    // 전투 중에 쓰러졌으면 '전투 종료' 창을 먼저 보여 주고, 그다음에 앞으로 어떻게 할지 묻는다
+    if(contracted().length>1&&!w.final){ if(w.battle){ w.out=true; w.lossAsk=true; } else afterLoss(); } else w.out=true;
   }
   function afterLoss(){
     const w=W(); w.out=true;
@@ -11580,7 +11584,7 @@ function renderChoices(d){
 const noAuto=d=>!!d&&(d.input==='last'||!!d.manual);
 function autoNote(d){ const n=$('#dAuto'), man=!!(d&&d.manual); n.textContent=man?'이 장면은 직접 고릅니다. 자동 결정은 쓸 수 없습니다.':'자동 결정이 켜져 있습니다. 잠시 뒤 자동으로 고릅니다.'; n.classList.toggle('hidden',!man&&(!Sim.S.auto||!d||d.input==='last')); }
 function manualStop(d){ const man=!!(d&&d.manual); $('#autoBtn').disabled=man; if(man&&Sim.S.auto){ Sim.S.auto=false; syncCtrl(); } }
-function scheduleAuto(){ clearTimeout(autoTimer); const d=Sim.S.pending; if(!d||noAuto(d)) return; autoTimer=setTimeout(()=>{ if(!$('#info').classList.contains('hidden')||dFolded()) return; if(Sim.S.pending===d&&Sim.S.auto) choose(Sim.autoChoice(d)); }, Math.max(500,1800/Sim.S.speed)); }
+function scheduleAuto(){ clearTimeout(autoTimer); const d=Sim.S.pending; if(!d||noAuto(d)) return; autoTimer=setTimeout(()=>{ if(!$('#info').classList.contains('hidden')||dFolded()) return; if(Sim.S.pending===d&&Sim.S.auto) choose(Sim.autoChoice(d)); }, Math.max(Sim.S.phase==='war'&&Sim.S.speed>=8?300:500,1800/Sim.S.speed)); }
 // 전투 중의 선택: 다음 합이나 전투 결과가 나올 때까지 창을 닫지 않고 기다린다 (닫혔다 다시 열리는 깜빡임을 없앤다)
 function choose(i){ clearTimeout(autoTimer); const d=Sim.S.pending; if(!d) return; $('#autoBtn').disabled=false; const txt=d.input?$('#dInput').value:''; setFold(false);
   if(d.battle&&!d.endE) $('#dlg').classList.add('busy'); else $('#dlg').classList.add('hidden');
