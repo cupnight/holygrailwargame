@@ -4170,7 +4170,6 @@ const Sim = (() => {
 
   let HOLD=false; // 화면 연출(격돌 등)이 도는 동안 잠시 멈춘다. 저장하지 않는다
   function setHold(v){ HOLD=!!v; }
-  // 성배전쟁은 하루에 기록이 많아 같은 배속이면 삶보다 훨씬 길게 느껴진다: 4배속 · 8배속에서는 전쟁을 더 빨리 넘긴다
   function tick(dt){
     if(!S||S.dead||S.pending||S.paused||HOLD) return;
     if(S._resume){ const r=S._resume; S._resume=null; resumeAt(r); if(S.pending) return; }
