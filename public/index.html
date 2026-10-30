@@ -4965,10 +4965,12 @@ const Sim = (() => {
   ];
   function seal(){ if(S.sealId==null) S.sealId=S.origin==='church'&&ch(.4)?10:ri(0,SEALS.length-1); return SEALS[S.sealId]; }
   function knowsWar(){ return O().mage||S.flags.knowsCup||S.flags.watcherCard||S.flags.archive; }
-  function warPrelude(){
-    if(!knowsWar()) return warPreludeNaive();
-    mark('war');
-    log(`오른손등에 붉은 문양이 떠올랐다. ${seal().d} 세 획. 령주다. 문지르면 따뜻했다.`,'war');
+  // 전쟁 직전 선택(령주·손등의 자국·밤길·성당·촉매·소환): 나갔다 들어와도 그 선택부터 다시 이어지도록 표시해 둔다
+  function preStep(fn){ S.resumeEv={src:'WAR',fn}; }
+  function warPrelude(again){
+    if(!knowsWar()) return warPreludeNaive(again);
+    preStep('prelude'); if(!again){ mark('war');
+    log(`오른손등에 붉은 문양이 떠올랐다. ${seal().d} 세 획. 령주다. 문지르면 따뜻했다.`,'war'); }
     decide({manual:true,title:'령주',body:`${S.year}년 겨울. ${cityN()}의 성배가 일곱 사람을 골랐고, 당신이 그중 하나다. 손등의 령주는 서번트를 불러내는 계약의 증표이며, 한 획마다 서번트에게 거역할 수 없는 명령을 하나 내릴 수 있다. 세 획이 모두 사라지면 서번트를 묶어 둘 수단도 사라진다. 14일 안에 마지막 한 쌍이 남는다.`,choices:[
       {t:'서번트를 부른다',auto:true,d:'성배를 두고 싸운다',f:()=>{S.warState='in';summonStep();}},
       ...(S.origin==='noble'||S.origin==='noble2'||S.flags.crest?[{t:'가문의 의식대로 3일을 준비한다',d:'영맥과 보석을 써서 정식으로 소환한다. 결계와 신뢰에 이점',f:()=>{S.warState='in';S.flags.ritual=1;log('3일 동안 수련실 바닥에 원을 다시 그리고, 보석 열두 개를 깨뜨렸다.','ev');add({wealth:-6});summonStep();}}]:[]),
@@ -4979,9 +4981,9 @@ const Sim = (() => {
       {t:'숨기고 지켜본다',d:'참가하지 않지만 위험하다',f:()=>{S.warState='refused';S.flags.war='refused';S.flags.hidSeal=1;offscreenWar();if(ch(.12)){S.flags.war='dead';die('령주를 노린 마술사의 습격');return;}add({will:2,lore:3});log('14일 동안 창밖으로 몇 번 빛이 번쩍였다. 령주는 봄이 오자 저절로 사라졌다.','ev');log(S.oldWar.summary,'ev');startEpilogue();}},
     ]});
   }
-  function warPreludeNaive(){
-    mark('war');
-    log(`오른손등에 붉은 문양이 떠올랐다. ${seal().d} 세 획. 문신 같기도 하고 화상 자국 같기도 했다. 문지르면 따뜻했다.`,'war');
+  function warPreludeNaive(again){
+    preStep('naive'); if(!again){ mark('war');
+    log(`오른손등에 붉은 문양이 떠올랐다. ${seal().d} 세 획. 문신 같기도 하고 화상 자국 같기도 했다. 문지르면 따뜻했다.`,'war'); }
     decide({manual:true,title:'손등의 자국',body:`${S.year}년 겨울. 자고 일어나니 손등에 붉은 무늬가 생겨 있었다. 지워지지 않는다. 뉴스에서는 ${cityN()} 곳곳의 원인 모를 가스 사고 소식이 이어진다.`,choices:[
       {t:'피부과에 간다',f:()=>{add({wealth:-2});log('의사는 고개를 갸웃했다. “알레르기 같은데요.” 처방받은 연고는 아무 효과가 없었다.','ev');warNaive2();}},
       {t:'인터넷에 검색한다',auto:true,f:()=>{add({lore:2});log('비슷한 사진이 올라온 오래된 괴담 게시판을 찾았다. 60년마다 이 도시에서 “잔이 차오른다”는 글. 댓글은 대부분 장난이었다. 하나만 빼고.','ev');S.flags.knowsCup=1;warNaive2();}},
@@ -4989,14 +4991,14 @@ const Sim = (() => {
       ...(S.flags.awakened||S.circuit>=3?[{t:'자국에 마력을 흘려 본다',f:()=>{awaken(true);add({mana:2});log('손끝의 이상한 힘을 자국에 흘려 넣자, 머릿속으로 낯선 단어들이 흘러들어 왔다. 서번트, 성배, 14일.','ev');S.flags.knowsCup=1;warNaive2();}}]:[]),
     ]});
   }
-  function warNaive2(){
+  function warNaive2(){ preStep('naive2');
     decide({manual:true,title:'밤길',body:'밤길, 인적 없는 골목에서 누군가 앞을 막아섰다. 사람의 형상을 했지만 사람이 아니다. 손에 든 무기가 가로등 빛을 받아 번쩍였다. “령주를 가진 자는 모두 적이다.”',choices:[
       {t:'살고 싶다고 외친다',auto:true,d:'무슨 일이 일어날지 모른다',f:()=>{log('손등이 불에 덴 듯 뜨거워졌다. 바닥에 빛의 원이 그려지고, 바람이 휘몰아쳤다.','war');S.flags.accidental=1;S.warState='in';accidentalSummon();}},
       {t:'성당으로 도망친다',d:'근처에 불 켜진 성당이 있다',f:()=>{if(chkp('건강',.6+S.st.health/400)){log('성당 문을 두드렸다. 신부가 당신 손등을 보고 얼굴을 굳혔다. “이건 성배전쟁의 령주입니다. 넘기시겠습니까, 싸우시겠습니까?”','ev');S.flags.knowsCup=1;warPreludeChurch();}else{add({health:-20});log('등 뒤에서 무언가가 스쳤다. 피를 흘리며 성당 문 앞에 쓰러졌다.','loss');if(S.st.health<=0){S.flags.war='dead';die('정체 모를 습격');return;}S.flags.knowsCup=1;warPreludeChurch();}}},
       {t:'반대로 덤벼든다',f:()=>{add({health:-12,will:4});log('주먹이 닿기도 전에 몸이 벽에 부딪혔다. 의식이 흐려지는 순간 손등이 타올랐다.','loss');if(S.st.health<=0){S.flags.war='dead';die('정체 모를 습격');return;}S.flags.accidental=1;S.warState='in';accidentalSummon();}},
     ]});
   }
-  function warPreludeChurch(){
+  function warPreludeChurch(){ preStep('church');
     decide({manual:true,title:'성당에서',body:'신부는 성배전쟁에 대해 짧게 설명했다. 일곱 명의 마스터, 일곱 서번트, 14일, 마지막 한 쌍이 손에 넣는 성배.',choices:[
       {t:'싸우겠다',auto:true,f:()=>{S.warState='in';log('신부는 성당 지하의 오래된 소환진으로 당신을 데려갔다.','ev');summonStep();}},
       {t:'령주를 넘긴다',f:()=>{S.warState='refused';S.flags.war='refused';offscreenWar();log('신부가 기도문을 외우자 손등의 자국이 옅어졌다.','ev');log(S.oldWar.summary,'ev');startEpilogue();}},
@@ -5020,7 +5022,7 @@ const Sim = (() => {
   const bondH=()=>S.bond&&!S.bondTried&&H_BY[S.bond.id]?H_BY[S.bond.id]:null;
   function summonStep(){
     const rs=S.relics||[], bh=bondH();
-    if(rs.length>1||bh){
+    if(rs.length>1||bh){ preStep('summon');
       decide({manual:true,title:'촉매',body:bh?`${rs.length?`손에 넣은 촉매가 ${rs.length}개다. `:''}원 가운데에 무엇을 놓을 것인가. 지난 생에서 맺은 인연을 떠올릴 수도 있다.`:`손에 넣은 촉매가 ${rs.length}개다. 원 가운데에 무엇을 놓을 것인가. 촉매가 기억하는 누군가가 올 것이다.`,choices:[
         ...(bh?[{t:'인연 소환',d:S.bond.p>=1?`${bh.name}${J(bh.name,을)} 부른다 · 반드시 닿는다`:`${bh.name}${J(bh.name,을)} 부른다 · 닿을 확률 약 ${Math.round(S.bond.p*100)}% · 닿지 않으면 성배가 고른 누군가가 온다`,auto:true,f:()=>{S.relic=null;S.bondTry=true;summonCast();}}]:[]),
         ...rs.map(id=>({t:H_BY[id].relic,d:`‘${H_BY[id].from}’에 얽힌 물건`,auto:!bh,f:()=>{S.relic=id;summonCast();}})),
@@ -5035,7 +5037,7 @@ const Sim = (() => {
       : S.relic
       ? `자정. 바닥에 피와 수은으로 원을 그리고, 가운데에 ‘${H_BY[S.relic].relic}’${josa(H_BY[S.relic].relic,'을','를').slice(H_BY[S.relic].relic.length)} 놓았다. 물건이 기억하는 누군가가 올 것이다.`
       : '자정. 바닥에 피와 수은으로 원을 그렸다. 원 가운데는 비어 있다. 촉매가 없으면 성배는 당신과 닮은 누군가를 고른다.';
-    decide({manual:true,title:'소환',body,choices:[{t:'주문을 외운다',auto:true,f:()=>doSummon(S.relic||null)}]});
+    preStep('cast'); decide({manual:true,title:'소환',body,choices:[{t:'주문을 외운다',auto:true,f:()=>doSummon(S.relic||null)}]});
   }
   // 서번트와 마스터의 궁합: 서번트 성향마다 마스터의 능력치로 점수를 매겨 평균한다.
   // 성향이 하나뿐이면 중간값 50을 함께 넣는다(성향 둘인 서번트와 같은 조건). 자유는 마음이 단단하고 덜 얽매인 마스터일수록 높다
@@ -5128,10 +5130,10 @@ const Sim = (() => {
     S.war.queue.push(()=>dayStart());
   }
   // 소환 직후: 안내와 첫 만남
-  function firstMeeting(){
+  function firstMeeting(again){
     const w=W(),h=hero(); if(!w||!w.heroAlive||S.dead) return;
     const acc=!!S.flags.accidental, mute=VREG(h)==='mute';
-    const g0=sayV(h,'greet'); log(g0,'voice');
+    const g0=sayV(h,'greet'); if(!again) log(g0,'voice');
     const tr=n=>{ w.trust=clamp(w.trust+n); };
     const loyal=h.traits.some(t=>t==='명예'||t==='충성');
     const body=g0+'\n\n'+'서번트는 성배가 불러낸 과거의 영웅이다. 앞으로 14일 동안 당신과 함께 싸운다.\n'+
@@ -5153,6 +5155,7 @@ const Sim = (() => {
       {t:'작전부터 의논한다',d:'결계↑ · 다른 조의 단서를 하나 얻는다',off:S.st.lore<25,st:[{l:'지식',v:Math.round(S.st.lore)}],k:'voice',f:()=>{w.fort=clamp(w.fort+6);tr(1+traitR({충성:2,야망:2,명예:1,자유:-1}));const t=pick(alivePairs());if(t)addIntel(t,15);return sayV(h,'plan');}},
     ];
     if(mute&&!acc) cs.push({t:'마력을 흘려 넣어 본다',d:'건강 −5 · 서번트 마력·신뢰↑',k:'voice',f:()=>{add({health:-5});w.sm=clamp(w.sm+15);tr(3);return sayV(h,'thanks');}});
+    w.resumeAt='meet'; LASTWAR=serial(); // 나갔다 들어오면 첫 만남부터 (서번트는 그대로)
     decide({manual:true,title:'첫 만남',body,qbody:`${h.name}${J(h.name,과)} 처음 마주했다.`,war:true,summon:true,choices:cs});
   }
 
@@ -9893,6 +9896,8 @@ const Sim = (() => {
     if(r==='night'&&S.phase==='war') return nightDecision();
     if(r==='outnight'&&S.phase==='war') return outNightDecision();
     if(r==='ev'&&S.resumeEv&&S.resumeEv.src==='FOCUS') return focusPick();
+    if(r==='ev'&&S.resumeEv&&S.resumeEv.src==='WAR'){ const F={prelude:()=>warPrelude(true),naive:()=>warPreludeNaive(true),naive2:warNaive2,church:warPreludeChurch,summon:summonStep,cast:summonCast}[S.resumeEv.fn]; if(F) return F(); }
+    if(r==='meet'&&S.phase==='war'){ firstMeeting(true); S.war.queue.push(()=>dayStart()); return; }
     if(r==='ev'&&S.resumeEv){ const R0=S.resumeEv; const e=(R0.src==='GROW'?GROW:EV).find(x=>x.id===R0.id); if(e) (R0.src==='GROW'?showGrow:showEv)(e); }
   }
   function load(data){ if(data&&JSON.stringify(data).includes('"arthur"')) data=JSON.parse(JSON.stringify(data).replace(/"arthur"/g,'"artoria"')); // 아서 → 시구르드 교체 전 저장분 호환
