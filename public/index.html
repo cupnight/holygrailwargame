@@ -8948,9 +8948,11 @@ const Sim = (() => {
     if(H_BY[e.hero].cls==='shadow'&&ch(.5)){ shadowVisit(e); return; }
     const ally=w.pairs.find(x=>x.ally&&x.alive);
     // 동맹이 달려오면 그 싸움에 함께 선다: 합마다 협공 · 엄호 · 견제(후반 위기의 공동전과 같은 규칙)
-    if(ally&&ch(.5)){ w.allyHelp=true; log(`동맹 ${pName(ally)}${J(pName(ally),이)} 달려왔다.`,'war'); return battle(e,{defend:true,allyComp:true,comp:[ally.i]}); }
+    // 동맹이 달려올 확률: 마스터 성향에 따라(평균 약 35%). 수비적 · 순진한 마스터는 잘 오고, 교활한 마스터는 잘 오지 않는다
+    if(ally&&ch(ALLY_COME[ally.tac]??.35)){ w.allyHelp=true; log(`동맹 ${pName(ally)}${J(pName(ally),이)} 달려왔다.`,'war'); return battle(e,{defend:true,allyComp:true,comp:[ally.i]}); }
     battle(e,{defend:true});
   }
+  const ALLY_COME={defensive:.45,naive:.45,reckless:.4,proud:.35,hunter:.3,desperate:.3,cunning:.2};
   // 결계를 부수는 세 가지 수단: 서번트의 힘 / 마스터의 술식 해체 / 마스터의 현대식 파괴
   const BRK_K=k=>/대계/.test(k)?8:/대성|대마술/.test(k)?5:/대마보구/.test(k)?3:/대군/.test(k)?2:0;
   function brkSv(e){ const eh=H_BY[e.hero], E=npcParams(e).p.map(PV), a=ARTX[eh.id]||{}; return Math.max(E[0],E[3])*2+(RANKV[a.r]||0)+BRK_K(a.k||'')+Math.min(3,e.fortRead||0)*3; }
