@@ -5713,12 +5713,16 @@ const Sim = (() => {
   const CX_TR={break:{연민:3,명예:3,야망:-4,자유:2},sealbreak:{연민:3,명예:3,야망:-4,자유:2},claim:{연민:-4,명예:-4,야망:3,자유:-1}};
   const cxClash=(a,b)=>(a==='claim')!==(b==='claim');
   const cxIn=p=>!!(p&&p.alive&&p.master&&p.hp>0);
+  // 막아서는 조는 성배 앞까지 오느라 상대와 비슷하게 지쳐 있다: 건강 · 마력을 상대 근처로 맞춘다
+  const cxMatch=(r,hp,sm)=>{ r.hp=clamp(hp+ri(-5,5),5,100); r.sm=clamp(sm+ri(-5,5),0,100); };
+  // 결전의 결과: 지키는 쪽(defend)은 승부가 나지 않아도 성배를 지킨다. 빼앗는 쪽(take)은 이겨야 가져간다
+  const cxWon=(g,r)=>W().heroAlive&&(g.mode==='defend'?g.res!=='retreat'||!cxIn(r):(['win','fled','asn'].includes(g.res)||!cxIn(r)));
   const cxStrongest=l=>l.slice().sort((a,b)=>npcPower(b,false,1)-npcPower(a,false,1))[0]||null;
   function cxEndPick(k){ const w=W(), c=CXW(), g=c.grab||(c.grab={}); g.mode='picked';
     if(CX_TR[k]) cxTraitEnd(CX_TR[k]);
     const r=g.noRival?null:cxStrongest(contracted().filter(p=>!p.ally&&p.cxKnow&&cxClash(p.cxStance,k==='claim'?'claim':'break')));
     if(!r){ c.done=true; w.ended=true; w.queue=[]; return cxDoEnd(k); }
-    g.mode='defend'; g.key=k; g.rival=r.i; const who=r.known?r.mname:`${cn(r)} 조의 마스터`;
+    g.mode='defend'; g.key=k; g.rival=r.i; cxMatch(r,w.hp,w.sm); const who=r.known?r.mname:`${cn(r)} 조의 마스터`;
     log(`${pName(r)} 조가 성배 앞을 막아섰다. ${who}: ${k==='claim'?'“그 잔에 손대게 둘 수는 없다.”':'“부수게 둘 수는 없다. 그 잔은 우리가 쥔다.”'}`,'war');
     w.queue.push(()=>battle(r,{cxGrab:true})); return ''; }
   function cxDoEnd(k){ const w=W(), c=CXW(); S.flags.war='victor'; mark('war'); const cost=Math.ceil(smCost('art')/2), enough=w.sm>=cost;
@@ -5732,15 +5736,15 @@ const Sim = (() => {
     const fin=fn=>{ c.done=true; w.ended=true; w.queue=[]; fn(); };
     if(!g.mode&&!g.asked) w.queue=[];
     if(c.bossDown==='me'){
-      if(g.mode==='defend'){ const r=pairBy(g.rival); g.mode='done';
-        if(w.heroAlive&&!cxIn(r)){ log('성배를 노리던 조는 더 이상 없다.','war'); fin(()=>cxDoEnd(g.key)); }
+      if(g.mode==='defend'){ const r=pairBy(g.rival), won=cxWon(g,r); g.mode='done';
+        if(won){ log('성배를 노리던 조는 더 이상 없다.','war'); fin(()=>cxDoEnd(g.key)); }
         else fin(()=>cxIn(r)?cxNpcResolve(r,true):w.heroAlive?cxDoEnd(g.key):cxFlood()); return; }
       if(g.mode==='pick'||g.mode==='picked') return;
       if(!w.heroAlive){ const h=cxStrongest(contracted()); fin(()=>h?cxNpcResolve(h):cxFlood()); return; }
       g.mode='pick'; cxFinale(); return; }
     const p=pairBy(c.bossDown);
-    if(g.mode==='take'){ g.mode='done';
-      if(w.heroAlive&&!cxIn(p)){ c.bossDown='me'; g.noRival=true; g.mode='pick'; cxFinale(); return; }
+    if(g.mode==='take'){ const won=cxWon(g,p); g.mode='done';
+      if(won){ c.bossDown='me'; g.noRival=true; g.mode='pick'; cxFinale(); return; }
       fin(()=>cxIn(p)?cxNpcResolve(p,true):cxFlood()); return; }
     if(!cxIn(p)){ if(w.heroAlive){ c.bossDown='me'; g.mode='pick'; cxFinale(); return; } const h=cxStrongest(contracted()); fin(()=>h?cxNpcResolve(h):cxFlood()); return; }
     if(w.heroAlive&&!g.asked){ g.asked=true; cxGrabAsk(p); return; }
@@ -5754,7 +5758,7 @@ const Sim = (() => {
   function cxNpcResolve(p,noRival){ let h=p;
     if(!noRival){ const r=cxStrongest(contracted().filter(q=>q!==p&&q.cxKnow&&cxClash(q.cxStance,p.cxStance)));
       if(r){ log(`${pName(r)} 조가 성배 앞을 막아섰다. ${p.cxStance==='claim'?'그 잔을 쥐게 둘 수는 없다고 했다.':'부수게 둘 수는 없다고 했다.'}`,'war');
-        const {win,lose}=npcFight(r,p,true); if(lose.hp<=0){ lose.alive=false; lose.revealed=true; pairOut(lose,'성배 앞에서 쓰러졌다',win); }
+        cxMatch(r,p.hp,npcSmOf(p)); const {win,lose}=npcFight(r,p,true); if(lose.hp<=0){ lose.alive=false; lose.revealed=true; pairOut(lose,'성배 앞에서 쓰러졌다',win); }
         log(`${pName(win)} 조가 성배 앞에 남았다.`,'war'); h=win; } }
     cxNpcEnd(h); }
   function cxTraitEnd(r){ const w=W(); if(!w.heroAlive) return; const r2={}; for(const k in r) r2[k]=r[k]*2; w.trust=clamp(w.trust+traitR(r2)); } // 성배를 두고 고른 길: 평소의 두 배로 움직인다
@@ -8267,6 +8271,7 @@ const Sim = (() => {
       const how=b.ctx.final?'최후의 결전':b.ctx.attack?'습격':b.ctx.defend?'거처 방어':b.ctx.ambushed?'기습을 받음':b.ctx.duel?'결투':'조우';
       wrec('battle',`${cn(b.e)} 조와 교전(${how}) — ${BRES[b.res]||b.res}`,{p:b.e.i,res:b.res});
       if(w.tl&&b.tlIdx!=null&&b.tlIdx<w.tl.length-1){ const ent=w.tl.pop(); w.tl.splice(b.tlIdx,0,ent); } }
+    if(b&&b.ctx&&b.ctx.cxGrab&&CXW()&&CXW().grab) CXW().grab.res=b.res; // 성배를 두고 벌인 결전의 결과
     w.battle=null; if(S.dead) return;
     if(b&&b.e&&!w.ended){ w.queue.unshift(()=>battleClose(b)); return; }
     checkEnd(); }
