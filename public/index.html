@@ -5263,7 +5263,6 @@ const Sim = (() => {
     if(h.id==='enkidu'&&w.morph==='atk') p+=6;
     if(ctx.judged) p+=22;
     if(w.boost) p+=w.boost;
-    if(w.allyHelp) p+=12;
     p+=(w.taint||0)*5;
     return p;
   }
@@ -5434,7 +5433,7 @@ const Sim = (() => {
   // 보스 수치: 마스터 실력(pw) · 두 번째 몸의 체력 · 성배 앞 판정 보정(desc) · NPC끼리 싸울 때 보정(nd) · 능력치 목표(tgt)
   // · 함께 온 조 수에 따른 보정(j[0~3]) · 함께 온 서번트 강함 보정(k, 기준 ref) · 함께 온 조의 협공 세기(ad) · NPC끼리 함께 갈 때 보정(na)
   // 목표 승률(내가 쓰러뜨림): 혼자 35~45% · 2조 50~60% · 3조 65~75%
-  const CXB={pw:38,hp2:30,desc:-33,nd:-15,na:5,ad:.4,tgt:113,j:[0,0,-5,-5],k:0,ref:134};
+  const CXB={pw:38,hp2:30,desc:-33,nd:-15,na:5,ad:1.2,tgt:113,j:[0,3,2,2],k:0,ref:134};
   const CXW=()=>S.war&&S.war.crisis;
   const cxOn=()=>{ const c=CXW(); return !!(c&&!c.done); };
   const cxUnits=()=>{ const c=CXW(); return c?c.units:[]; };
@@ -5656,7 +5655,7 @@ const Sim = (() => {
   const cxTacP=(p,k)=>(CX_TACP[p.tac]||[.5,.35,.4])[k];
   const cxStayP=p=>Math.min(.95,cxTacP(p,0)+(p.cxStance==='claim'?.1:0));
   // 합마다: 함께 온 조가 협공 · 엄호 · 견제 중 하나를 한다. 강할수록, 멀쩡할수록 자주 움직인다
-  function cxCompRound(b,hp0){ const w=W(), e=b.e; if(!e||!e.cx||!b.ctx.comp||!b.ctx.comp.length||!w.heroAlive||e.hp<=0) return;
+  function cxCompRound(b,hp0){ const w=W(), e=b.e; if(!e||!(e.cx||b.ctx.allyComp)||!b.ctx.comp||!b.ctx.comp.length||!w.heroAlive||e.hp<=0) return;
     const out=b.compOut||(b.compOut=[]), h=hero(), eN=pName(e), mN=h.name;
     let lost=Math.max(0,hp0-w.hp);
     for(const i of b.ctx.comp){ if(out.includes(i)) continue; const p=pairBy(i); if(!p||!p.alive||!p.master){ out.push(i); continue; }
@@ -5676,7 +5675,7 @@ const Sim = (() => {
               :k==='burst'?pickNR([`${pN}${J(pN,이)} 마력을 터뜨리며 ${eN}에게 부딪쳤다.`,`${pN}의 일격에 실린 마력이 ${eN}의 옆구리에서 터졌다.`],'cmpB')
               :pickNR([`${pN}${J(pN,이)} 옆에서 ${eN}에게 일격을 보탰다.`,`${pN}${J(pN,이)} 틈을 파고들어 ${eN}${J(eN,을)} 베었다.`,`${pN}의 공격이 ${eN}의 등 뒤를 때렸다.`],'cmpA'),'war'); } } }
       if(p.hp<=0){ const lh=H_BY[p.hero]; if(lh.sp==='revive'&&!p.usedRevive){ p.usedRevive=true; p.hp=40; log(`${pN}${J(pN,이)} 쓰러졌다가 다시 일어섰다.`,'war'); continue; }
-        p.alive=false; p.revealed=true; out.push(i); pairOut(p,e.cx==='boss'?'검은 성배 앞에서 쓰러졌다':'검은 그림자에게 쓰러졌다');
+        p.alive=false; p.revealed=true; out.push(i); pairOut(p,e.cx==='boss'?'검은 성배 앞에서 쓰러졌다':e.cx?'검은 그림자에게 쓰러졌다':'다른 조에게 쓰러졌다');
         log(`감독관의 통지: ${cn(p)} 조 탈락. ${e.cx==='boss'?'검은 성배 앞에서.':`${cn(e)}의 손에.`}`,'notice'); if(p.ally) log(`동맹 ${p.mname}의 조가 무너졌다.`,'loss'); continue; }
       if(p.hp<30&&ch(cxTacP(p,2))){ out.push(i); log(`${pN} 조가 더 버티지 못하고 물러났다.`,'war'); } } }
   // NPC 조 하나와 그림자 · 보스의 싸움 (플레이어가 없는 곳)
@@ -7497,7 +7496,6 @@ const Sim = (() => {
     if(e.intel>=30) add(M,'정보',e.intel*.1,'이 조에 대해 모아 둔 정보가 많을수록 유리하다','','',`지금 정보 ${Math.round(e.intel)}`);
     { const v=(w.trust-50)*.15; add(M,w.trust>=80?'유대':v>0?'신뢰':'신뢰 부족',v,v>0?'서번트가 당신을 믿을수록 강해진다':'서번트가 당신을 믿지 못해 힘을 다 내지 않는다','','',`지금 신뢰 ${Math.round(w.trust)}`); }
     if(c.raid) add(M,'다른 조들의 엄호',12,'토벌대로 함께 싸우는 조들이 엄호한다');
-    if(w.allyHelp) add(M,'동맹의 도움',12,'동맹 조가 함께 싸운다','오늘');
     if(w.boost) add(M,'기세',w.boost,'오늘 낮의 일로 기세가 올라 있다','오늘');
     if(c.final&&w.altar==='me') add(M,'성배의 자리',6,'성배가 강림할 자리를 차지했다');
     if(c.final&&w.riteDone) add(M,'도시의 영맥',6,'도시의 영맥이 우리 편이다');
@@ -8941,7 +8939,8 @@ const Sim = (() => {
       if(ch(back)){ if(fortBreak(e)) return; log(`${pName(e)} 조가 결계 앞까지 왔다가 발길을 돌렸다.`,'war'); return; } }
     if(H_BY[e.hero].cls==='shadow'&&ch(.5)){ shadowVisit(e); return; }
     const ally=w.pairs.find(x=>x.ally&&x.alive);
-    if(ally&&ch(.5)){ w.allyHelp=true; log(`동맹 ${pName(ally)}${J(pName(ally),이)} 달려왔다.`,'war'); }
+    // 동맹이 달려오면 그 싸움에 함께 선다: 합마다 협공 · 엄호 · 견제(후반 위기의 공동전과 같은 규칙)
+    if(ally&&ch(.5)){ w.allyHelp=true; log(`동맹 ${pName(ally)}${J(pName(ally),이)} 달려왔다.`,'war'); return battle(e,{defend:true,allyComp:true,comp:[ally.i]}); }
     battle(e,{defend:true});
   }
   // 결계를 부수는 세 가지 수단: 서번트의 힘 / 마스터의 술식 해체 / 마스터의 현대식 파괴
