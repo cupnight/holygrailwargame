@@ -4097,7 +4097,7 @@ const Sim = (() => {
   }
   let KNOWN_MEET=null; // 이미 정체를 아는 마스터와 '처음 만나는' 장면이면 알아보았다는 문장을 앞에 붙인다
   function decide(d){ d.title=fixQ(d.title); d.body=fixQ(d.body); d.qbody=fixQ(d.qbody); for(const c of d.choices||[]){ c.t=fixQ(c.t); c.d=fixQ(c.d); }
-    if(KNOWN_MEET&&d.body&&d.war){ const p=KNOWN_MEET; KNOWN_MEET=null; if(!d.body.includes(p.mname)) d.body=`낯익은 얼굴이다. 이미 알고 있는 ${cn(p)} 조의 마스터, ${p.mname}.\n${d.body}`; }
+    if(KNOWN_MEET&&d.body&&d.war){ const p=KNOWN_MEET; KNOWN_MEET=null; d.body=d.body.includes(p.mname)?`낯익은 얼굴이다. 이미 알고 있는 ${cn(p)} 조의 마스터다.\n${d.body}`:`낯익은 얼굴이다. 이미 알고 있는 ${cn(p)} 조의 마스터, ${p.mname}.\n${d.body}`; }
     if(S&&(S.phase==='life'||S.phase==='epi')&&!S.pending) PRE=serial(); for(const c of d.choices||[]){ const fn=c.src||c.f; delete c.src; if(typeof c.st==='function') c.st=c.st(); if(!c.st){ const st=statsOf(fn); if(st.length) c.st=st; } if(!c.ck){ const ck=chkOf(fn); if(ck.length){ c.ck=ck; c.st=(c.st||[]).filter(x=>!ck.some(y=>y.l===x.l)); } } } S.pending=d; H.decide(d);}
   const DL={mana:'마력',lore:'지식',will:'정신',bond:'관계',health:'건강',wealth:'재산',hp:'서번트 건강',sm:'서번트 마력',trust:'신뢰',exposure:'노출',fort:'결계',seals:'령주'};
   function snapD(){ const o={...S.st,wealth:S.wealth}; if(S.war&&S.phase==='war'){o.hp=S.war.heroAlive?S.war.hp:0;o.sm=S.war.sm;o.trust=S.war.trust;o.exposure=S.war.exposure;o.fort=S.war.fort;o.seals=S.war.seals;} return o; }
@@ -5653,7 +5653,7 @@ const Sim = (() => {
     {id:'allycall',c:()=>W().pairs.some(p=>p.ally&&p.alive),f:()=>{ const a=W().pairs.find(p=>p.ally&&p.alive); return {txt:`동맹인 ${pName(a)} 조에게서 급한 연락이 왔다. 습격을 받고 있다고 한다.`,ch:[
       {t:'달려간다',r:{충성:6,명예:4,연민:3,야망:-3},f:()=>{ const w=W(); w.hp=clamp(w.hp-10); a.hp=clamp(a.hp+20); return '도착했을 때 습격자는 막 물러나던 참이었다. 동맹의 마스터가 당신 손을 꽉 잡았다.'; }},
       {t:'모른 척한다',r:{충성:-7,명예:-4,야망:3},f:()=>{ a.hp=clamp(a.hp-20); return '휴대폰이 몇 번 더 울리다 멈췄다.'; }},
-      {t:'이참에 동맹을 끊는다',r:{야망:5,충성:-8,자유:2},f:()=>{ a.ally=false; a.provoked=2; return '답장 대신 동맹의 표식을 불태웠다.'; }}]}; }},
+      {t:'이참에 동맹을 끊는다',r:{야망:5,충성:-8,자유:2},f:()=>{ a.ally=false; a.cutByMe=true; a.provoked=2; return '답장 대신 동맹의 표식을 불태웠다.'; }}]}; }},
     {id:'injured',c:()=>W().fought,f:()=>({txt:'아침 뉴스에 어젯밤 싸움으로 다친 사람들이 나왔다. 병원 로비가 부상자로 가득하다고 한다.',ch:[
       {t:'병원을 찾아가 몰래 보상한다',r:{연민:6,명예:3},f:()=>{ add({wealth:-8}); return '익명으로 치료비를 냈다. 병실 창가에 앉은 아이가 붕대 감은 손을 흔들었다.'; }},
       {t:'흔적을 지운다',r:{명예:-4,야망:3,연민:-3},f:()=>{ W().exposure=clamp(W().exposure-10); return '현장 사진 몇 장이 인터넷에서 사라졌다.'; }},
@@ -6349,7 +6349,7 @@ const Sim = (() => {
       if(p.arc<arc.length&&arc[p.arc].c(p)) opts.push(p); }
     if(!opts.length) return;
     const p=pick(opts); const step=MASTER_EV[p.aid][p.arc]; const first=p.arc===0||(p.arc===1&&MASTER_EV[p.aid][0].opt&&!p.optRoll); p.arc++;
-    p.metKnown=!!p.known; KNOWN_MEET=first&&p.known&&p.aid!=='killer'?p:null; try{ step.f(p); } finally { KNOWN_MEET=null; }
+    p.metKnown=!!p.known; KNOWN_MEET=first&&(p.known||p.met||p.ally||p.truce)&&p.aid!=='killer'?p:null; try{ step.f(p); } finally { KNOWN_MEET=null; p.met=true; }
   }
 
   /* ---------- 밤 ---------- */
@@ -6776,7 +6776,7 @@ const Sim = (() => {
   function battle(e,ctx){
     const w=W(),h=hero(); if(!w.heroAlive||!e.alive) return;
     if(e.ally&&ctx.attack&&!ctx.final){ log('동맹을 칠 수는 없다.'); return; }
-    e.fought=true;
+    e.fought=true; if(!e.cx) e.met=true;
     w.battle={e,ctx,round:1,maxR:ctx.raid?7:ri(5,6),res:'draw',tlIdx:(w.tl||[]).length}; w.battle.od=w.battle.odMax=oddMax(); w.fought=true; w.lastFight=w.day; w.woundRest=0; if(ctx.attack||ctx.ambushed) w.roamed=true;
     if(ctx.attack&&e.cls==='avenger'&&!e.mark) e.mark='me';
     if((ctx.attack||ctx.duel)&&!ctx.final&&!ctx.claim){ w.strikes=(w.strikes||0)+1; if(w.day-(w.lastStrike||0)>=3&&(h.traits.includes('명예')||h.traits.includes('야망'))) w.trust=clamp(w.trust+2); w.woundRest=0; w.lastStrike=w.day; }
@@ -7923,19 +7923,19 @@ const Sim = (() => {
     return Math.max(1,Math.min(7,Math.round(d)));
   }
   const strays=()=>W().pairs.filter(p=>p.alive&&!p.master&&p.stray>0);
-  function makeStray(e){ const eh=H_BY[e.hero], d=strayDays(eh); e.master=false; e.stray=d; e.wishKnown=false; if(!W().stray||!W().stray.alive) W().stray=e; return d; }
+  function makeStray(e){ const eh=H_BY[e.hero], d=strayDays(eh); e.master=false; e.mDied=true; e.stray=d; e.wishKnown=false; if(!W().stray||!W().stray.alive) W().stray=e; return d; }
   const indTxt=h=>{ const ind=skillsOf(h).find(x=>x.k==='ind'); return ind?`스킬 「${ind.n} ${ind.r}」. `:''; };
   // 서번트를 잃은 NPC 마스터가 물러나지 않고 버틸지: 대담한 성향일수록, 령주가 남아 있어야
   function npcStayAlone(p){ if(!(p.seals>0)) return false; const r=(STYLE[p.aid]||{retreat:30}).retreat; return ch(Math.max(.1,Math.min(.85,(55-r)/55))); }
   function npcRecontract(m,s){ const w=W();
-    s.master=true; s.stray=0; s.mname=m.mname; s.aid=m.aid; s.arche=m.arche; s.tac=m.tac; s.pw=m.pw; s.seals=Math.max(0,(m.seals||1)-1); s.ghost=m.ghost||null; s.ghostIntro=!!m.ghostIntro; s.joinDay=m.joinDay;
+    s.master=true; s.mDied=false; s.stray=0; s.mname=m.mname; s.aid=m.aid; s.arche=m.arche; s.tac=m.tac; s.pw=m.pw; s.seals=Math.max(0,(m.seals||1)-1); s.ghost=m.ghost||null; s.ghostIntro=!!m.ghostIntro; s.joinDay=m.joinDay;
     s.hp=Math.max(s.hp,55); s.known=false; s.ally=false; s.truce=false; s.wishKnown=false; s.recon=1; m.lone=false; if(w.stray===s) w.stray=null;
     log(`감독관의 통지: 주인을 잃었던 ${cn(s)}${J(cn(s),이)} 새 마스터와 계약했다.${m.known?` 탈락했던 ${cn(m)} 조의 ${m.mname}${J(m.mname,이)==='이'?'이다':'다'}.`:''}`,'notice');
     wrec('hint',`${cn(s)} 서번트가 ${m.known?m.mname:'다른 마스터'}${J(m.known?m.mname:'다른 마스터',과)} 다시 계약했다`); }
   // 마스터를 노리는 정도: 어새신 서번트, 마스터를 먼저 노리는 마술사
   const mHunt=p=>.03+(H_BY[p.hero].cls==='shadow'?.15:H_BY[p.hero].cls==='bow'?.06:0)+(['exec','killer','executor'].includes(p.aid)?.15:0)+(p.tac==='hunter'?.04:0);
   function masterKilled(e){
-    e.master=false; e.byMe=true; S.flags.killedMaster=S.flags.killedMaster||1;
+    e.master=false; e.mDied=true; e.byMe=true; S.flags.killedMaster=S.flags.killedMaster||1;
     if(ch(.6)){ const d=makeStray(e); log(`주인을 잃은 ${pName(e)}${J(pName(e),은)} 아직 사라지지 않았다. ${indTxt(H_BY[e.hero])}마력이 다하기까지 ${d}일.`,'war'); }
     else { e.alive=false; pairOut(e,'마스터를 잃고 흩어졌다'); log(`주인을 잃은 ${pName(e)}${J(pName(e),은)} 그대로 흩어졌다.`,'war'); }
   }
@@ -8383,7 +8383,7 @@ const Sim = (() => {
     for(const x of [a,b]) if(x.madCost){ x.madCost=0; x.hp=clamp(x.hp-10); }
     if(asnWin){ const win=asnWin.p, lose=asnWin.o.p, sn=seen||ch(.5);
       if(ch(.7)){ makeStray(lose); log(`감독관의 통지: ${cn(lose)} 조의 마스터 사망.${sn?` ${pName(win)} 조가 서번트를 피해 마스터를 노렸다고 한다.`:''}`,'notice'); }
-      else { lose.master=false; lose.alive=false; pairOut(lose,'마스터를 잃고 흩어졌다',sn?win:null); log(`감독관의 통지: ${cn(lose)} 조의 마스터 사망.${sn?` ${pName(win)} 조가 서번트를 피해 마스터를 노렸다고 한다.`:''}`,'notice'); }
+      else { lose.master=false; lose.mDied=true; lose.alive=false; pairOut(lose,'마스터를 잃고 흩어졌다',sn?win:null); log(`감독관의 통지: ${cn(lose)} 조의 마스터 사망.${sn?` ${pName(win)} 조가 서번트를 피해 마스터를 노렸다고 한다.`:''}`,'notice'); }
       return {win,lose,asn:true}; }
     const [win,lose]=a.hp===b.hp?(ch(.5)?[a,b]:[b,a]):a.hp>b.hp?[a,b]:[b,a];
     if(final) lose.hp=0;
@@ -8395,7 +8395,7 @@ const Sim = (() => {
   function npcClassNight(){
     const w=W(), cs=contracted(), V=p=>npcParams(p).p.map(PV), seenOf=(a,b)=>a.known||b.known||a.ally||b.ally;
     const others=a=>cs.filter(x=>x!==a&&x.alive&&x.master&&!(x.ally&&a.ally));
-    const mKill=(t,by,how)=>{ const seen=seenOf(t,by); if(ch(.7)) makeStray(t); else { t.master=false; t.alive=false; pairOut(t,'마스터를 잃고 흩어졌다',seen?by:null); }
+    const mKill=(t,by,how)=>{ const seen=seenOf(t,by); if(ch(.7)) makeStray(t); else { t.master=false; t.mDied=true; t.alive=false; pairOut(t,'마스터를 잃고 흩어졌다',seen?by:null); }
       log(`감독관의 통지: ${cn(t)} 조의 마스터 사망.${seen?` ${pName(by)} 조가 ${how}고 한다.`:''}`,'notice'); };
     for(const a of shuffle(cs)){
       if(!a.alive||!a.master||a.halt>0) continue; const ah=H_BY[a.hero], A=V(a), ts=others(a); if(!ts.length) continue;
@@ -8469,7 +8469,7 @@ const Sim = (() => {
       const seen=a.known||b.known||a.ally||b.ally||ch(.5);
       if(lose.master&&ch(mHunt(win))){
         if(ch(.7)){ const d=makeStray(lose); log(`감독관의 통지: ${cn(lose)} 조의 마스터 사망.${seen?` ${pName(win)} 조가 서번트를 피해 마스터를 노렸다고 한다.`:''}`,'notice'); }
-        else { lose.master=false; lose.alive=false; pairOut(lose,'마스터를 잃고 흩어졌다',seen?win:null); log(`감독관의 통지: ${cn(lose)} 조의 마스터 사망.${seen?` ${pName(win)} 조가 서번트를 피해 마스터를 노렸다고 한다.`:''}`,'notice'); }
+        else { lose.master=false; lose.mDied=true; lose.alive=false; pairOut(lose,'마스터를 잃고 흩어졌다',seen?win:null); log(`감독관의 통지: ${cn(lose)} 조의 마스터 사망.${seen?` ${pName(win)} 조가 서번트를 피해 마스터를 노렸다고 한다.`:''}`,'notice'); }
         reported++; continue;
       }
       if(lose.hp<=0){
@@ -8912,7 +8912,9 @@ const Sim = (() => {
     if(dead){ die(causeFor()); return; }
     H.change();
   }
-  const ally=()=>S.flags.allyName;
+  // 에필로그의 옛 동맹: 마스터가 죽었거나, 내가 동맹을 끊었거나 쓰러뜨린 사이라면 다시 연락하지 않는다
+  const allyRaw=()=>S.flags.allyName;
+  const ally=()=>{ const n=S.flags.allyName; if(!n) return null; const p=S.war&&S.war.pairs.find(x=>x.mname===n); if(p&&(p.mDied||p.cutByMe||p.byMe&&!p.ally)) return null; return n; };
   const EPI_START=[
     {yrs:0,f:()=>{ const h=H_BY[S.hero];
       if(S.flags.stay){ decide({title:'봄',body:`${h.name}${J(h.name,은)} 이 세계에 남았다. 이름도 서류도 없는 사람과 함께 사는 일은 생각보다 손이 많이 간다.`,choices:[
@@ -8921,7 +8923,10 @@ const Sim = (() => {
       decide({title:'봄',body:`${S.year}년 봄. 손등의 령주 흔적이 비 오는 날마다 욱신거린다. ${S.flags.war==='refused'?'당신이 거부한 전쟁의 흔적이다.':'그 겨울과 아직 이어져 있는 것 같다.'}`,choices:[
         {t:'성당교회에 지워 달라고 한다',f:()=>{add({mana:-6,will:2});return '신부는 흔적을 지웠다. 그날 밤 처음으로 그 겨울의 꿈을 꾸지 않았다.'}},
         {t:'그대로 둔다',auto:true,f:()=>{S.flags.sealScar=1;add({will:3});return '흔적은 그대로 남았다. 당신은 그게 싫지 않았다.'}}]}); }},
-    {yrs:()=>ri(2,5),f:()=>{ decide({title:'그 뒤의 길',body:S.flags.war==='refused'?'그 겨울 뒤로 마술을 대하는 마음이 달라졌다. 앞으로 무엇을 하며 살 것인가.':'전쟁을 겪은 마술사는 둘로 나뉜다고 한다. 더 깊이 들어가는 사람과, 다시는 돌아보지 않는 사람.',choices:[
+    {yrs:()=>ri(2,5),f:()=>{ if(!isMage()){ decide({title:'그 뒤의 길',body:'그 겨울에 본 것은 평범한 삶과는 너무 멀었다. 앞으로 그 기억을 어떻게 품고 살 것인가.',choices:[ // 마술사가 아닌 사람: 마술을 계속할지 묻지 않는다
+        {t:'일상으로 돌아간다',auto:true,f:()=>{S.flags.epiPath='daily';S.focus='bond';add({health:4,bond:4});return '출근길 지하철에서, 그 겨울이 꿈이었던 것처럼 느껴지는 아침이 늘어 갔다.'}},
+        {t:'그 겨울을 적어 둔다',off:!!S.flags.wrote,f:()=>{S.flags.epiPath='daily';S.flags.wrote=1;S.focus='study';add({lore:4,will:2});return '공책 한 권을 다 채웠다. 아무에게도 보여 주지 않을 기록이었다.'}}]}); return; }
+      decide({title:'그 뒤의 길',body:S.flags.war==='refused'?'그 겨울 뒤로 마술을 대하는 마음이 달라졌다. 앞으로 무엇을 하며 살 것인가.':'전쟁을 겪은 마술사는 둘로 나뉜다고 한다. 더 깊이 들어가는 사람과, 다시는 돌아보지 않는 사람.',choices:[
         {t:'마술을 계속한다',auto:O().mage,off:!!S.flags.mundane,f:()=>{S.flags.epiPath='magic';add({mana:6,lore:4});return '수련실 바닥의 원을 새로 그렸다. 예전보다 손이 덜 떨렸다.'}},
         {t:'마술을 내려놓는다',f:()=>{S.flags.epiPath='plain';S.focus='bond';add({health:4,bond:4,mana:-10});return '수련실을 창고로 바꿨다. 상자 위에 먼지가 쌓이는 걸 오래 지켜보았다.'}},
         {t:'그 겨울을 마술협회에 보고한다',off:S.flags.war==='refused',auto:!O().mage,f:()=>{S.flags.epiPath='report';S.focus='study';add({wealth:10,lore:6,will:-2});return '보고서는 삼백 쪽이었다. 마술협회는 당신에게 연구비와 함께 침묵 서약서를 보냈다.'}}]}); }},
@@ -9471,7 +9476,7 @@ const Sim = (() => {
         {t:'진실을 말한다',f:()=>{S.flags.toldTruth=1;add({will:-3,bond:4});lean('judge',1);return '말을 다 듣고 나서 그 사람은 오래 울었다. 돌아가면서 고개를 숙였다.'}},
         {t:'익명으로 돕는다',auto:true,f:()=>{add({wealth:-10,will:2});return '매년 겨울, 이름 없이 돈을 보냈다.'}},
         {t:'외면한다',f:()=>{add({will:-4});lean('cruel',1);return '그 겨울 꿈을 꾸는 날이 늘었다.'}}]})},
-    {id:'other_master',c:()=>S.war&&S.war.pairs.some(p=>AIDTXT[p.aid]&&p.mname),f:()=>{const p=pick(S.war.pairs.filter(p=>AIDTXT[p.aid]&&p.mname)); const good=p.alive||ch(.5); log(AIDTXT[p.aid](p)[good?0:1], good?'n':'loss');}},
+    {id:'other_master',c:()=>S.war&&S.war.pairs.some(p=>AIDTXT[p.aid]&&p.mname&&!p.mDied),f:()=>{const p=pick(S.war.pairs.filter(p=>AIDTXT[p.aid]&&p.mname&&!p.mDied)); const good=!p.byMe&&(p.alive||ch(.5)); log(AIDTXT[p.aid](p)[good?0:1], good?'n':'loss');}},
     {id:'leftover',c:()=>(S.relics||[]).some(id=>id!==S.relic),f:()=>{const id=(S.relics||[]).find(x=>x!==S.relic); const r=H_BY[id].relic; decide({title:'쓰지 않은 촉매',body:`서랍 속에 쓰지 않은 촉매 ‘${r}’${RI(r)} 남아 있다. 다음 겨울 누군가의 손에 들어가면, 그 영웅이 다시 불려 온다.`,choices:[
         {t:'박물관에 기증한다',auto:true,f:()=>{S.relics=S.relics.filter(x=>x!==id);add({will:2});return '진열장 안 설명문에는 ‘출처 불명’이라고만 적혔다.'}},
         {t:'부숴 버린다',f:()=>{S.relics=S.relics.filter(x=>x!==id);add({mana:2});return '부수는 순간 아주 먼 곳에서 누군가 한숨을 쉬는 것 같았다.'}},
@@ -9552,7 +9557,7 @@ const Sim = (() => {
     {id:'two_contracts',w:2,c:()=>!!S.flags.recontract&&!!S.flags.firstHero&&!!H_BY[S.flags.firstHero]&&!!S.hero,f:()=>{const a=H_BY[S.flags.firstHero], h=H_BY[S.hero]; decide({title:'두 번째 계약',body:`그 겨울 처음 계약했던 ${a.name}, 그리고 주인을 잃고 당신 손을 잡은 ${h.name}. 둘 중 누구를 더 자주 떠올리는지 스스로도 모르겠다.`,choices:[
       {t:'둘 다 기억한다',auto:true,f:()=>{add({will:3});return '둘의 이름을 나란히 적어 두었다. 순서는 해마다 바뀌었다.'}}]});}},
     // ---- 다른 마스터와 동맹 ----
-    {id:'betrayer',w:3,c:()=>!!S.flags.allyBetrayed&&!!ally(),f:()=>{const p=S.war&&S.war.pairs.find(x=>x.mname===ally()); const alive=p&&p.alive; decide({title:'등을 돌린 사람',body:`마지막 밤에 등을 돌렸던 ${ally()}의 소식을 들었다. ${alive?'그 사람은 아직 그 일을 사과하고 싶어 한다고 했다.':'그 사람의 무덤은 도시 외곽에 있다고 했다.'}`,choices:[
+    {id:'betrayer',w:3,c:()=>!!S.flags.allyBetrayed&&!!allyRaw(),f:()=>{const p=S.war&&S.war.pairs.find(x=>x.mname===allyRaw()); const alive=p&&p.alive; decide({title:'등을 돌린 사람',body:`마지막 밤에 등을 돌렸던 ${allyRaw()}의 소식을 들었다. ${alive?'그 사람은 아직 그 일을 사과하고 싶어 한다고 했다.':'그 사람의 무덤은 도시 외곽에 있다고 했다.'}`,choices:[
       {t:'찾아간다',auto:true,f:()=>{add({bond:3,will:2});return alive?'마주 앉아 한참 말이 없었다. 먼저 웃은 쪽이 누구였는지는 기억나지 않는다.':'무덤 앞에 그 겨울 함께 마시던 캔커피를 하나 두고 왔다.'}},
       {t:'잊기로 한다',f:()=>{add({will:1});return '잊기로 한 날부터 오히려 자주 떠올랐다.'}}]});}},
     {id:'disciple',w:3,c:()=>!!S.war&&S.war.pairs.some(p=>p.byMe&&!p.master&&p.aid!=='sibling'&&p.mname),f:()=>{const p=S.war.pairs.find(x=>x.byMe&&!x.master&&x.aid!=='sibling'&&x.mname); decide({title:'남겨진 제자',body:`그 겨울 당신 손에 쓰러진 마스터 ${p.mname}의 제자가 찾아왔다. 스승이 무엇을 위해 싸웠는지 알고 싶다고 했다.`,choices:[
