@@ -11625,6 +11625,15 @@ let GS=API_OK?store.get(K_GSTAT):null;
 function devId(){ let d=store.get(K_DEV); if(!d){ try{ d=crypto.randomUUID().replace(/-/g,''); }catch(e){ d=Date.now().toString(36)+Math.random().toString(36).slice(2,14); } store.set(K_DEV,d); } return d; }
 function gsLoad(force){ if(!API_OK) return; if(!force&&GS&&Date.now()-(GS.got||0)<30*60e3) return;
   fetch('/api/stats').then(r=>r.ok?r.json():null).then(j=>{ if(j&&j.ok){ j.got=Date.now(); GS=j; store.set(K_GSTAT,j); } }).catch(()=>{}); }
+// 서버 허용 목록에 새 서번트 17명이 빠져 있던 동안(11월 1일 배포 전) 보낸 생은 서번트 칸이 빈 채 저장됐다.
+// 이 기기의 '지난 생'에 남은 기록으로 한 번만 채워 넣는다. 서버는 같은 기기·같은 생이고 서번트 칸이 빈 기록만 고친다(새 기록은 더하지 않는다).
+const K_HFIX='cupnight.herofix.v1', HFIX_BEFORE=Date.UTC(2026,10,2,15,0,0);
+function gsFix(){ if(!API_OK||store.get(K_NOSTAT)||store.get(K_HFIX)) return;
+  try{ const ids=new Set(Sim.pickup().ids||[]), dev=devId();
+    const list=(store.get(K_HIST)||[]).filter(r=>r&&r.ts&&r.ts<HFIX_BEFORE&&r.hero&&!r.bond&&(r.warKey||'none')!=='none').map(r=>({r,id:hidOf(r.wd&&r.wd.my&&r.wd.my.id,r.hero.name)})).filter(x=>x.id&&ids.has(x.id))
+      .map(x=>({life:'l'+x.r.ts.toString(36)+dev.slice(0,10),hero:x.id})).slice(0,60);
+    if(!list.length){ store.set(K_HFIX,1); return; }
+    fetch('/api/life/fix',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({v:1,dev,list})}).then(r=>r.ok?r.json():null).then(j=>{ if(j&&j.ok){ store.set(K_HFIX,1); if(j.fixed) gsLoad(true); } }).catch(()=>{}); }catch(e){} }
 function gsSend(r){ if(!API_OK||store.get(K_NOSTAT)||r.bond) return; // 인연 소환으로 시작한 생은 전체 통계에 넣지 않는다
   try{ const S=Sim.S||{}, c=dexLoad(), h=S.hero&&Sim.H_BY[S.hero];
     const body={v:1,life:'l'+r.ts.toString(36)+devId().slice(0,10),dev:devId(),lang:(typeof LANG==='string'?LANG:'ko'),hero:h?S.hero:null,cls:h?h.cls:null,end:r.warKey||'none',
@@ -11946,7 +11955,7 @@ let TOAST_QUIET=false; // 설정 창에서 켜고 끌 때는 화면에 바로 �
 function toast(t){ if(TOAST_QUIET) return; const d=document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),2200); }
 
 /* ---- 익명 통계: 시작 화면 버튼과 불러오기 ---- */
-gsStatBtn(); gsLoad(); ghBtn(); ghNewsCard(); ghNewsLoad();
+gsStatBtn(); gsLoad(); gsFix(); ghBtn(); ghNewsCard(); ghNewsLoad();
 $('#ghnAll').onclick=ghNewsPopup;
 $('#ghnAlert').onclick=()=>{ const q=!gnQuiet(); if(q) store.set(K_GHQUIET,true); else store.del(K_GHQUIET); ghNewsCard(); if(!$('#pastWrap').classList.contains('hidden')) renderPast();
   toast(q?'보낸 조 소식 알림을 껐습니다. 소식은 계속 쌓이며 여기에서 볼 수 있습니다':'새 소식이 오면 시작 화면에 알려 드립니다'); };

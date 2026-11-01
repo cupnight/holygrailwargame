@@ -3,6 +3,7 @@
 //
 //   GET  /api/health  상태 확인
 //   POST /api/life    한 생이 끝날 때 게임 결과를 익명으로 받는다
+//   POST /api/life/fix  새 서번트가 허용 목록에 빠져 있던 동안 서번트 칸이 빈 채 저장된 생을 그 기기의 기록으로 채운다
 //   GET  /api/stats   모인 결과를 합쳐 돌려준다 (10분 동안 캐시)
 //   POST /api/ghost   살아남은 조를 다른 겨울로 보낸다 (이름을 공개하기로 한 경우에만 이름 포함)
 //   GET  /api/ghost   ?year=&dev= — 1~40년 앞선 전쟁에서 살아남은 다른 기기의 조를 몇 개 받는다
@@ -129,6 +130,27 @@ async function postLife(request, env) {
   return json({ ok: true, fresh });
 }
 
+
+// 11월 1일 배포 전까지 허용 목록에 빠져 있던 새 서번트 17명. 그동안 보낸 생은 서번트 칸이 빈 채 저장됐다.
+// 같은 기기가 보낸 같은 생이고, 서번트 칸이 비어 있고, 전쟁을 치른 생이고, 그 기간에 저장된 기록만 고친다. 새 기록은 더하지 않는다.
+const FIXABLE = new Set(['baobhan', 'barghest', 'melusine', 'muramasa', 'ishtar', 'ereshkigal', 'lanling', 'habetrot', 'quetzalcoatl', 'kama', 'sheba', 'asclepius', 'constantine', 'huyan', 'lilith', 'yuyoku', 'nameless']);
+const FIX_BEFORE = Date.UTC(2026, 10, 2, 15, 0, 0);
+async function fixLives(request, env) {
+  if (await slowDown(env, request, 'f')) return SLOW();
+  const b = await readJson(request, 6000);
+  const dev = str(b && b.dev, ID);
+  if (!b || b.v !== 1 || !dev || !Array.isArray(b.list)) return json({ ok: false, error: 'bad_fields' }, 400);
+  const list = b.list.slice(0, 60).map(x => {
+    const id = str(x && x.life, ID), hero = heroOk(x && x.hero);
+    return id && hero && FIXABLE.has(hero) ? [id, hero, HEROES[hero]] : null;
+  }).filter(Boolean);
+  if (!list.length) return json({ ok: true, fixed: 0 });
+  await ensureSchema(env);
+  const rs = await env.DB.batch(list.map(([id, hero, cls]) => env.DB.prepare(
+    `UPDATE lives SET hero = ?, cls = ? WHERE id = ? AND dev = ? AND hero IS NULL AND ending != 'none' AND ts < ?`
+  ).bind(hero, cls, id, dev, FIX_BEFORE)));
+  return json({ ok: true, fixed: rs.reduce((a, r) => a + ((r.meta && r.meta.changes) || 0), 0) });
+}
 
 // ---- 다른 겨울에서 온 조 ----
 // A가 살아남은 조를 보내고(POST /api/ghost), B의 전쟁이 열릴 때 1~40년 앞선 전쟁의 조를 받아 간다(GET /api/ghost).
@@ -333,6 +355,7 @@ export default {
         if (request.method !== 'POST') return json({ ok: false, error: 'method' }, 405, { allow: 'POST' });
         return await postLife(request, env);
       }
+      if (request.method === 'POST' && url.pathname === '/api/life/fix') return await fixLives(request, env);
       if (url.pathname === '/api/stats') {
         if (request.method !== 'GET') return json({ ok: false, error: 'method' }, 405, { allow: 'GET' });
         return await getStats(request, env, ctx);
