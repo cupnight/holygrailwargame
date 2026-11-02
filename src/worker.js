@@ -86,12 +86,27 @@ const SCHEMA = [
      year INTEGER NOT NULL, city TEXT, join_day INTEGER NOT NULL, ending TEXT NOT NULL, out_day INTEGER, tod TEXT, by_who TEXT, ally INTEGER NOT NULL DEFAULT 0,
      name TEXT, hero TEXT, cls TEXT, sent_year INTEGER, sent_city TEXT, PRIMARY KEY (id, dev))`,
   `CREATE INDEX IF NOT EXISTS ghost_results_owner ON ghost_results(owner, ts)`,
+  // 검은 성배 루트를 치른 생만 따로 남긴다(보스 밸런스 점검용). lives와 같은 id.
+  `CREATE TABLE IF NOT EXISTS cx_lives (
+     id TEXT PRIMARY KEY, ts INTEGER NOT NULL, dev TEXT NOT NULL, hero TEXT, cls TEXT,
+     cx_end TEXT NOT NULL, by_who TEXT NOT NULL, fate TEXT NOT NULL, st INTEGER, comp INTEGER, tries INTEGER, sk INTEGER, day INTEGER)`,
+  `CREATE INDEX IF NOT EXISTS cx_lives_ts ON cx_lives(ts)`,
 ];
 let schemaReady = null;
 const ensureSchema = env => (schemaReady ??= env.DB.batch(SCHEMA.map(s => env.DB.prepare(s))).catch(e => { schemaReady = null; throw e; }));
 
 const ENDINGS = new Set(['shared', 'victor', 'lost', 'survived', 'collapsed', 'withdrew', 'refused', 'dead', 'none']);
-const ID = /^[A-Za-z0-9_-]{1,40}$/;               // 서번트·업적·클래스·출신 같은 내부 이름
+const ID = /^[A-Za-z0-9_-]{1,40}$/;
+// 검은 성배 결과: 결말 · 보스를 쓰러뜨린 쪽 · 내 서번트의 끝
+const CX_END = new Set(['seal', 'key', 'break', 'claim', 'flood', 'npcBreak', 'npcClaim', 'none']);
+const CX_BY = new Set(['me', 'npc', 'none']);
+const CX_FATE = new Set(['alive', 'boss', 'shadow', 'fight', 'swallow', 'defect', 'keyGone', 'other']);
+function cxOk(c) {
+  if (!c || typeof c !== 'object') return null;
+  const end = CX_END.has(c.end) ? c.end : null, by = CX_BY.has(c.by) ? c.by : null, fate = CX_FATE.has(c.fate) ? c.fate : null;
+  if (!end || !by || !fate) return null;
+  return { end, by, fate, st: int(c.st, 0, 3), comp: int(c.comp, 0, 6), tries: int(c.tries, 0, 60), sk: int(c.sk, 0, 30), day: int(c.day, 0, 30) };
+}               // 서번트·업적·클래스·출신 같은 내부 이름
 const str = (v, re) => (typeof v === 'string' && re.test(v) ? v : null);
 const int = (v, lo, hi) => (Number.isInteger(v) && v >= lo && v <= hi ? v : null);
 
@@ -120,6 +135,7 @@ async function postLife(request, env) {
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(id, now, dev, lang, hero, hero ? cls : null, ending, cup, city, origin, int(b.circuit, 0, 9), int(b.age, 0, 150)).run();
   const fresh = ins.meta && ins.meta.changes > 0;
+  const cx = hero ? cxOk(b.cx) : null;
 
   const stmts = [
     env.DB.prepare(
@@ -128,6 +144,9 @@ async function postLife(request, env) {
     ).bind(dev, now, now, fresh ? 1 : 0),
     ...ach.map(a => env.DB.prepare(`INSERT OR IGNORE INTO dev_ach (dev, ach) VALUES (?, ?)`).bind(dev, a)),
   ];
+  if (cx && fresh) stmts.push(env.DB.prepare(
+    `INSERT OR IGNORE INTO cx_lives (id, ts, dev, hero, cls, cx_end, by_who, fate, st, comp, tries, sk, day) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(id, now, dev, hero, cls, cx.end, cx.by, cx.fate, cx.st, cx.comp, cx.tries, cx.sk, cx.day));
   await env.DB.batch(stmts);
   return json({ ok: true, fresh });
 }
@@ -312,6 +331,17 @@ async function ghostNews(request, env) {
   return json({ ok: true, list });
 }
 
+// 검은 성배 집계: 결말×보스를 쓰러뜨린 쪽×내 서번트의 끝×함께 싸운 조 수로 묶은 줄과, 클래스별 판수·내가 쓰러뜨린 수
+const cxQ = (env, W, B) => [
+  env.DB.prepare(`SELECT cx_end, by_who, fate, comp, COUNT(*) AS n, SUM(tries) AS tr FROM cx_lives WHERE ${W} GROUP BY cx_end, by_who, fate, comp`).bind(...B),
+  env.DB.prepare(`SELECT cls, COUNT(*) AS n, SUM(by_who = 'me') AS me, SUM(fate = 'alive') AS alive FROM cx_lives WHERE ${W} GROUP BY cls`).bind(...B),
+];
+const cxOut = (rows, cls) => ({
+  n: rows.results.reduce((a, r) => a + r.n, 0),
+  rows: rows.results.map(r => [r.cx_end, r.by_who, r.fate, r.comp, r.n, r.tr || 0]),
+  cls: Object.fromEntries(cls.results.filter(r => r.cls).map(r => [r.cls, [r.n, r.me || 0, r.alive || 0]])),
+});
+
 // 신규 서번트(2026.10.30) — 통계 페이지의 '신규 서번트 이후' 기준점
 const NEW_HEROES = ['baobhan','barghest','melusine','muramasa','ishtar','ereshkigal','lanling','habetrot','quetzalcoatl','kama','sheba','asclepius','constantine','huyan','lilith','yuyoku','nameless'];
 const tsArg = v => { const n = Number(v); return Number.isFinite(n) && n > 0 && n < 1e14 ? Math.floor(n) : null; };
@@ -332,12 +362,13 @@ async function getStatsRange(request, env, ctx, url) {
   if (hit) return hit;
   const W = `ts >= ?${until ? ' AND ts < ?' : ''}`, B = until ? [since, until] : [since];
   const q = (sql) => env.DB.prepare(sql).bind(...B);
-  const [tot, heroes, cls, ends] = await env.DB.batch([
+  const [tot, heroes, cls, ends, cxr, cxc] = await env.DB.batch([
     q(`SELECT COUNT(*) AS lives, COUNT(DISTINCT dev) AS players, MIN(ts) AS first, MAX(ts) AS last, ROUND(AVG(age), 1) AS avgAge,
               SUM(hero IS NOT NULL) AS warLives, SUM(hero IS NOT NULL AND ending IN ('victor', 'shared')) AS wins FROM lives WHERE ${W}`),
     q(`SELECT hero, COUNT(*) AS n, SUM(ending IN ('victor', 'shared')) AS g FROM lives WHERE ${W} AND hero IS NOT NULL GROUP BY hero`),
     q(`SELECT cls, COUNT(*) AS n, SUM(ending IN ('victor', 'shared')) AS g FROM lives WHERE ${W} AND hero IS NOT NULL GROUP BY cls`),
     q(`SELECT ending, COUNT(*) AS n FROM lives WHERE ${W} GROUP BY ending`),
+    ...cxQ(env, W, B),
   ]);
   const t = tot.results[0] || {};
   const body = {
@@ -347,6 +378,7 @@ async function getStatsRange(request, env, ctx, url) {
     heroes: Object.fromEntries(heroes.results.map(r => [r.hero, [r.n, r.g || 0]])),
     cls: Object.fromEntries(cls.results.filter(r => r.cls).map(r => [r.cls, [r.n, r.g || 0]])),
     ends: Object.fromEntries(ends.results.map(r => [r.ending, r.n])),
+    cx: cxOut(cxr, cxc),
   };
   const res = json(body, 200, { 'cache-control': 'public, max-age=600' });
   ctx.waitUntil(cache.put(key, res.clone()));
@@ -363,7 +395,7 @@ async function getStats(request, env, ctx) {
   if (hit) return hit;
 
   await ensureSchema(env);
-  const [tot, heroes, ends, cups, ach] = await env.DB.batch([
+  const [tot, heroes, ends, cups, ach, cxr, cxc] = await env.DB.batch([
     env.DB.prepare(`SELECT (SELECT COUNT(*) FROM lives) AS lives, (SELECT COUNT(*) FROM devices) AS players,
                            (SELECT MIN(ts) FROM lives) AS since, (SELECT ROUND(AVG(age), 1) FROM lives) AS avgAge,
                            (SELECT COUNT(*) FROM lives WHERE hero IS NOT NULL) AS warLives`),
@@ -371,6 +403,7 @@ async function getStats(request, env, ctx) {
     env.DB.prepare(`SELECT ending, COUNT(*) AS n FROM lives GROUP BY ending`),
     env.DB.prepare(`SELECT cup, COUNT(*) AS n FROM lives WHERE cup IS NOT NULL GROUP BY cup`),
     env.DB.prepare(`SELECT ach, COUNT(*) AS n FROM dev_ach GROUP BY ach`),
+    ...cxQ(env, 'ts >= ?', [0]),
   ]);
   const t = tot.results[0] || {};
   const body = {
@@ -385,6 +418,7 @@ async function getStats(request, env, ctx) {
     ends: Object.fromEntries(ends.results.map(r => [r.ending, r.n])),
     cups: Object.fromEntries(cups.results.map(r => [r.cup, r.n])),
     ach: Object.fromEntries(ach.results.map(r => [r.ach, r.n])),
+    cx: cxOut(cxr, cxc),
   };
   const res = json(body, 200, { 'cache-control': 'public, max-age=600' });
   ctx.waitUntil(cache.put(key, res.clone()));

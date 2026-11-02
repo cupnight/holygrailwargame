@@ -46,6 +46,8 @@ td.bar{width:38%;min-width:120px}
 .tools input[type=number]{width:64px}
 .ends{display:flex;flex-wrap:wrap;gap:8px}
 .ends div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--dim)}
+#cxK{grid-template-columns:repeat(4,1fr)} @media (max-width:560px){#cxK{grid-template-columns:repeat(2,1fr)}}
+.h3{font-size:13px;color:var(--dim);font-weight:500;margin:14px 0 8px}
 .ends b{color:var(--text);font:500 13px var(--f-mono);margin-left:6px}
 .note{color:var(--faint);font-size:12px;margin-top:22px;line-height:1.7}
 .err{color:#e58b8b;margin:16px 0}
@@ -87,6 +89,15 @@ td.bar{width:38%;min-width:120px}
   <h2>엔딩</h2>
   <div class="ends" id="ends"></div>
 
+  <div id="cxBox" style="display:none">
+    <h2>검은 성배 <small>검은 성배 루트를 치른 생만</small></h2>
+    <div class="kpis" id="cxK"></div>
+    <h3 class="h3">결말</h3><div class="ends" id="cxEnd"></div>
+    <h3 class="h3">내 서번트의 끝</h3><div class="ends" id="cxFate"></div>
+    <h3 class="h3">내가 보스를 쓰러뜨린 결전 · 함께 싸운 조</h3><div class="ends" id="cxComp"></div>
+    <div class="scroll"><table id="cxT"></table></div>
+  </div>
+
   <p class="note" id="foot"></p>
 </div>
 <script>
@@ -112,10 +123,21 @@ function render(r){ const H=Object.entries(D.heroes), war=H.reduce((a,[,v])=>a+v
   const from=D.range?D.range.since:D.since, to=D.range&&D.range.until?D.range.until:D.at;
   $('#kpis').innerHTML=[['기간',(from?dstr(from):'—')+' ~ '+dstr(to)],['기록된 생',fmt(D.lives)],['참전한 생',fmt(war)],['평균 승률',pct(mean)],['참여 기기',fmt(D.players||0)],['평균 사망 나이',D.avgAge!=null?D.avgAge+'세':'—']]
     .map(([a,b],i)=>`<div class="kpi"><span>${a}</span><b style="${i===0?'font-size:13px;line-height:1.5':''}">${b}</b></div>`).join('');
-  renderCls(); renderHero();
+  renderCls(); renderHero(); renderCx();
   const E=Object.entries(D.ends||{}).sort((a,b)=>b[1]-a[1]), et=E.reduce((a,[,n])=>a+n,0);
   $('#ends').innerHTML=E.map(([k,n])=>`<div>${END[k]||k}<b>${fmt(n)}</b> <span class="d">${et?pct(n/et):''}</span></div>`).join('');
   $('#foot').innerHTML=`기록은 10분마다 새로 집계됩니다 · 마지막 집계 ${dstr(D.at)}<br>막대 위의 세로선은 평균 승률(${pct(mean)}), ±는 95% 신뢰구간입니다. 판수가 적을수록 범위가 넓습니다.`; }
+const CXE={seal:'봉인',key:'원한을 끌어안음',break:'내가 부숨',claim:'내가 소원을 빎',flood:'범람',npcBreak:'다른 조가 부숨',npcClaim:'다른 조가 소원을 빎',none:'결말 전에 끝남'};
+const CXF={alive:'끝까지 살아남음',boss:'보스에게 쓰러짐',shadow:'그림자에게 쓰러짐',fight:'다른 조에게 쓰러짐',swallow:'성배에 삼켜짐',defect:'성배 편으로 넘어감',keyGone:'원한과 함께 사라짐',other:'그 밖'};
+function chips(el,M,L,tot){ const E=Object.entries(M).sort((a,b)=>b[1]-a[1]); $(el).innerHTML=E.length?E.map(([k,n])=>`<div>${L[k]||k}<b>${fmt(n)}</b> <span class="d">${tot?pct(n/tot):''}</span></div>`).join(''):'<div>—</div>'; }
+function renderCx(){ const X=D.cx; if(!X||!X.n){ $('#cxBox').style.display='none'; return; } $('#cxBox').style.display='block';
+  const E={},F={},C={}; let me=0,alive=0,tr=0;
+  for(const [e,by,f,comp,n,t] of X.rows){ E[e]=(E[e]||0)+n; F[f]=(F[f]||0)+n; tr+=t; if(by==='me'){ me+=n; const k=comp==null?'?':comp===0?'혼자':comp+'개 조와 함께'; C[k]=(C[k]||0)+n; } if(f==='alive') alive+=n; }
+  $('#cxK').innerHTML=[['기록된 판',fmt(X.n)],['내가 보스를 쓰러뜨림',pct(me/X.n)+` <span class="ci">±${(ci(me,X.n)*100).toFixed(1)}</span>`],['서번트 생존',pct(alive/X.n)],['판당 보스 결전',(tr/X.n).toFixed(2)+'번']]
+    .map(([a,b])=>`<div class="kpi"><span>${a}</span><b>${b}</b></div>`).join('');
+  chips('#cxEnd',E,CXE,X.n); chips('#cxFate',F,CXF,X.n); chips('#cxComp',C,{},me);
+  const rows=Object.entries(X.cls).map(([k,[n,m,a]])=>({name:CLS[k]||k,n,m,a})).sort((a,b)=>b.n-a.n);
+  $('#cxT').innerHTML='<tr><th class="l">클래스</th><th>판</th><th>내가 쓰러뜨림</th><th>서번트 생존</th></tr>'+rows.map(r=>`<tr><td>${r.name}</td><td>${fmt(r.n)}</td><td>${pct(r.m/r.n)} <span class="ci">±${(ci(r.m,r.n)*100).toFixed(1)}</span></td><td>${pct(r.a/r.n)}</td></tr>`).join(''); }
 function th(cols,S){ return '<tr>'+cols.map(([k,t,cl])=>`<th class="${cl||''} ${S.k===k?'on':''}" data-sort="${k}">${t}${S.k===k?(S.d<0?' ▾':' ▴'):''}</th>`).join('')+'</tr>'; }
 function bar(p){ return `<div class="b"><i style="width:${(p*100).toFixed(1)}%"></i><em style="left:${(mean*100).toFixed(1)}%"></em></div>`; }
 function sortRows(rows,S){ return rows.sort((a,b)=>{ const x=a[S.k], y=b[S.k]; return (typeof x==='string'?x.localeCompare(y,'ko'):x-y)*S.d; }); }

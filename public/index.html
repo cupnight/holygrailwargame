@@ -11653,7 +11653,7 @@ function gsFix(){ if(!API_OK||store.get(K_NOSTAT)||store.get(K_HFIX)) return;
 function gsSend(r){ if(!API_OK||store.get(K_NOSTAT)||r.bond) return; // 인연 소환으로 시작한 생은 전체 통계에 넣지 않는다
   try{ const S=Sim.S||{}, c=dexLoad(), h=S.hero&&Sim.H_BY[S.hero];
     const body={v:1,life:'l'+r.ts.toString(36)+devId().slice(0,10),dev:devId(),lang:(typeof LANG==='string'?LANG:'ko'),hero:h?S.hero:null,cls:h?h.cls:null,end:r.warKey||'none',
-      cup:(r.wd&&r.wd.cup)||null,city:(S.city&&S.city.n)||null,origin:S.origin||null,circuit:Number.isInteger(S.circuit)?S.circuit:null,age:r.age,ach:Object.keys(c.ach||{})};
+      cup:(r.wd&&r.wd.cup)||null,city:(S.city&&S.city.n)||null,origin:S.origin||null,circuit:Number.isInteger(S.circuit)?S.circuit:null,age:r.age,ach:Object.keys(c.ach||{}),cx:(r.wd&&r.wd.cx&&r.wd.cx.rep)||null};
     fetch('/api/life',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),keepalive:true}).then(()=>gsLoad(true)).catch(()=>{}); }catch(e){} }
 const gsReady=()=>API_OK&&GS&&GS.lives>=GS_MIN;
 function gsPct(a,b){ if(!b) return '0%'; const p=a/b*100; return (p>0&&p<1?p.toFixed(1):String(Math.round(p)))+'%'; }
