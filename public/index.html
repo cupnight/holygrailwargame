@@ -4465,7 +4465,7 @@ const Sim = (() => {
   function baseQ(age){ if(age<1) return .004; if(age<5) return .0012; if(age<15) return .0003; return .00035*Math.exp(.088*(age-25)); }
   function mortality(){
     const q = baseQ(S.age)*Math.exp((50-S.st.health)/16) + (S.focus==='train'&&S.age>12? .0015:0);
-    if(ch(Math.min(.6,q)) || S.st.health<=0 || S.age>=104) die(causeFor());
+    if(ch(Math.min(.6,q)) || S.st.health<=0 || S.age>=104){ if(stayHome()) lastNight(); die(causeFor()); }
   }
   function causeFor(){
     const a=S.age;
@@ -5455,14 +5455,14 @@ const Sim = (() => {
     if(t.ghost) log(`${t.ghost.year}년 겨울 ${t.ghost.city}에서도 ${t.mname}${J(t.mname,과)} 함께 싸운 서번트다.`,'war');
   }
   function allyConfide(p){ const w=S.war; if(!w) return;
-    if(p.ghost){ ghostIntro(p); w.queue.push(()=>{ if(!p.alive) return;
+    if(p.ghost){ ghostIntro(p); w.queue.push(()=>{ if(!p.alive||!p.ally) return;
       const qs=w.pairs.filter(q=>q!==p&&q.alive&&gKnow(p,q.hero)&&(!q.revealed||(gKnow(p,q.hero).a&&!q.artKnown))).slice(0,2);
       if(!qs.length){ log(`${p.mname}${J(p.mname,은)} 지난 겨울의 기억을 더듬었지만, 이번 전쟁에서 아는 얼굴은 없다고 했다.`,'war'); return; }
       qs.forEach(q=>{ const k=gKnow(p,q.hero);
         if(k.n&&!q.revealed) revealPair(q,`${p.mname}${J(p.mname,이)} 지난 겨울의 기억을 꺼냈다. `); else if(!q.revealed) addIntel(q,30);
         if(k.a&&q.revealed) revealArt(q,`${p.mname}${J(p.mname,이)} 그 보구를 지난 겨울에 직접 보았다고 했다. `); }); }); }
     const keep = p.ghost? .85 : p.tac==='cunning'||p.tac==='proud'||p.aid==='killer'||p.aid==='merc' ? .3 : .75;
-    w.queue.push(()=>{ if(!p.alive) return;
+    w.queue.push(()=>{ if(!p.alive||!p.ally) return;
       if(ch(keep)){ revealPair(p,`동맹의 표시로 ${p.mname}${J(p.mname,이)} 서번트의 이름을 털어놓았다. `); revealArt(p,`${p.mname}${J(p.mname,이)} 보구까지 알려 주었다. `); }
       else log(`${p.mname}${J(p.mname,은)} 손은 잡았지만, 서번트의 이름과 보구만큼은 끝내 말하지 않았다.`,'war'); });
   }
@@ -6862,7 +6862,7 @@ const Sim = (() => {
     {t:'잔에 든 것을 살핀다',off:S.st.lore<35,f:()=>{addIntel(p,45);return '독은 없었다. 대신 잔 바닥에 추적 주문이 새겨져 있었다. 지워 버렸다.'}},
     {t:'참석하지 않는다',f:()=>{p.tac='hunter';return '다음 날 대문에 가문의 문장이 그을려 있었다.'}}]})});
   MASTER_EV.merc.push({c:p=>W().day>=6,f:p=>{log(`용병 ${p.mname}${J(p.mname,이)} 다른 조에 고용되었다는 소문을 들었다. 당신 쪽 거처를 알려 준 사람도 그일지 모른다.`,'war');W().exposure=clamp(W().exposure+expUp(8));}});
-  MASTER_EV.student.push({c:p=>W().day>=5&&p.alive,f:p=>decide({title:'문자',body:`모르는 번호로 문자가 왔다. “저 편의점 앞에서 봤던 학생이에요. 저 아직 살아 있어요. 혹시 다른 조 정보 필요하세요?”`,war:true,choices:[
+  MASTER_EV.student.push({c:p=>W().day>=5&&p.alive&&!p.allyGone,f:p=>decide({title:'문자',body:`모르는 번호로 문자가 왔다. “저 편의점 앞에서 봤던 학생이에요. 저 아직 살아 있어요. 혹시 다른 조 정보 필요하세요?”`,war:true,choices:[
     {t:'답장한다',auto:true,f:()=>{const t=pick(alivePairs().filter(x=>x!==p));if(t)addIntel(t,25);addIntel(p,15);return '학생은 생각보다 많은 것을 알고 있었다. 마지막 문자는 “살아남으세요”였다.'}},
     {t:'번호를 차단한다',f:()=>'휴대폰이 조용해졌다.'}]})});
   MASTER_EV.mother.unshift({opt:1,c:p=>true,f:p=>decide({title:'약국',body:`약국 줄에서 앞에 선 여자가 처방전을 떨어뜨렸다. 소아 병동 처방전. 주워 주는 순간, 그녀 손등의 령주가 보였다.`,war:true,choices:[
@@ -9111,9 +9111,9 @@ const Sim = (() => {
       {t:'달려간다',d:`${pName(a)} 조와 싸운다. 동맹이 함께 싸운다(${hpWord(b.hp)}) · 그동안 거처는 빈다`,auto:w.hp>=50&&w.sm>=30,f:()=>{ crossReact({충성:6,명예:4,연민:3,야망:-3}); w.rescue=w.day; b.owe=(b.owe||0)+1; b.slight=Math.max(0,(b.slight||0)-1);
         w.queue.unshift(()=>{ if(!a.alive||!b.alive||!w.heroAlive) return; if(!a.known){ a.known=true; a.intel=Math.max(a.intel||0,30); } log(`${pName(b)} 조의 거처 앞에서 ${pName(a)} 조와 마주쳤다.`,'war'); battle(a,{attack:true,allyComp:true,comp:[b.i]}); }); return '도시를 가로질러 달렸다.'; }},
       {t:'모른 척한다',d:'그 싸움은 그들끼리 결판난다. 동맹이 서운해할 수 있다',f:()=>{ crossReact({충성:-7,명예:-4,야망:3}); allyRaidFight(a,b);
-        if(b.alive&&b.ally){ b.slight=(b.slight||0)+1; if(ch(Math.min(.9,(ALLY_QUIT[b.tac]??.35)*(b.owe?.5:1)+.15*(b.slight-1)))){ b.ally=false; log(`${who}에게서 짧은 전갈이 왔다. “부를 때 오지 않는 동맹은 동맹이 아니다.” 동맹이 끊겼다.`,'loss'); wrec('mine',`동맹 ${who}${J(who,이)} 등을 돌렸다 — 습격을 외면했다`,{p:b.i}); } }
+        if(b.alive&&b.ally){ b.slight=(b.slight||0)+1; if(ch(Math.min(.9,(ALLY_QUIT[b.tac]??.35)*(b.owe?.5:1)+.15*(b.slight-1)))){ b.ally=false; b.allyGone=true; log(`${who}에게서 짧은 전갈이 왔다. “부를 때 오지 않는 동맹은 동맹이 아니다.” 동맹이 끊겼다.`,'loss'); wrec('mine',`동맹 ${who}${J(who,이)} 등을 돌렸다 — 습격을 외면했다`,{p:b.i}); } }
         return '휴대폰이 몇 번 더 울리다 멈췄다.'; }},
-      {t:'이참에 동맹을 끊는다',d:'동맹의 표식을 불태운다. 그 조가 한동안 우리를 노린다',f:()=>{ crossReact({야망:5,충성:-8,자유:2}); b.ally=false; b.cutByMe=true; b.provoked=2; allyRaidFight(a,b); return '답장 대신 동맹의 표식을 불태웠다.'; }}]}); }
+      {t:'이참에 동맹을 끊는다',d:'동맹의 표식을 불태운다. 그 조가 한동안 우리를 노린다',f:()=>{ crossReact({야망:5,충성:-8,자유:2}); b.ally=false; b.allyGone=true; b.cutByMe=true; b.provoked=2; allyRaidFight(a,b); return '답장 대신 동맹의 표식을 불태웠다.'; }}]}); }
   // 외면하거나 끊었을 때: 미뤄 둔 싸움을 그들끼리 치른다(밤의 다른 조 싸움과 같은 규칙)
   function allyRaidFight(a,b){ const w=W(); if(!a.alive||!b.alive) return; const {win,lose}=npcFight(a,b,false,true); w.nf.push([a.i,b.i]);
     if(lose.master&&ch(mHunt(win))){ if(ch(.7)) makeStray(lose); else { lose.master=false; lose.alive=false; pairOut(lose,'마스터를 잃고 흩어졌다',win); }
@@ -9210,7 +9210,7 @@ const Sim = (() => {
     {w:2,c:()=>hero().sp==='traitor'||(hero().traits.includes('야망')&&W().trust<25),f:()=>{const w=W(),h=hero();if(w.trust>=40){log(`${h.name}${J(h.name,이)} 다른 조의 사신과 이야기하다가 당신을 보고 입을 다물었다.`);return;}decide({title:'배신의 기척',body:`${h.name}${J(h.name,이)} 당신보다 강한 주인을 찾고 있다.`,war:true,choices:[
       {t:'령주로 묶어 둔다',d:'1획',off:w.seals<1,auto:true,f:()=>{useSeal('내 곁에 있어라');w.trust=clamp(w.trust+fitT(-5));return `${h.name}${J(h.name,은)} 이를 갈며 무릎을 꿇었다.`}},
       {t:'말로 붙잡는다',f:()=>{if(chkp('정신',.3+S.st.will/200)){w.trust=clamp(w.trust+10);return `${he(h)}는 오래 당신을 보다가 무기를 내려놓았다.`}w.heroAlive=false;w.myOut={d:w.day,tod:w.tod,why:'붙잡지 못하고 떠나보냈다'};wrec('mine',`${h.name}${J(h.name,이)} 계약을 끊고 떠났다`);S.flags.war='lost';S.flags.betrayedByHero=1;mark('loss');log(`${h.name}${J(h.name,은)} 떠났다.`,'loss');afterLoss();return ''}}]});}},
-    {w:2,c:()=>W().pairs.some(p=>p.ally&&p.alive)&&W().day>=7,f:()=>{const a=W().pairs.find(p=>p.ally&&p.alive);if(ch(Math.max(.03,(a.tac==='cunning'||a.tac==='proud'?.45:.15)+.15*(a.slight||0)-.1*(a.owe||0)))){a.ally=false;log(`동맹 ${a.mname}${J(a.mname,이)} 등을 돌렸다.`,'loss');battle(a,{ambushed:true});}else{log(`${a.mname}${J(a.mname,이)} 알아낸 것을 나눠 주었다.`);W().pairs.forEach(p=>{if(p.alive&&!p.ally&&ch(.4))addIntel(p,20);});}}},
+    {w:2,c:()=>W().pairs.some(p=>p.ally&&p.alive)&&W().day>=7,f:()=>{const a=W().pairs.find(p=>p.ally&&p.alive);if(ch(Math.max(.03,(a.tac==='cunning'||a.tac==='proud'?.45:.15)+.15*(a.slight||0)-.1*(a.owe||0)))){a.ally=false;a.allyGone=true;log(`동맹 ${a.mname}${J(a.mname,이)} 등을 돌렸다.`,'loss');battle(a,{ambushed:true});}else{log(`${a.mname}${J(a.mname,이)} 알아낸 것을 나눠 주었다.`);W().pairs.forEach(p=>{if(p.alive&&!p.ally&&ch(.4))addIntel(p,20);});}}},
     {w:1,c:()=>true,f:()=>decide({title:'은폐반',body:'성당교회의 은폐반이 무너진 건물 주변에 장막을 치고 있다. 그들 눈에 띄면 오늘 밤의 일을 해명해야 한다.',war:true,choices:[
       {t:'협조한다',auto:true,f:()=>{W().exposure=clamp(W().exposure-5);add({wealth:-3});return '진술서 세 장을 썼다. 새벽에 풀려났다.'}},
       {t:'몰래 빠져나간다',f:()=>{if(ch(.6))return '아무도 당신을 보지 못했다.';W().exposure=clamp(W().exposure+expUp(10));return '은폐반 한 명과 눈이 마주쳤다. 그는 무전기를 들었다.'}}]})},
@@ -9558,7 +9558,7 @@ const Sim = (() => {
       if(ch(Math.min(.6,q))||S.age>=104){ dead=true; break; }
     }
     head.t=`그 후 ${k}년`; flushBuf();
-    if(dead){ die(causeFor()); return; }
+    if(dead){ if(stayHome()) lastNight(); die(causeFor()); return; } // 수육한 서번트가 곁에 있으면 언제 떠나든 작별을 건넨다
     H.change();
   }
   // 에필로그의 옛 동맹: 마스터가 죽었거나, 내가 동맹을 끊었거나 쓰러뜨린 사이라면 다시 연락하지 않는다
@@ -10815,7 +10815,7 @@ const Sim = (() => {
         return;
       }
     }
-    if(!S.dead) die(causeFor());
+    if(!S.dead){ if(stayHome()) lastNight(); die(causeFor()); }
   }
 
   /* ---------- 저장 ---------- */
