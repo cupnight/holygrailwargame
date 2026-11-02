@@ -5277,7 +5277,7 @@ const Sim = (() => {
   // 마술 공격: 캐스터, 마술 계열 스킬 보유자, 그리고 스킬 조건엔 없지만 전승상 마술을 쓰는 서번트
   const MAGIC_X={medb:1,tesla:1,kriemhild:1,jalter:1};
   const canMagic=h=>h.cls==='caster'||!!MAGIC_X[h.id]||(SK[h.id]||[]).some(([n])=>/^(마술|원초의 룬|고속영창|고속신언|주술|진지작성)|영창/.test(n));
-  const revP=P=>.05+PV(P[4])*.008; // 역전의 일격 확률: 기본 5% + 행운 랭크 비례 — E 5.8% · C 7.4% · A 9% · EX 9.8%
+  const revP=P=>.07+PV(P[4])*.08/6; // 역전의 일격 확률: 기본 7% + 행운 랭크 비례(EX에서 +8%) — E 8.3% · C 11% · A 13.7% · EX 15%
   const sjNight=h=>{ const x=(SK[h.id]||[]).find(([n])=>n==='성자의 숫자'); return x?RANKV[x[1]]*1.2:0; };
   const sjDayM=h=>{ if(!S.war||S.war.tod!=='낮') return 1; const x=(SK[h.id]||[]).find(([n])=>n==='성자의 숫자'); return x?1+RANKV[x[1]]*.1:1; }; // 낮의 성자의 숫자: 주는 피해 ×(1+랭크×0.1) — EX ×1.6, B ×1.4
   const sjDay=h=>{ const x=(SK[h.id]||[]).find(([n])=>n==='성자의 숫자'); return x?RANKV[x[1]]*4:0; }; // 낮의 성자의 숫자: 힘 +랭크×4 — EX +24, B +16
