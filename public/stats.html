@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>성배가 차는 밤 · 통계</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Song+Myung&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--ink:#121019;--panel:#1a1723;--panel2:#211d2c;--line:#2e2a3b;--text:#e8e1d2;--dim:#9c94a9;--faint:#6a6378;--gold:#c9a45c;--gold2:#e3c98d;--seal:#c03a45;--moss:#86ab92;--f-display:'Song Myung',serif;--f-ui:'IBM Plex Sans KR',system-ui,sans-serif;--f-mono:'IBM Plex Mono',ui-monospace,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--text);font:14px/1.55 var(--f-ui)}
+.wrap{max-width:980px;margin:0 auto;padding:28px 16px 80px}
+h1{font:400 28px/1.2 var(--f-display);margin:0 0 4px;letter-spacing:.02em}
+.sub{color:var(--dim);margin:0 0 20px}
+.eyebrow{font:500 11px var(--f-mono);letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.chip{border:1px solid var(--line);background:var(--panel);color:var(--dim);border-radius:999px;padding:6px 12px;font:inherit;cursor:pointer}
+.chip[aria-pressed=true]{border-color:var(--gold);color:var(--gold2);background:#251f17}
+.custom{display:flex;gap:6px;align-items:center;flex-wrap:wrap;color:var(--dim)}
+.custom input{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:5px 8px;font:inherit;color-scheme:dark}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0 26px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.kpi b{display:block;font:500 24px/1.2 var(--f-mono);color:var(--text);margin-top:2px}
+.kpi span{color:var(--dim);font-size:12px}
+h2{font:600 15px var(--f-ui);margin:28px 0 8px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+h2 small{font-weight:400;color:var(--faint);font-size:12px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{color:var(--dim);font-weight:500;font-size:12px;cursor:pointer;user-select:none}
+th:first-child,td:first-child,th.l,td.l{text-align:left}
+th[data-sort]:hover{color:var(--gold2)}
+th.on{color:var(--gold2)}
+td.bar{width:38%;min-width:120px}
+.b{position:relative;height:8px;background:var(--panel2);border-radius:4px;overflow:hidden}
+.b i{position:absolute;inset:0 auto 0 0;background:var(--gold);border-radius:4px}
+.b em{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--dim);opacity:.7}
+.ci{color:var(--faint);font-size:12px}
+.low td{opacity:.42}
+.new{font:500 10px var(--f-mono);color:#ffd9a0;border:1px solid #6b5126;border-radius:4px;padding:0 4px;margin-left:6px;vertical-align:1px}
+.d{font:12px var(--f-mono);color:var(--faint)}
+.up{color:var(--moss)} .dn{color:#e58b8b}
+.tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;color:var(--dim);font-size:13px;margin:4px 0 8px}
+.tools select,.tools input[type=number]{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:4px 6px;font:inherit}
+.tools input[type=number]{width:64px}
+.ends{display:flex;flex-wrap:wrap;gap:8px}
+.ends div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--dim)}
+.ends b{color:var(--text);font:500 13px var(--f-mono);margin-left:6px}
+.note{color:var(--faint);font-size:12px;margin-top:22px;line-height:1.7}
+.err{color:#e58b8b;margin:16px 0}
+.scroll{overflow-x:auto}
+.kpis{} @media (max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}td.bar{min-width:80px}.ci{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Cupnight · Stats</div>
+  <h1>성배가 차는 밤 · 통계</h1>
+  <p class="sub">플레이어가 마친 생의 익명 기록을 모은 것입니다. 승률은 서번트와 함께 성배전쟁에 나간 생 가운데 성배를 쥔(함께 빈 소원 포함) 비율입니다.</p>
+
+  <div class="chips" id="range">
+    <button class="chip" data-r="all">전체</button>
+    <button class="chip" data-r="new">신규 서번트 이후</button>
+    <button class="chip" data-r="7d">최근 7일</button>
+    <button class="chip" data-r="1d">최근 24시간</button>
+    <button class="chip" data-r="custom">직접 고르기</button>
+  </div>
+  <div class="custom hidden" id="customBox" style="display:none">
+    <input type="date" id="dFrom"> ~ <input type="date" id="dTo"> <button class="chip" id="dGo">보기</button>
+  </div>
+  <div id="err" class="err" style="display:none"></div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <h2>클래스별 <small id="clsNote"></small></h2>
+  <div class="scroll"><table id="clsT"></table></div>
+
+  <h2>서번트별 <small>최소 판수보다 적은 서번트는 흐리게, 맨 아래에</small></h2>
+  <div class="tools">
+    <label>클래스 <select id="fCls"><option value="">전체</option></select></label>
+    <label>최소 판수 <input type="number" id="fMin" min="0" step="10" value="20"></label>
+    <label><input type="checkbox" id="fNew"> 신규 서번트만</label>
+  </div>
+  <div class="scroll"><table id="heroT"></table></div>
+
+  <h2>엔딩</h2>
+  <div class="ends" id="ends"></div>
+
+  <p class="note" id="foot"></p>
+</div>
+<script>
+const HN={"sigurd":["시구르드","sword"],"siegfried":["지크프리트","sword"],"lancelot":["랜슬롯","berserk"],"arjuna":["아르주나","bow"],"robin":["로빈 후드","bow"],"atalanta":["아탈란테","bow"],"cuchulainn":["쿠 훌린","lance"],"hector":["헥토르","lance"],"leonidas":["레오니다스","lance"],"alexander":["이스칸다르","rider"],"boudica":["부디카","rider"],"achilles":["아킬레우스","rider"],"medea":["메데이아","caster"],"merlin":["멀린","caster"],"paracelsus":["파라켈수스","caster"],"jingke":["형가","shadow"],"heracles":["헤라클레스","berserk"],"spartacus":["스파르타쿠스","berserk"],"lubu":["여포 봉선","berserk"],"dantes":["암굴왕","avenger"],"salieri":["안토니오 살리에리","avenger"],"jeanne":["잔 다르크","judge"],"qinshihuang":["시황제","judge"],"artoria":["알트리아 펜드래곤","sword"],"nero":["네로 클라우디우스","sword"],"gawain":["가웨인","sword"],"mordred":["모드레드","sword"],"altera":["알테라","sword"],"charlemagne":["샤를마뉴","sword"],"bedivere":["베디비어","sword"],"okita":["오키타 소지","sword"],"musashi":["미야모토 무사시","sword"],"rama":["라마","sword"],"richard":["리처드 1세","sword"],"emiya":["에미야","bow"],"gilgamesh":["길가메시","bow"],"chiron":["케이론","bow"],"arash":["아라쉬","bow"],"tristan":["트리스탄","bow"],"nobunaga":["오다 노부나가","bow"],"tomoe":["토모에 고젠","bow"],"tesla":["니콜라 테슬라","bow"],"napoleon":["나폴레옹","bow"],"orion":["오리온","bow"],"superorion":["초인 오리온","bow"],"diarmuid":["디어뮈드 오 디나","lance"],"karna":["카르나","lance"],"vlad":["블라드 3세","lance"],"elizabeth":["엘리자베트 바토리","lance"],"enkidu":["엘키두","lance"],"scathach":["스카사하","lance"],"romulus":["로물루스","lance"],"brynhild":["브륀힐드","lance"],"qinliangyu":["진양옥","lance"],"fionn":["핀 막 쿨","lance"],"medusa":["메두사","rider"],"drake":["프랜시스 드레이크","rider"],"astolfo":["아스톨포","rider"],"georgios":["게오르기우스","rider"],"teach":["에드워드 티치","rider"],"ozymandias":["오지만디아스","rider"],"medb":["여왕 메이브","rider"],"ushiwaka":["우시와카마루","rider"],"ivan":["이반 뇌제","rider"],"odysseus":["오디세우스","rider"],"hippolyta":["히폴리테","rider"],"gilles":["질 드 레","caster"],"tamamo":["타마모노마에","caster"],"andersen":["한스 크리스티안 안데르센","caster"],"shakespeare":["윌리엄 셰익스피어","caster"],"davinci":["레오나르도 다 빈치","caster"],"nitocris":["니토크리스","caster"],"mozart":["볼프강 아마데우스 모차르트","caster"],"sanzang":["현장 삼장","caster"],"circe":["키르케","caster"],"avicebron":["아비케브론","caster"],"prelati":["프랑수아 프렐라티","caster"],"kojiro":["사사키 코지로","shadow"],"cursedarm":["주완의 하산","shadow"],"hundred":["백모의 하산","shadow"],"serenity":["정밀의 하산","shadow"],"kinghassan":["산의 노인","shadow"],"semiramis":["세미라미스","shadow"],"jack":["잭 더 리퍼","shadow"],"lishuwen":["이서문","shadow"],"sanson":["샤를=앙리 상송","shadow"],"shuten":["슈텐도지","shadow"],"frankenstein":["프랑켄슈타인","berserk"],"asterios":["아스테리오스","berserk"],"darius":["다리우스 3세","berserk"],"beowulf":["베오울프","berserk"],"kintoki":["사카타 킨토키","berserk"],"raikou":["미나모토노 라이코","berserk"],"ibaraki":["이바라키도지","berserk"],"penthesilea":["펜테실레이아","berserk"],"hijikata":["히지카타 토시조","berserk"],"caligula":["칼리굴라","berserk"],"hessian":["헤센・로보","avenger"],"kagekiyo":["타이라노 카게키요","avenger"],"angra":["앙리 마유","avenger"],"jalter":["잔 다르크(얼터)","avenger"],"amakusa":["아마쿠사 시로","judge"],"holmes":["셜록 홈즈","judge"],"caenis":["카이니스","lance"],"quixote":["돈 키호테","lance"],"percival":["퍼시벌","lance"],"kagetora":["나가오 카게토라","lance"],"morgan":["모르간","berserk"],"shingen":["타케다 신겐","rider"],"ptolemaios":["프톨레마이오스","bow"],"kriemhild":["크림힐트","berserk"],"solomon":["솔로몬","caster"],"baobhan":["바반 시","bow"],"barghest":["바게스트","sword"],"melusine":["멜뤼진","lance"],"muramasa":["센지 무라마사","sword"],"ishtar":["이슈타르","bow"],"ereshkigal":["에레쉬키갈","lance"],"lanling":["난릉왕","sword"],"habetrot":["하베트롯","rider"],"quetzalcoatl":["케찰코아틀","rider"],"kama":["카마","shadow"],"sheba":["시바의 여왕","caster"],"asclepius":["아스클레피오스","caster"],"constantine":["콘스탄티누스 11세","rider"],"huyan":["호연작","shadow"],"lilith":["릴리스","berserk"],"yuyoku":["유익의 하산","shadow"],"nameless":["이름 없는 어새신","shadow"]};
+const CLS={sword:'세이버',bow:'아처',lance:'랜서',rider:'라이더',caster:'캐스터',shadow:'어새신',berserk:'버서커',avenger:'어벤저',judge:'룰러'};
+const NEW=new Set(['baobhan','barghest','melusine','muramasa','ishtar','ereshkigal','lanling','habetrot','quetzalcoatl','kama','sheba','asclepius','constantine','huyan','lilith','yuyoku','nameless']);
+const END={victor:'성배를 쥠',shared:'함께 빈 소원',lost:'서번트를 잃음',survived:'살아남음',withdrew:'물러남',refused:'참전 거부',dead:'전쟁 중 사망',collapsed:'붕괴',none:'전쟁 없음'};
+const $=s=>document.querySelector(s), fmt=n=>n.toLocaleString('ko-KR'), pct=x=>(x*100).toFixed(1)+'%';
+const ci=(g,n)=>{ if(!n) return 0; const z=1.96, p=g/n, d=1+z*z/n; return z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d; }; // 윌슨 구간의 반폭
+const dstr=t=>{ const d=new Date(t); return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
+let D=null, mean=0, hSort={k:'p',d:-1}, cSort={k:'p',d:-1};
+function q(r){ const H=3600e3; if(r==='all') return ''; if(r==='new') return '?since=new'; if(r==='7d') return '?since='+(Math.floor(Date.now()/H)*H-7*24*H); if(r==='1d') return '?since='+(Math.floor(Date.now()/H)*H-24*H);
+  const f=$('#dFrom').value, t=$('#dTo').value; if(!f) return ''; return '?since='+new Date(f+'T00:00:00').getTime()+(t?'&until='+(new Date(t+'T00:00:00').getTime()+24*H):''); }
+async function load(r){ document.querySelectorAll('#range .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===r)); $('#customBox').style.display=r==='custom'?'flex':'none';
+  try{ localStorage.setItem('cupnight.statsRange',r); }catch(e){}
+  if(r==='custom'&&!$('#dFrom').value) return;
+  $('#err').style.display='none';
+  try{ const res=await fetch('/api/stats'+q(r)); const j=await res.json(); if(!j.ok) throw new Error(j.error||res.status); D=j; render(r); }
+  catch(e){ $('#err').textContent='통계를 불러오지 못했습니다 ('+e.message+'). 잠시 뒤 다시 시도해 주세요.'; $('#err').style.display='block'; } }
+function agg(){ // 전체(기간 없음) 응답에는 클래스 합계가 없으니 서번트 합계로 만든다
+  const c={}; for(const [h,[n,g]] of Object.entries(D.heroes)){ const k=(HN[h]||[])[1]||'?'; c[k]=c[k]||[0,0]; c[k][0]+=n; c[k][1]+=g; } return D.cls&&Object.keys(D.cls).length?D.cls:c; }
+function render(r){ const H=Object.entries(D.heroes), war=H.reduce((a,[,v])=>a+v[0],0), win=H.reduce((a,[,v])=>a+v[1],0); mean=war?win/war:0;
+  const from=D.range?D.range.since:D.since, to=D.range&&D.range.until?D.range.until:D.at;
+  $('#kpis').innerHTML=[['기간',(from?dstr(from):'—')+' ~ '+dstr(to)],['기록된 생',fmt(D.lives)],['참전한 생',fmt(war)],['평균 승률',pct(mean)],['참여 기기',fmt(D.players||0)],['평균 사망 나이',D.avgAge!=null?D.avgAge+'세':'—']]
+    .map(([a,b],i)=>`<div class="kpi"><span>${a}</span><b style="${i===0?'font-size:13px;line-height:1.5':''}">${b}</b></div>`).join('');
+  renderCls(); renderHero();
+  const E=Object.entries(D.ends||{}).sort((a,b)=>b[1]-a[1]), et=E.reduce((a,[,n])=>a+n,0);
+  $('#ends').innerHTML=E.map(([k,n])=>`<div>${END[k]||k}<b>${fmt(n)}</b> <span class="d">${et?pct(n/et):''}</span></div>`).join('');
+  $('#foot').innerHTML=`기록은 10분마다 새로 집계됩니다 · 마지막 집계 ${dstr(D.at)}<br>막대 위의 세로선은 평균 승률(${pct(mean)}), ±는 95% 신뢰구간입니다. 판수가 적을수록 범위가 넓습니다.`; }
+function th(cols,S){ return '<tr>'+cols.map(([k,t,cl])=>`<th class="${cl||''} ${S.k===k?'on':''}" data-sort="${k}">${t}${S.k===k?(S.d<0?' ▾':' ▴'):''}</th>`).join('')+'</tr>'; }
+function bar(p){ return `<div class="b"><i style="width:${(p*100).toFixed(1)}%"></i><em style="left:${(mean*100).toFixed(1)}%"></em></div>`; }
+function sortRows(rows,S){ return rows.sort((a,b)=>{ const x=a[S.k], y=b[S.k]; return (typeof x==='string'?x.localeCompare(y,'ko'):x-y)*S.d; }); }
+function renderCls(){ const C=agg(), cnt={}; for(const h in HN){ const c=HN[h][1]; cnt[c]=(cnt[c]||0)+1; }
+  let rows=Object.entries(C).map(([k,[n,g]])=>({k,name:CLS[k]||k,m:cnt[k]||0,n,g,p:n?g/n:0}));
+  rows=sortRows(rows,cSort);
+  $('#clsT').innerHTML=th([['name','클래스','l'],['m','서번트'],['n','참전'],['p','승률'],['bar','','bar']],cSort)+rows.map(r=>`<tr><td>${r.name}</td><td>${r.m}</td><td>${fmt(r.n)}</td><td>${pct(r.p)} <span class="ci">±${(ci(r.g,r.n)*100).toFixed(1)}</span></td><td class="bar">${bar(r.p)}</td></tr>`).join('');
+  $('#clsNote').textContent=''; }
+function renderHero(){ const fc=$('#fCls').value, mn=+$('#fMin').value||0, fn=$('#fNew').checked;
+  let rows=Object.entries(D.heroes).map(([h,[n,g]])=>({h,name:(HN[h]||[h])[0],c:(HN[h]||[])[1]||'',cn:CLS[(HN[h]||[])[1]]||'',n,g,p:n?g/n:0})).filter(r=>(!fc||r.c===fc)&&(!fn||NEW.has(r.h)));
+  rows=sortRows(rows,hSort); rows=rows.filter(r=>r.n>=mn).concat(rows.filter(r=>r.n<mn)); // 판수가 적은 줄은 아래로
+  $('#heroT').innerHTML=th([['name','서번트','l'],['cn','클래스','l'],['n','참전'],['p','승률'],['bar','','bar']],hSort)+rows.map(r=>`<tr class="${r.n<mn?'low':''}"><td>${r.name}${NEW.has(r.h)?'<span class="new">NEW</span>':''}</td><td class="l">${r.cn}</td><td>${fmt(r.n)}</td><td>${pct(r.p)} <span class="ci">±${(ci(r.g,r.n)*100).toFixed(1)}</span></td><td class="bar">${bar(r.p)}</td></tr>`).join(''); }
+document.addEventListener('click',e=>{ const t=e.target.closest('th[data-sort]'); if(!t||t.dataset.sort==='bar') return; const S=t.closest('table').id==='clsT'?cSort:hSort, k=t.dataset.sort; if(S.k===k) S.d*=-1; else { S.k=k; S.d=(k==='name'||k==='cn')?1:-1; } t.closest('table').id==='clsT'?renderCls():renderHero(); });
+document.querySelectorAll('#range .chip').forEach(b=>b.onclick=()=>load(b.dataset.r));
+$('#dGo').onclick=()=>load('custom');
+for(const [k,v] of Object.entries(CLS)){ const o=document.createElement('option'); o.value=k; o.textContent=v; $('#fCls').appendChild(o); }
+['#fCls','#fMin','#fNew'].forEach(s=>$(s).addEventListener('input',()=>D&&renderHero()));
+let r0='new'; try{ r0=localStorage.getItem('cupnight.statsRange')||'new'; if(r0==='custom') r0='new'; }catch(e){}
+load(r0);
+</script>
+</body>
+</html>

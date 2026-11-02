@@ -5,6 +5,7 @@
 //   POST /api/life    한 생이 끝날 때 게임 결과를 익명으로 받는다
 //   POST /api/life/fix  새 서번트가 허용 목록에 빠져 있던 동안 서번트 칸이 빈 채 저장된 생을 그 기기의 기록으로 채운다
 //   GET  /api/stats   모인 결과를 합쳐 돌려준다 (10분 동안 캐시)
+//                     ?since=&until= (ms 시각, since=new는 신규 서번트 17명이 처음 기록된 때) — 그 기간만 클래스·서번트·엔딩별로 (통계 페이지 /stats.html)
 //   POST /api/ghost   살아남은 조를 다른 겨울로 보낸다 (이름을 공개하기로 한 경우에만 이름 포함)
 //   GET  /api/ghost   ?year=&dev= — 1~40년 앞선 전쟁에서 살아남은 다른 기기의 조를 몇 개 받는다
 //   POST /api/ghost/shown · /withdraw · /report — 등장 횟수, 거두기, 신고(3번이면 숨김)
@@ -75,6 +76,7 @@ const SCHEMA = [
   `CREATE INDEX IF NOT EXISTS ghosts_year ON ghosts(year)`,
   `CREATE TABLE IF NOT EXISTS ghost_reports (id TEXT NOT NULL, dev TEXT NOT NULL, ts INTEGER NOT NULL, PRIMARY KEY (id, dev))`,
   `CREATE INDEX IF NOT EXISTS lives_dev ON lives(dev, ts)`,
+  `CREATE INDEX IF NOT EXISTS lives_ts ON lives(ts)`,
   `CREATE INDEX IF NOT EXISTS ghosts_dev ON ghosts(dev)`,
   `CREATE TABLE IF NOT EXISTS ghost_seen (id TEXT NOT NULL, dev TEXT NOT NULL, ts INTEGER NOT NULL, PRIMARY KEY (id, dev))`,
   `CREATE TABLE IF NOT EXISTS ghost_flags (id TEXT NOT NULL, who TEXT NOT NULL, dev TEXT, ts INTEGER NOT NULL, PRIMARY KEY (id, who))`,
@@ -310,8 +312,51 @@ async function ghostNews(request, env) {
   return json({ ok: true, list });
 }
 
+// 신규 서번트(2026.10.30) — 통계 페이지의 '신규 서번트 이후' 기준점
+const NEW_HEROES = ['baobhan','barghest','melusine','muramasa','ishtar','ereshkigal','lanling','habetrot','quetzalcoatl','kama','sheba','asclepius','constantine','huyan','lilith','yuyoku','nameless'];
+const tsArg = v => { const n = Number(v); return Number.isFinite(n) && n > 0 && n < 1e14 ? Math.floor(n) : null; };
+// 기간을 정해 합친다. 같은 기간을 여러 번 물어도 DB를 한 번만 읽도록 10분 캐시하고, 시각은 분 단위로 맞춘다.
+async function getStatsRange(request, env, ctx, url) {
+  const cache = caches.default;
+  const sRaw = url.searchParams.get('since'), uRaw = url.searchParams.get('until');
+  await ensureSchema(env);
+  let since = sRaw === 'new' ? null : tsArg(sRaw), until = tsArg(uRaw);
+  if (sRaw === 'new') {
+    const r = await env.DB.prepare(`SELECT MIN(ts) AS t0 FROM lives WHERE hero IN (${NEW_HEROES.map(() => '?').join(',')})`).bind(...NEW_HEROES).first();
+    since = (r && r.t0) || null;
+  }
+  const M = 60000; since = since ? Math.floor(since / M) * M : 0; until = until ? Math.ceil(until / M) * M : 0;
+  const ck = new URL('/api/stats', request.url); ck.searchParams.set('since', String(since)); if (until) ck.searchParams.set('until', String(until));
+  const key = new Request(ck.toString(), { method: 'GET' });
+  const hit = await cache.match(key);
+  if (hit) return hit;
+  const W = `ts >= ?${until ? ' AND ts < ?' : ''}`, B = until ? [since, until] : [since];
+  const q = (sql) => env.DB.prepare(sql).bind(...B);
+  const [tot, heroes, cls, ends] = await env.DB.batch([
+    q(`SELECT COUNT(*) AS lives, COUNT(DISTINCT dev) AS players, MIN(ts) AS first, MAX(ts) AS last, ROUND(AVG(age), 1) AS avgAge,
+              SUM(hero IS NOT NULL) AS warLives, SUM(hero IS NOT NULL AND ending IN ('victor', 'shared')) AS wins FROM lives WHERE ${W}`),
+    q(`SELECT hero, COUNT(*) AS n, SUM(ending IN ('victor', 'shared')) AS g FROM lives WHERE ${W} AND hero IS NOT NULL GROUP BY hero`),
+    q(`SELECT cls, COUNT(*) AS n, SUM(ending IN ('victor', 'shared')) AS g FROM lives WHERE ${W} AND hero IS NOT NULL GROUP BY cls`),
+    q(`SELECT ending, COUNT(*) AS n FROM lives WHERE ${W} GROUP BY ending`),
+  ]);
+  const t = tot.results[0] || {};
+  const body = {
+    ok: true, at: Date.now(), range: { since, until: until || null },
+    lives: t.lives || 0, players: t.players || 0, warLives: t.warLives || 0, wins: t.wins || 0,
+    first: t.first || null, last: t.last || null, avgAge: t.avgAge || null,
+    heroes: Object.fromEntries(heroes.results.map(r => [r.hero, [r.n, r.g || 0]])),
+    cls: Object.fromEntries(cls.results.filter(r => r.cls).map(r => [r.cls, [r.n, r.g || 0]])),
+    ends: Object.fromEntries(ends.results.map(r => [r.ending, r.n])),
+  };
+  const res = json(body, 200, { 'cache-control': 'public, max-age=600' });
+  ctx.waitUntil(cache.put(key, res.clone()));
+  return res;
+}
+
 async function getStats(request, env, ctx) {
   if (await slowDown(env, request, 't')) return SLOW();
+  const url = new URL(request.url);
+  if (url.searchParams.has('since') || url.searchParams.has('until')) return getStatsRange(request, env, ctx, url);
   const cache = caches.default;
   const key = new Request(new URL('/api/stats', request.url).toString(), { method: 'GET' });
   const hit = await cache.match(key);
