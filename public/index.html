@@ -5497,7 +5497,7 @@ const Sim = (() => {
   // 보스 수치: 마스터 실력(pw) · 두 번째 몸의 체력 · 성배 앞 판정 보정(desc) · NPC끼리 싸울 때 보정(nd) · 능력치 목표(tgt)
   // · 함께 온 조 수에 따른 보정(j[0~3]) · 함께 온 서번트 강함 보정(k, 기준 ref) · 함께 온 조의 협공 세기(ad) · NPC끼리 함께 갈 때 보정(na)
   // 목표 승률(내가 쓰러뜨림): 혼자 35% · 2조 45% · 3조 55%
-  const CXB={pw:38,hp2:30,desc:-28,nd:-15,na:5,ad:1.2,np:.3,tgt:113,j:[0,6,14,14],k:0,ref:134};
+  const CXB={pw:38,hp2:30,desc:-22,nd:-15,na:5,ad:1.2,np:.3,tgt:113,j:[0,6,14,14],k:0,ref:134};
   const CXW=()=>S.war&&S.war.crisis;
   const cxOn=()=>{ const c=CXW(); return !!(c&&!c.done); };
   const cxUnits=()=>{ const c=CXW(); return c?c.units:[]; };
