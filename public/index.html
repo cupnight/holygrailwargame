@@ -5010,13 +5010,19 @@ const Sim = (() => {
     if(bt&&bt.e){ const e=bt.e, w=S.war; decide({title:`${pName(e)} · 전투 종료`,body:`당신이 쓰러졌다 · ${e.alive?`상대 ${hpWord(e.hp)}`:'상대 소멸'} · ${w.heroAlive?`우리 ${hpWord(w.hp)}`:'우리 서번트 소멸'}`,war:true,battle:true,endE:e,silent:true,choices:[{t:'닫기',auto:true,f:()=>{ decide(lastD); return null; }}]}); }
     else decide(lastD);
   }
+  // 통계로 보내는 검은 성배 결과(서버 cx_lives): 결말 · 보스를 쓰러뜨린 쪽 · 내 서번트의 끝 · 함께 싸운 조 수 · 보스 결전 횟수
+  function cxRep(){ const w=S.war, c=w&&w.crisis; if(!c) return null; const f=S.flags, mo=w.myOut;
+    const end=f.cupSealed?'seal':f.cupKey?'key':f.cxFlood?'flood':f.cxNpcBreak?'npcBreak':f.cxNpcClaim?'npcClaim':f.cxClaim?'claim':f.brokeCup?'break':'none';
+    const by=c.bossDown==='me'?'me':c.bossDown?'npc':'none';
+    const fate=w.heroAlive?'alive':mo&&mo.by==='boss'?'boss':mo&&mo.by==='shadow'?'shadow':mo&&['fight','swallow','defect','keyGone'].includes(mo.by)?mo.by:'other';
+    return {end,by,fate,st:c.stage||0,comp:by==='me'&&c.bossComp!=null?c.bossComp:null,tries:c.tries||0,sk:c.shadowKills||0,day:w.day}; }
   function warDigest(){
     const w=S.war; if(!w||!S.hero) return null; const h=H_BY[S.hero]; const a=artOf(h);
     const f0=S.flags.firstHero&&S.flags.firstHero!==S.hero?H_BY[S.flags.firstHero]:null;
     const lab=p=>({i:p.i,id:p.hero,fought:!!p.fought,byMe:!!p.byMe,cls:CLS[p.cls].n,hero:H_BY[p.hero].name,title:H_BY[p.hero].title,heroKnown:!!p.revealed,hint:p.revealed?null:(p.hint||null),mname:p.mname||null,arche:p.arche||null,mKnown:!!(p.known||p.ally||!p.alive),art:artOf(H_BY[p.hero]).n,artKnown:!!p.artKnown,mg:p.master!==undefined?`${mTier(p)}등급 · ${MGRP_N[mGrp(p)]}`:null,mgKnown:!!(p.mDueled||p.intel>=60),alive:!!p.alive,ally:!!p.ally,out:p.out||null,extra:p.extra?H_BY[p.extra].name:null,ghost:p.ghost?{gid:p.ghost.gid,year:p.ghost.year,city:p.ghost.city,join:p.joinDay||null}:null});
     return { day:w.day, my:{id:h.id,ccls:h.cls,cls:cn(h),name:h.name,title:h.title,art:a.n,artR:a.r,trust:Math.round(w.trust),frag:w.frag||0,fragN:h.frags.length,alive:!!w.heroAlive,out:w.myOut||null,first:f0?`${cn(f0)} ${f0.name}`:null},
       pairs:w.pairs.map(lab), bt:w.bt||null, kills:w.kills||0, seals:w.sealLog||[], np:w.npN||0, tl:(w.tl||[]).slice(0,80), last:w.lastVoice||'',
-      winner:w.winner||0, cup:(S.flags.war==='victor'||S.flags.war==='shared')?(w.cupPure?'pure':'dark'):null, cx:w.crisis?{st:w.crisis.stage,sk:w.crisis.shadowKills||0,end:S.flags.cupSealed?'seal':S.flags.cupKey?'key':S.flags.cxFlood?'flood':S.flags.cxNpcBreak?'npcBreak':S.flags.cxNpcClaim?'npcClaim':S.flags.cxClaim?'claim':S.flags.brokeCup?'break':null}:null, wish:S.flags.wishText||'', ally:S.flags.allyName||'' };
+      winner:w.winner||0, cup:(S.flags.war==='victor'||S.flags.war==='shared')?(w.cupPure?'pure':'dark'):null, cx:w.crisis?{st:w.crisis.stage,sk:w.crisis.shadowKills||0,end:S.flags.cupSealed?'seal':S.flags.cupKey?'key':S.flags.cxFlood?'flood':S.flags.cxNpcBreak?'npcBreak':S.flags.cxNpcClaim?'npcClaim':S.flags.cxClaim?'claim':S.flags.brokeCup?'break':null,rep:cxRep()}:null, wish:S.flags.wishText||'', ally:S.flags.allyName||'' };
   }
   function record(){
     const h=S.hero?H_BY[S.hero]:null;
@@ -5636,7 +5642,7 @@ const Sim = (() => {
       {t:'령주: 버텨라',seal:true,off:w.seals<1,d:w.seals<1?'령주가 남아 있지 않다':`령주 1획 · 반드시 버틴다 · 남은 ${w.seals}획`,auto:w.seals>0&&pr<.6,f:()=>{ useSeal('버텨라'); return hold(`령주가 타오르자 진흙이 비명처럼 끓으며 물러났다. ${h.name}${J(h.name,은)} 한 걸음도 밀리지 않았다.`); }}]}); }
   function cxMeSwallow(){ const w=W(), h=hero(), c=CXW();
     log(`진흙이 ${h.name}${J(h.name,을)} 끌어내렸다. 손등의 계약이 검게 타들어 갔다.`,'loss');
-    w.heroAlive=false; w.hp=0; S.flags.war='lost'; mark('loss'); w.myOut={d:w.day,tod:w.tod,why:'검은 성배에 삼켜졌다'}; wrec('mine',`${h.name}${J(h.name,이)} 검은 성배에 삼켜졌다`);
+    w.heroAlive=false; w.hp=0; S.flags.war='lost'; mark('loss'); w.myOut={d:w.day,tod:w.tod,why:'검은 성배에 삼켜졌다',by:'swallow'}; wrec('mine',`${h.name}${J(h.name,이)} 검은 성배에 삼켜졌다`);
     c.meUsed=true; cxMkShadow(S.hero,{mine:true});
     if(contracted().length>1) w.queue.unshift(()=>afterLoss()); else w.out=true; }
   // 보스 능력치: 누가 보스가 되든 최상급까지 끌어올린다. 낮은 능력치부터 한 단계씩, 목표에 닿을 때까지(약한 서번트일수록 많이 오른다)
@@ -5657,7 +5663,7 @@ const Sim = (() => {
   function cxMeDefect(){ const w=W(), h=hero(), kind=CXW().meDefect==='low'?'low':'release', L=CX_DEFECT_LINE[h.id], line=L?L[kind]:'';
     log(`${h.name}${J(h.name,은)} 당신을 돌아보지 않았다. 성배가 부르는 쪽으로, 한 걸음씩 걸어갔다. 손등의 계약이 타들어 가듯 끊어졌다.`,'loss',{fx:{t:'defect',kind,name:h.name,line,seals:w.seals}});
     if(line) log(`“${line}”`,'voice');
-    w.heroAlive=false; w.hp=0; S.flags.war='lost'; S.flags.cxDefect=1; mark('loss'); w.myOut={d:w.day,tod:w.tod,why:'서번트가 성배 편으로 넘어갔다'}; wrec('mine',`${h.name}${J(h.name,이)} 성배 편으로 넘어갔다`);
+    w.heroAlive=false; w.hp=0; S.flags.war='lost'; S.flags.cxDefect=1; mark('loss'); w.myOut={d:w.day,tod:w.tod,why:'서번트가 성배 편으로 넘어갔다',by:'defect'}; wrec('mine',`${h.name}${J(h.name,이)} 성배 편으로 넘어갔다`);
     if(contracted().length>1) w.queue.unshift(()=>afterLoss()); else w.out=true; }
   // 어벤저: 단계마다 한 번 성배의 부름
   function cxCall(){ const w=W(), h=hero(), c=CXW();
@@ -5714,7 +5720,7 @@ const Sim = (() => {
     if(u.cx==='shadow'){ log(`${pName(u)}${J(pName(u),이)} 진흙으로 무너져 내렸다.`,'war');
       if(by==='me'){ c.shadowKills++; w.seals++; log('다음 날 감독관의 사자가 찾아와 당신 손등에 령주 한 획을 그려 주었다.','seal'); }
       else if(by&&by.i){ by.seals=(by.seals||0)+1; } return true; }
-    c.bossDown=by==='me'?'me':by&&by.i?by.i:'npc'; if(by==='me'&&w.battle&&w.battle.e===u&&!((w.battle.ctx||{}).comp||[]).length) c.soloBoss=1; log(`${pName(u)}${J(pName(u),이)} 무너졌다. 성배를 감싸던 진흙이 한순간 멎었다.`,'war'); if(!w.battle) w.queue.unshift(()=>checkEnd()); return true; }
+    c.bossDown=by==='me'?'me':by&&by.i?by.i:'npc'; if(by==='me') c.bossComp=w.battle&&w.battle.e===u?((w.battle.ctx||{}).comp||[]).length:0; if(by==='me'&&w.battle&&w.battle.e===u&&!((w.battle.ctx||{}).comp||[]).length) c.soloBoss=1; log(`${pName(u)}${J(pName(u),이)} 무너졌다. 성배를 감싸던 진흙이 한순간 멎었다.`,'war'); if(!w.battle) w.queue.unshift(()=>checkEnd()); return true; }
   // 전투가 끝난 뒤: 함께 싸운 조가 남은 몫을 친다
   function cxAfterBattle(b){ const w=W(), e=b.e; if(!e||!e.cx) return; const out=b.compOut||[];
     const comp=(b.ctx.comp||[]).map(i=>pairBy(i)).filter(p=>p&&p.alive&&p.master&&!out.includes(p.i));
@@ -5891,7 +5897,7 @@ const Sim = (() => {
       if(kt>=90){ log(`새벽이 와도 ${h.name}${J(h.name,은)} 흩어지지 않았다. 성배가 남긴 검은 것을 몸 안에 가라앉힌 채, ${he(h)}는 이 세계에 발을 디뎠다.`,'joy'); add({will:8,bond:8}); S.flags.stay=h.id; S.flags.stayDark=1; S.flags.keyRemain=1; warOver(); return ''; }
       add({will:8,bond:4}); farewell(); return ''; }
     log(`${h.name}의 윤곽이 검게 번지며 흩어졌다. 마지막으로 당신 쪽을 한 번 돌아보았다.`,'loss'); add({will:6});
-    w.heroAlive=false; w.myOut={d:w.day,tod:w.tod,why:'원한을 끌어안고 성배와 함께 사라졌다'}; mark('loss'); warOver(); return ''; }
+    w.heroAlive=false; w.myOut={d:w.day,tod:w.tod,why:'원한을 끌어안고 성배와 함께 사라졌다',by:'keyGone'}; mark('loss'); warOver(); return ''; }
   // NPC가 보스를 쓰러뜨렸을 때: 그 조의 입장대로
   function cxNpcEnd(p){ const w=W();
     if(!p){ cxFlood(); return; } p.revealed=true; w.winner=p.i; S.flags.cxEndM=p.mname;
@@ -7282,6 +7288,7 @@ const Sim = (() => {
   function battle(e,ctx){
     const w=W(),h=hero(); if(!w.heroAlive||!e.alive) return;
     if(e.ally&&ctx.attack&&!ctx.final){ log('동맹을 칠 수는 없다.'); return; }
+    if(e.cx==='boss'&&CXW()) CXW().tries=(CXW().tries||0)+1; // 통계: 보스 결전 횟수
     e.fought=true; if(!e.cx) e.met=true;
     w.battle={e,ctx,round:1,maxR:ctx.raid?7:ri(5,6),res:'draw',tlIdx:(w.tl||[]).length}; w.battle.od=w.battle.odMax=oddMax(); w.fought=true; w.lastFight=w.day; w.woundRest=0; if(ctx.attack||ctx.ambushed) w.roamed=true;
     if(ctx.attack&&e.cls==='avenger'&&!e.mark) e.mark='me';
@@ -8626,7 +8633,7 @@ const Sim = (() => {
   function myHeroDown(e){
     const w=W(),h=hero();
     if(h.sp==='revive'&&!w.usedRevive){ w.usedRevive=true; w.hp=35; log(`${h.name}${J(h.name,이)} 쓰러졌다가, 다시 일어섰다. 열두 과업 중 하나를 목숨 대신 내놓았다.`,'war'); return; }
-    w.heroAlive=false; w.hp=0; S.flags.war='lost'; mark('loss'); if(w.battle) w.battle.res='lose'; w.myOut={d:w.day,tod:w.tod,why:e?`${cn(e)} 조와 싸우다 쓰러졌다`:'쓰러졌다'}; wrec('mine',`${h.name}${J(h.name,이)} 쓰러졌다`);
+    w.heroAlive=false; w.hp=0; S.flags.war='lost'; mark('loss'); if(w.battle) w.battle.res='lose'; w.myOut={d:w.day,tod:w.tod,why:e?`${cn(e)} 조와 싸우다 쓰러졌다`:'쓰러졌다',by:e?(e.cx||'fight'):null}; wrec('mine',`${h.name}${J(h.name,이)} 쓰러졌다`);
     log(`${h.name}${J(h.name,이)} 쓰러졌다.`,'loss');
     const lw=LASTW[h.id]||[];
     if(w.trust>=60) log(voiceLine(h,pick(lw.concat([VO(h,'bye')]).filter(Boolean))),'voice');
