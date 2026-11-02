@@ -91,6 +91,7 @@ td.bar{width:38%;min-width:120px}
 
   <div id="cxBox" style="display:none">
     <h2>검은 성배 <small>검은 성배 루트를 치른 생만</small></h2>
+    <div class="tools"><label><input type="checkbox" id="cxNat" checked> 자연 발생만 <small class="d" id="cxModeN"></small></label></div>
     <div class="kpis" id="cxK"></div>
     <h3 class="h3">결말</h3><div class="ends" id="cxEnd"></div>
     <h3 class="h3">내 서번트의 끝</h3><div class="ends" id="cxFate"></div>
@@ -124,13 +125,19 @@ function render(r){ const H=Object.entries(D.heroes), war=H.reduce((a,[,v])=>a+v
   $('#kpis').innerHTML=[['기간',(from?dstr(from):'—')+' ~ '+dstr(to)],['기록된 생',fmt(D.lives)],['참전한 생',fmt(war)],['평균 승률',pct(mean)],['참여 기기',fmt(D.players||0)],['평균 사망 나이',D.avgAge!=null?D.avgAge+'세':'—']]
     .map(([a,b],i)=>`<div class="kpi"><span>${a}</span><b style="${i===0?'font-size:13px;line-height:1.5':''}">${b}</b></div>`).join('');
   renderCls(); renderHero(); renderCx();
+  $('#cxNat').onchange=renderCx;
   const E=Object.entries(D.ends||{}).sort((a,b)=>b[1]-a[1]), et=E.reduce((a,[,n])=>a+n,0);
   $('#ends').innerHTML=E.map(([k,n])=>`<div>${END[k]||k}<b>${fmt(n)}</b> <span class="d">${et?pct(n/et):''}</span></div>`).join('');
   $('#foot').innerHTML=`기록은 10분마다 새로 집계됩니다 · 마지막 집계 ${dstr(D.at)}<br>막대 위의 세로선은 평균 승률(${pct(mean)}), ±는 95% 신뢰구간입니다. 판수가 적을수록 범위가 넓습니다.`; }
 const CXE={seal:'봉인',key:'원한을 끌어안음',break:'내가 부숨',claim:'내가 소원을 빎',flood:'범람',npcBreak:'다른 조가 부숨',npcClaim:'다른 조가 소원을 빎',none:'결말 전에 끝남'};
 const CXF={alive:'끝까지 살아남음',boss:'보스에게 쓰러짐',shadow:'그림자에게 쓰러짐',fight:'다른 조에게 쓰러짐',swallow:'성배에 삼켜짐',defect:'성배 편으로 넘어감',keyGone:'원한과 함께 사라짐',other:'그 밖'};
 function chips(el,M,L,tot){ const E=Object.entries(M).sort((a,b)=>b[1]-a[1]); $(el).innerHTML=E.length?E.map(([k,n])=>`<div>${L[k]||k}<b>${fmt(n)}</b> <span class="d">${tot?pct(n/tot):''}</span></div>`).join(''):'<div>—</div>'; }
-function renderCx(){ const X=D.cx; if(!X||!X.n){ $('#cxBox').style.display='none'; return; } $('#cxBox').style.display='block';
+function renderCx(){ const X0=D.cx; if(!X0||!X0.n){ $('#cxBox').style.display='none'; return; } $('#cxBox').style.display='block';
+  const nat=$('#cxNat').checked, ok=m=>!nat||m==='nat', al=X0.rows.reduce((a,r)=>a+(r[6]==='always'?r[4]:0),0);
+  $('#cxModeN').textContent=`(시나리오 설정 「항상」으로 치른 판 ${fmt(al)} 제외)`; $('#cxModeN').style.display=nat?'':'none';
+  const rr=X0.rows.filter(r=>ok(r[6])), X={n:rr.reduce((a,r)=>a+r[4],0),rows:rr,cls:{}};
+  for(const [k,n,m,a,md] of X0.cls){ if(!ok(md)) continue; const c=X.cls[k]=X.cls[k]||[0,0,0]; c[0]+=n; c[1]+=m; c[2]+=a; }
+  if(!X.n){ ['#cxK','#cxEnd','#cxFate','#cxComp'].forEach(s=>$(s).innerHTML=''); $('#cxT').innerHTML=''; return; }
   const E={},F={},C={}; let me=0,alive=0,tr=0;
   for(const [e,by,f,comp,n,t] of X.rows){ E[e]=(E[e]||0)+n; F[f]=(F[f]||0)+n; tr+=t; if(by==='me'){ me+=n; const k=comp==null?'?':comp===0?'혼자':comp+'개 조와 함께'; C[k]=(C[k]||0)+n; } if(f==='alive') alive+=n; }
   $('#cxK').innerHTML=[['기록된 판',fmt(X.n)],['내가 보스를 쓰러뜨림',pct(me/X.n)+` <span class="ci">±${(ci(me,X.n)*100).toFixed(1)}</span>`],['서번트 생존',pct(alive/X.n)],['판당 보스 결전',(tr/X.n).toFixed(2)+'번']]
