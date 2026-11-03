@@ -11,6 +11,10 @@
 //   POST /api/ghost/shown · /withdraw · /report — 등장 횟수, 거두기, 신고(3번이면 숨김)
 //   POST /api/ghost/result  그 조가 끼어든 전쟁의 결과(받은 기기가 전쟁이 끝날 때 한 번 보냄)
 //   POST /api/ghost/news    보낸 기기가 자기 조들의 결과 소식을 받아 간다(받은 쪽 플레이어 정보는 담지 않음)
+//   POST /api/sync/new · /code · /join · /pull · /push · /leave
+//        기기 연결: 같은 사람이 웹·모바일을 오가며 같은 기록을 쓰도록, 압축한 기록 묶음을 비밀 키로 맡아 둔다.
+//        키 자체는 저장하지 않고 해시만 둔다. 연결 코드는 10분 동안 한 번만 쓸 수 있다.
+//        마지막 접근 뒤 180일이 지나거나 모든 기기가 연결을 끊으면 지운다. 내용은 열어 보지 않는다(크기만 본다).
 //
 // 받는 것: 서번트·클래스, 엔딩 종류, 성배 상태, 도시, 출신, 회로 등급, 사망 나이, 언어,
 //          그 기기에서 지금까지 연 업적 목록, 기기마다 무작위로 만든 번호.
@@ -91,6 +95,10 @@ const SCHEMA = [
      id TEXT PRIMARY KEY, ts INTEGER NOT NULL, dev TEXT NOT NULL, hero TEXT, cls TEXT,
      cx_end TEXT NOT NULL, by_who TEXT NOT NULL, fate TEXT NOT NULL, mode TEXT, st INTEGER, comp INTEGER, tries INTEGER, sk INTEGER, day INTEGER)`,
   `CREATE INDEX IF NOT EXISTS cx_lives_ts ON cx_lives(ts)`,
+  // 기기 연결: gid = 비밀 키의 SHA-256. data = 기기가 압축해 보낸 기록 묶음(서버는 열어 보지 않는다)
+  `CREATE TABLE IF NOT EXISTS sync_groups (gid TEXT PRIMARY KEY, ver INTEGER NOT NULL, ts INTEGER NOT NULL, seen INTEGER NOT NULL, devs INTEGER NOT NULL, size INTEGER NOT NULL, data TEXT NOT NULL)`,
+  `CREATE INDEX IF NOT EXISTS sync_groups_seen ON sync_groups(seen)`,
+  `CREATE TABLE IF NOT EXISTS sync_codes (code TEXT PRIMARY KEY, gid TEXT NOT NULL, key TEXT NOT NULL, exp INTEGER NOT NULL)`,
 ];
 let schemaReady = null;
 const ensureSchema = env => (schemaReady ??= env.DB.batch(SCHEMA.map(s => env.DB.prepare(s))).catch(e => { schemaReady = null; throw e; }));
@@ -323,13 +331,102 @@ async function ghostNews(request, env) {
   const b = await readJson(request, 300);
   const dev = str(b && b.dev, ID);
   if (!dev) return json({ ok: false, error: 'bad_fields' }, 400);
+  // 연결된 기기들이 보낸 조의 소식도 함께(기기 번호 최대 8개)
+  const devs = [...new Set([dev, ...(Array.isArray(b.devs) ? b.devs : []).map(d => str(d, ID)).filter(Boolean)])].slice(0, 8);
   await ensureSchema(env);
   const { results } = await env.DB.prepare(
     `SELECT id, ts, year, city, join_day, ending, out_day, tod, by_who, ally, name, hero, cls, sent_year, sent_city
-       FROM ghost_results WHERE owner = ? ORDER BY ts DESC LIMIT 200`).bind(dev).all();
+       FROM ghost_results WHERE owner IN (${devs.map(() => '?').join(',')}) ORDER BY ts DESC LIMIT 200`).bind(...devs).all();
   const list = results.map(r => ({ id: r.id, ts: r.ts, year: r.year, city: r.city || '', join: r.join_day, end: r.ending, day: r.out_day, tod: r.tod,
     by: r.by_who, ally: !!r.ally, name: r.name, hero: r.hero, cls: r.cls, sentYear: r.sent_year, sentCity: r.sent_city || '' }));
   return json({ ok: true, list });
+}
+
+// ---- 기기 연결 ----
+const SYNC_KEY = /^[A-Za-z0-9_-]{32,64}$/, SYNC_DATA = /^[zj]:/, SYNC_MAX = 1_400_000, SYNC_DEVS = 5;
+const SYNC_ABC = '23456789ABCDEFGHJKMNPQRSTUVWXYZ'; // 헷갈리는 0·O·1·I·L은 뺀다
+const SYNC_TTL = 180 * 864e5, CODE_TTL = 10 * 60e3;
+const b64u = a => btoa(String.fromCharCode(...a)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+async function gidOf(key) { const h = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key))); return b64u(h); }
+function syncCode() { const out = []; while (out.length < 8) { const r = crypto.getRandomValues(new Uint8Array(16)); for (const x of r) if (x < 248 && out.length < 8) out.push(SYNC_ABC[x % 31]); } return out.join(''); }
+const syncData = z => (typeof z === 'string' && SYNC_DATA.test(z) && z.length <= SYNC_MAX ? z : null);
+async function syncGroup(env, key) { if (!str(key, SYNC_KEY)) return null; const gid = await gidOf(key); const g = await env.DB.prepare(`SELECT gid, ver, seen, devs, data FROM sync_groups WHERE gid = ?`).bind(gid).first(); return g; }
+async function syncTouch(env, g) { const now = Date.now(); if (now - g.seen > 864e5) await env.DB.prepare(`UPDATE sync_groups SET seen = ? WHERE gid = ?`).bind(now, g.gid).run(); }
+
+async function syncNew(request, env) {
+  if (await slowDown(env, request, 's')) return SLOW();
+  const b = await readJson(request, 1_500_000); const z = syncData(b && b.z);
+  if (!z) return json({ ok: false, error: 'bad_fields' }, 400);
+  await ensureSchema(env);
+  const now = Date.now();
+  await env.DB.batch([env.DB.prepare(`DELETE FROM sync_groups WHERE seen < ?`).bind(now - SYNC_TTL), env.DB.prepare(`DELETE FROM sync_codes WHERE exp < ?`).bind(now)]);
+  const key = b64u(crypto.getRandomValues(new Uint8Array(24)));
+  await env.DB.prepare(`INSERT INTO sync_groups (gid, ver, ts, seen, devs, size, data) VALUES (?, 1, ?, ?, 1, ?, ?)`).bind(await gidOf(key), now, now, z.length, z).run();
+  return json({ ok: true, key, ver: 1, devs: 1 });
+}
+async function syncMakeCode(request, env) {
+  if (await slowDown(env, request, 's')) return SLOW();
+  const b = await readJson(request, 400);
+  await ensureSchema(env);
+  const g = await syncGroup(env, b && b.key);
+  if (!g) return json({ ok: false, error: 'gone' }, 404);
+  if (g.devs >= SYNC_DEVS) return json({ ok: false, error: 'full' }, 409);
+  const now = Date.now();
+  await env.DB.batch([env.DB.prepare(`DELETE FROM sync_codes WHERE gid = ? OR exp < ?`).bind(g.gid, now)]);
+  for (let i = 0; i < 4; i++) {
+    const code = syncCode();
+    const r = await env.DB.prepare(`INSERT OR IGNORE INTO sync_codes (code, gid, key, exp) VALUES (?, ?, ?, ?)`).bind(code, g.gid, b.key, now + CODE_TTL).run();
+    if (r.meta && r.meta.changes > 0) return json({ ok: true, code, exp: now + CODE_TTL });
+  }
+  return json({ ok: false, error: 'server' }, 500);
+}
+async function syncJoin(request, env) {
+  if (await slowDown(env, request, 'j')) return SLOW();
+  const b = await readJson(request, 200);
+  const code = typeof (b && b.code) === 'string' ? b.code.toUpperCase().replace(/[^0-9A-Z]/g, '') : '';
+  if (code.length !== 8 || [...code].some(c => !SYNC_ABC.includes(c))) return json({ ok: false, error: 'bad_code' }, 404);
+  await ensureSchema(env);
+  const now = Date.now();
+  const c = await env.DB.prepare(`SELECT gid, key, exp FROM sync_codes WHERE code = ?`).bind(code).first();
+  if (!c || c.exp < now) return json({ ok: false, error: 'bad_code' }, 404);
+  await env.DB.prepare(`DELETE FROM sync_codes WHERE code = ?`).bind(code).run(); // 한 번만
+  const g = await env.DB.prepare(`SELECT gid, ver, devs, data FROM sync_groups WHERE gid = ?`).bind(c.gid).first();
+  if (!g) return json({ ok: false, error: 'gone' }, 404);
+  if (g.devs >= SYNC_DEVS) return json({ ok: false, error: 'full' }, 409);
+  await env.DB.prepare(`UPDATE sync_groups SET devs = devs + 1, seen = ? WHERE gid = ?`).bind(now, g.gid).run();
+  return json({ ok: true, key: c.key, ver: g.ver, z: g.data, devs: g.devs + 1 });
+}
+async function syncPull(request, env) {
+  if (await slowDown(env, request, 'p')) return SLOW();
+  const b = await readJson(request, 400);
+  await ensureSchema(env);
+  const g = await syncGroup(env, b && b.key);
+  if (!g) return json({ ok: false, error: 'gone' }, 404);
+  await syncTouch(env, g);
+  if (Number.isInteger(b.have) && b.have === g.ver) return json({ ok: true, same: true, ver: g.ver, devs: g.devs });
+  return json({ ok: true, ver: g.ver, z: g.data, devs: g.devs });
+}
+async function syncPush(request, env) {
+  if (await slowDown(env, request, 'u')) return SLOW();
+  const b = await readJson(request, 1_500_000); const z = syncData(b && b.z);
+  if (!z || !Number.isInteger(b.base) || !str(b.key, SYNC_KEY)) return json({ ok: false, error: 'bad_fields' }, 400);
+  await ensureSchema(env);
+  const gid = await gidOf(b.key), now = Date.now();
+  // 마지막으로 받은 판(base)이 서버의 최신일 때만 덮는다. 그 사이 다른 기기가 올렸으면 최신을 돌려줘 기기에서 합치게 한다.
+  const r = await env.DB.prepare(`UPDATE sync_groups SET ver = ver + 1, data = ?, size = ?, ts = ?, seen = ? WHERE gid = ? AND ver = ?`).bind(z, z.length, now, now, gid, b.base).run();
+  if (r.meta && r.meta.changes > 0) return json({ ok: true, ver: b.base + 1 });
+  const g = await env.DB.prepare(`SELECT ver, devs, data FROM sync_groups WHERE gid = ?`).bind(gid).first();
+  if (!g) return json({ ok: false, error: 'gone' }, 404);
+  return json({ ok: false, error: 'conflict', ver: g.ver, z: g.data, devs: g.devs }, 409);
+}
+async function syncLeave(request, env) {
+  if (await slowDown(env, request, 's')) return SLOW();
+  const b = await readJson(request, 400);
+  if (!str(b && b.key, SYNC_KEY)) return json({ ok: false, error: 'bad_fields' }, 400);
+  await ensureSchema(env);
+  const gid = await gidOf(b.key);
+  await env.DB.batch([env.DB.prepare(`UPDATE sync_groups SET devs = devs - 1 WHERE gid = ?`).bind(gid), env.DB.prepare(`DELETE FROM sync_groups WHERE gid = ? AND devs <= 0`).bind(gid), env.DB.prepare(`DELETE FROM sync_codes WHERE gid = ?`).bind(gid)]);
+  return json({ ok: true });
 }
 
 // 검은 성배 집계: 결말×보스를 쓰러뜨린 쪽×내 서번트의 끝×함께 싸운 조 수로 묶은 줄과, 클래스별 판수·내가 쓰러뜨린 수
@@ -450,6 +547,10 @@ export default {
       if (request.method === 'POST' && url.pathname === '/api/ghost/report') return await reportGhost(request, env);
       if (request.method === 'POST' && url.pathname === '/api/ghost/result') return await ghostResult(request, env);
       if (request.method === 'POST' && url.pathname === '/api/ghost/news') return await ghostNews(request, env);
+      if (request.method === 'POST' && url.pathname.startsWith('/api/sync/')) {
+        const f = { new: syncNew, code: syncMakeCode, join: syncJoin, pull: syncPull, push: syncPush, leave: syncLeave }[url.pathname.slice(10)];
+        if (f) return await f(request, env);
+      }
       if (url.pathname.startsWith('/api/')) return json({ ok: false, error: 'not_found' }, 404);
     } catch (e) {
       if (e instanceof TooBig) return json({ ok: false, error: 'too_big' }, 413);
