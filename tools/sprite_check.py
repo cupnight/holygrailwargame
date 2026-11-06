@@ -41,10 +41,11 @@ HEIGHT = dict(sigurd=178, siegfried=190, artoria=154, nero=150, gawain=180, mord
     ozymandias=179, medb=154, ushiwaka=168, ivan=531, odysseus=179, hippolyta=159, shingen=185, medea=163, merlin=178,
     paracelsus=183, gilles=196, tamamo=160, andersen=146, shakespeare=180, davinci=160, nitocris=162, mozart=180,
     sanzang=160, circe=147, avicebron=161, prelati=152, solomon=178, jingke=159, kojiro=176, cursedarm=215, hundred=170,
-    serenity=161, kinghassan=220, semiramis=169, jack=134, lishuwen=166, sanson=178, shuten=145, lancelot=191,
+    serenity=161, kinghassan=220, semiramis=169, jack=134, kama=156, lishuwen=166, sanson=178, shuten=145, lancelot=191,
     heracles=253, spartacus=221, lubu=225, frankenstein=172, asterios=298, darius=345, beowulf=186, kintoki=190,
     raikou=175, ibaraki=147, penthesilea=158, hijikata=187, caligula=185, morgan=170, kriemhild=168, jeanne=159,
-    qinshihuang=180, amakusa=169, holmes=183, dantes=185, salieri=181, hessian=181, kagekiyo=172, angra=167, jalter=159)
+    qinshihuang=180, amakusa=169, holmes=183, dantes=185, salieri=181, hessian=181, kagekiyo=172, angra=167, jalter=159,
+    baobhan=170, barghest=190, ereshkigal=159, ishtar=159, lanling=172, melusine=147, muramasa=167)
 
 # 마스터 유형 — 성별이 고정된 유형은 그 성별만
 MASTER_TYPES = {t: 'mf' for t in ('heir exec elder student avenger merc veteran detective collector cultist prodigy '
