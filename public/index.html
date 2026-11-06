@@ -431,7 +431,7 @@ aside{display:grid;gap:18px;align-content:start}
 .sfx-fly{position:fixed;z-index:61;left:0;top:0;transform-origin:0 0;pointer-events:none;opacity:0;will-change:transform,filter,opacity}
 .sfx-fly .pf{display:block}
 .sfx-card{position:absolute;left:0;right:0;text-align:center;display:grid;justify-items:center;gap:6px;padding:0 16px;pointer-events:none}
-.sfx-cls{font-family:var(--f-mono);font-size:12px;letter-spacing:.42em;color:var(--gold2);opacity:0}
+.sfx-cls{font-family:var(--f-mono);font-size:12px;letter-spacing:.6em;text-indent:.6em;color:var(--gold2);opacity:0}
 .sfx-nm{font-family:var(--f-display);font-size:clamp(22px,min(5vw,7.5vh),42px);color:#fbf1dc;letter-spacing:.08em;line-height:1.15;text-shadow:0 0 18px rgba(240,200,120,.45),0 0 4px #000;clip-path:inset(0 100% 0 0);word-break:keep-all}
 .sfx-rule{height:1px;width:0;max-width:420px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
 .sfx-tt{font-family:var(--f-story);font-size:clamp(14px,2.2vw,17px);color:#e7d6b4;opacity:0;text-shadow:0 0 6px #000}
@@ -13208,7 +13208,7 @@ function summonFx(){
   const sh=$('#sheet'), W=innerWidth, H=innerHeight, low=H<520, D=Math.round(Math.min(240,W*.5,H*(low?.27:.3))), cx=W/2, ey=H*(low?.27:.36); // low: 가로로 눕힌 휴대폰처럼 낮은 화면
   const o=document.createElement('div'); o.id='cfx'; o.className='sfx sfx-'+K; o.setAttribute('role','status'); o.setAttribute('aria-label',`${Sim.CLS[h.cls].n} ${h.name} 소환`);
   o.innerHTML=`<div class="sfx-bg"></div><canvas class="sfx-c1"></canvas><canvas class="sfx-c2"></canvas><div class="sfx-fl"></div>
-    <div class="sfx-card" style="top:${ey+D/2+18}px"><div class="sfx-cls" style="color:${T.cl}">${Sim.CLS[h.cls].n.split('').join(' ')}</div><div class="sfx-nm" style="color:${T.nm};text-shadow:0 0 18px rgba(${T.ng},.5),0 0 4px #000">${esc(h.name)}</div><div class="sfx-rule" style="background:linear-gradient(90deg,transparent,rgb(${T.ln}),transparent)"></div><div class="sfx-tt">${esc(h.title)}</div></div>
+    <div class="sfx-card" style="top:${ey+D/2+18}px"><div class="sfx-cls" style="color:${T.cl}">${esc(Sim.CLS[h.cls].n)}</div><div class="sfx-nm" style="color:${T.nm};text-shadow:0 0 18px rgba(${T.ng},.5),0 0 4px #000">${esc(h.name)}</div><div class="sfx-rule" style="background:linear-gradient(90deg,transparent,rgb(${T.ln}),transparent)"></div><div class="sfx-tt">${esc(h.title)}</div></div>
     <span class="xf-skip">누르면 넘어감</span>`;
   const fly=document.createElement('div'); fly.className='sfx-fly'; fly.innerHTML=faceHtml(h.id,D,{art:true}); fly.style.transform=`translate(${cx-D/2}px,${ey-D/2}px)`;
   document.body.appendChild(o); document.body.appendChild(fly); sh.classList.remove('sfx-show'); sh.classList.add('sfx-hide');
