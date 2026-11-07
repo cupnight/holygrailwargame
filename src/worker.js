@@ -11,6 +11,7 @@
 //   POST /api/ghost/shown · /withdraw · /report — 등장 횟수, 거두기, 신고(3번이면 숨김)
 //   POST /api/ghost/result  그 조가 끼어든 전쟁의 결과(받은 기기가 전쟁이 끝날 때 한 번 보냄)
 //   POST /api/ghost/news    보낸 기기가 자기 조들의 결과 소식을 받아 간다(받은 쪽 플레이어 정보는 담지 않음)
+//   POST /api/ghost/mine    보낸 기기(와 연결된 기기)가 아직 거두지 않은 조 목록 — 시작 화면 '보낸 조' 탭
 //   POST /api/sync/new · /code · /join · /pull · /push · /leave
 //        기기 연결: 같은 사람이 웹·모바일을 오가며 같은 기록을 쓰도록, 압축한 기록 묶음을 비밀 키로 맡아 둔다.
 //        키 자체는 저장하지 않고 해시만 둔다. 연결 코드는 10분 동안 한 번만 쓸 수 있다.
@@ -210,6 +211,7 @@ function cleanGhost(b) {
     trust: int(b.trust, 0, 100) ?? 50,
     bond: int(b.bond, 0, 200) ?? 50,
     kills: int(b.kills, 0, 9) ?? 0,
+    n: int(b.n, 1, 1e6),
     seals: int(b.seals, 0, 3) ?? 0,
     pw: int(b.pw, 40, 95) ?? 70,
     tac: TACS.has(b.tac) ? b.tac : 'defensive',
@@ -340,6 +342,21 @@ async function ghostNews(request, env) {
   const list = results.map(r => ({ id: r.id, ts: r.ts, year: r.year, city: r.city || '', join: r.join_day, end: r.ending, day: r.out_day, tod: r.tod,
     by: r.by_who, ally: !!r.ally, name: r.name, hero: r.hero, cls: r.cls, sentYear: r.sent_year, sentCity: r.sent_city || '' }));
   return json({ ok: true, list });
+}
+
+// 보낸 기기(와 연결된 기기, 최대 8개)가 아직 거두지 않은 조. 지난 생 기록이 기기에서 밀려나도 이 목록으로 거둘 수 있다.
+async function ghostMine(request, env) {
+  if (await slowDown(env, request, 'm')) return SLOW();
+  const b = await readJson(request, 300);
+  const dev = str(b && b.dev, ID);
+  if (!dev) return json({ ok: false, error: 'bad_fields' }, 400);
+  const devs = [...new Set([dev, ...(Array.isArray(b.devs) ? b.devs : []).map(d => str(d, ID)).filter(Boolean)])].slice(0, 8);
+  await ensureSchema(env);
+  const { results } = await env.DB.prepare(
+    `SELECT id, dev, created, hidden, data FROM ghosts WHERE dev IN (${devs.map(() => '?').join(',')}) ORDER BY created DESC LIMIT 300`).bind(...devs).all();
+  const list = results.map(r => { let d = {}; try { d = JSON.parse(r.data) || {}; } catch (e) {}
+    return { id: r.id, dev: r.dev, at: r.created, hidden: !!r.hidden, name: d.name || '', hero: d.hero, cls: d.cls, year: d.year, city: d.city || '', n: d.n || null }; });
+  return json({ ok: true, list, max: 30 });
 }
 
 // ---- 기기 연결 ----
@@ -547,6 +564,7 @@ export default {
       if (request.method === 'POST' && url.pathname === '/api/ghost/report') return await reportGhost(request, env);
       if (request.method === 'POST' && url.pathname === '/api/ghost/result') return await ghostResult(request, env);
       if (request.method === 'POST' && url.pathname === '/api/ghost/news') return await ghostNews(request, env);
+      if (request.method === 'POST' && url.pathname === '/api/ghost/mine') return await ghostMine(request, env);
       if (request.method === 'POST' && url.pathname.startsWith('/api/sync/')) {
         const f = { new: syncNew, code: syncMakeCode, join: syncJoin, pull: syncPull, push: syncPush, leave: syncLeave }[url.pathname.slice(10)];
         if (f) return await f(request, env);
