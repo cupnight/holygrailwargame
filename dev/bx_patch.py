@@ -97,5 +97,8 @@ for P in sys.argv[1:]:
     rp("""  const lastH=w=>{for(let i=w.length-1;i>=0;i--){const c=w.charCodeAt(i);if(c>=0xac00&&c<=0xd7a3)return c;if(/[0-9A-Za-z]/.test(w[i]))return 0;}return 0};""",
        """  const lastH=w=>{for(let i=w.length-1;i>=0;i--){const c=w.charCodeAt(i);if(c>=0xac00&&c<=0xd7a3)return c;if(/[0-9A-Za-z]/.test(w[i]))return /BB$/.test(w.slice(0,i+1))?0xBE44:0;}return 0};""")
 
+    import bx_tr
+    DD=[x for x in bx_tr.D]+[x for x in bx_tr.T if '{' not in x[0]]; TT=[x for x in bx_tr.T if '{' in x[0]]
+    s, nd, nt = i18n.add(s, DD, TT)
     open(P, 'w', encoding='utf-8').write(s)
-    print(os.path.basename(P), 'miss', miss)
+    print(os.path.basename(P), 'miss', miss, 'tr', nd, nt)

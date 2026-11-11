@@ -330,7 +330,7 @@
       else if(r<BXK.gCover+BXK.gChip){ b.bxChip={r:b.round+1,v:ri(3,6)}; log(`${gN}${J(gN,이)} 옆에서 ${hero().name}의 발을 묶었다.`,'war'); }
       else { const d=Math.max(1,Math.round((4+ri(0,5))*.6)); w.hp=clamp(w.hp-d); log(`${gN}${J(gN,이)} 키아라와 함께 ${hero().name}${J(hero().name,을)} 쳤다.`,'war'); } }
     for(const id of (c.freed||[])){ const nm=H_BY[id].name; c.egoNP=c.egoNP||{};
-      if(!c.egoNP[id]&&(e.hp<=40||b.round>=2)&&ch(.25)){ c.egoNP[id]=1; const d=ri(14,22); e.hp=Math.max(0,e.hp-d); log(id==='meltryllis'?`보구 해방 — 멜트릴리스의 「사랑의 흑고래(리바이어선)」. 키아라의 몸이 단숨에 녹아내렸다.`:`보구 해방 — 패션립의 「브레스트 바레이」. 키아라가 거대한 손톱 사이에 끼었다.`,'allynp'); continue; }
+      if(!c.egoNP[id]&&(e.hp<=40||b.round>=2)&&ch(.25)){ c.egoNP[id]=1; const d=ri(14,22); e.hp=Math.max(0,e.hp-d); log(id==='meltryllis'?`보구 해방 — 멜트릴리스의 「사라스바티 멜트아웃」. 키아라의 몸이 단숨에 녹아내렸다.`:`보구 해방 — 패션립의 「브륀힐드 로만시아」. 키아라가 거대한 손톱 사이에 끼었다.`,'allynp'); continue; }
       if(ch(.45)){ const gs=bxGuards(); if(gs.length&&ch(.4)){ const g=gs.sort((a,b)=>a.hp-b.hp)[0]; g.hp=clamp(g.hp-ri(5,10)); log(`${nm}${J(nm,이)} ${pName(g)}에게 달려들었다.`,'war'); if(g.hp<=0) bxUnitDown(g,'me'); }
         else { e.hp=Math.max(0,e.hp-ri(4,9)); log(`${nm}${J(nm,이)} 옆에서 키아라에게 일격을 보탰다.`,'war'); } } } }
   // 키아라의 힘: 플레이어 결전 · NPC 결전
