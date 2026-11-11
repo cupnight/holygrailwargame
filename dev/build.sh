@@ -7,4 +7,6 @@ mkdir -p build; cp base.html build/game.html
 python3 al_apply.py build/game.html            # ⓪ 속성·취향
 python3 inject3.py batch3 3차 build/game.html   # ① BB·멜트릴리스·패션립
 python3 cls_apply.py build/game.html           # ① 새 클래스 셋
+python3 inject3.py batch4 4차 build/game.html   # ③ 스즈카 고젠 · 타마모 캣
+python3 extras4.py build/game.html             # ③ 성향 말투 · 마성 · 매료 마안 · 낮잠
 python3 bx_patch.py build/game.html            # ② 비스트 위기

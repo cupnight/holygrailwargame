@@ -1,0 +1,110 @@
+# 신규 서번트 4차: 스즈카 고젠(세이버) · 타마모 캣(버서커)
+# 모든 문장은 (한국어, 영어, 일본어). 원작 대사를 옮기지 않고 새로 쓴 문장이다. 호칭 · 말투 · 말버릇만 빌렸다.
+# 스즈카: 하늘에서 내려온 천마의 딸이 여고생처럼 사는 컨셉. 해체 · 갸루 말투(완전, 대박, 진짜). 마스터를 '마스터'로.
+# 캣: 3인칭 '캣'. 짧은 단정형. 「멍」(woof · ワン)은 드물게(전체에서 두 번).
+T = lambda ko, en, ja: (ko, en, ja)
+
+B = []
+
+B.append(dict(
+ id='suzuka', fem=1, cls='sword', name=T('스즈카 고젠','Suzuka Gozen','鈴鹿御前'), title=T('제사천마왕의 딸','Daughter of the Fourth Heavenly Demon King','第四天魔王の娘'),
+ frm=T('스즈카산 전승','Legends of Mount Suzuka','鈴鹿山の伝承'), hint=T('하늘에서 내려온 귀녀의 이야기','The tale of a demon maiden who came down from the heavens','天から降りてきた鬼女の話'),
+ s=['D','A','D','A','B'],
+ art=dict(n=T('천귀우','Tenkiu','天鬼雨'), d=T('하늘에서 칼날의 비를 쏟아붓는 신통력','A divine power that pours a rain of blades down from the sky','天から刃の雨を降らせる神通力')),
+ traits=['자유','연민'],
+ wish=T('이번 생에서는 제대로 연애해 보는 것','To properly fall in love, this time around','今度こそ、ちゃんと恋愛してみること'),
+ relic=T('휴대폰 고리로 달아 둔 붉은 칼끈 한 토막','A scrap of red sword cord, hung as a phone charm','スマホのストラップにした赤い下げ緒の切れ端'),
+ frags=[
+  T('원래는 이 나라를 무너뜨리러 하늘에서 내려왔어. 마왕의 딸이니까 그게 일이었지. …근데 나를 베러 온 장군한테 반해 버렸어. 완전 계획 실패.','I originally came down from the heavens to bring this country to ruin. I\'m a demon king\'s daughter, so that was the job. ...But I fell for the general sent to cut me down. Total plan fail.','もともとはこの国を滅ぼしに天から降りてきたの。魔王の娘だし、それが仕事だったわけ。……なのに、私を斬りに来た将軍に惚れちゃった。計画、完全に失敗。'),
+  T('칼이 세 자루 있어. 대통련, 소통련, 현명련. 셋 다 하늘에서 가져온 거야. 하나는 한때 남한테 맡겼었는데… 그 얘긴 나중에.','I have three swords. Daitsuren, Shoutsuren, Kenmyouren. All three came with me from the heavens. I once entrusted one of them to someone... but that\'s a story for later.','刀が三振りあるの。大通連、小通連、顕明連。三つとも天から持ってきたやつ。一振りは昔、人に預けてたんだけど……その話はまた今度。'),
+  T('살아 있을 때는 산속에서 귀신 노릇만 했거든. 교복 입고 친구랑 수다 떨고 하굣길에 군것질하는 거, 그런 게 해 보고 싶었어. 그래서 지금은 이렇게 하고 다니는 거야.','When I was alive, all I did was play the demon up in the mountains. Wearing a uniform, gossiping with friends, grabbing snacks on the way home from school — I wanted to try all that. So that\'s why I go around like this now.','生きてた頃は山奥で鬼をやってばっかだったの。制服着て友達としゃべって、帰り道に買い食いして、そういうのやってみたかったんだよね。だから今はこうしてるってわけ。')],
+ voice=dict(reg='plain', ord=-1,
+  greet=T('세이버, 스즈카 고젠. 하늘에서 내려온 신통력 만렙 여고생이 와 줬거든? 마스터, 잘 부탁해!','Saber, Suzuka Gozen. A high schooler with maxed-out divine powers came all the way down from the heavens for you, okay? Master, nice to meet you!','セイバー、鈴鹿御前。天から降りてきた神通力カンストの女子高生が来てあげたんだけど？マスター、よろしくね！'),
+  bow=T('오, 인사 제대로 하네. 그런 거 은근 점수 높다?','Oh, you greet people properly. That actually scores pretty high, you know?','お、ちゃんと挨拶できるじゃん。そういうの、地味にポイント高いよ？'),
+  wish=T('소원? 연애. 진짜 제대로 된 연애. …웃지 마, 나 완전 진지하거든?','My wish? Romance. A real, proper romance. ...Don\'t laugh, I\'m dead serious, okay?','願い？恋愛。ちゃんとしたやつ。……笑わないでよ、マジで真剣なんだから。'),
+  order=T('오케이, 명령 접수. 대신 끝나면 크레이프 쏘기?','Okay, order received. But you\'re buying me a crepe after, deal?','オッケー、命令了解。そのかわり終わったらクレープおごりね？'),
+  plan=T('작전? 좋지. 내가 신통력으로 앞을 볼 테니까, 마스터는 따라만 와.','Strategy? Sure. I\'ll look ahead with my divine power, so just follow me, Master.','作戦？いいじゃん。私が神通力で先を見とくから、マスターはついてくるだけでいいよ。'),
+  naive=T('아무것도 모르고 불렀어? 대박. 성배전쟁이야. 일곱 명이 싸워서 마지막에 남는 쪽이 소원을 이루는 거. 내가 차근차근 알려 줄게.','You summoned me without knowing anything? No way. It\'s the Holy Grail War. Seven pairs fight, and whoever\'s left at the end gets their wish. I\'ll walk you through it.','何も知らずに呼んだの？ヤバ。聖杯戦争だよ。七組で戦って、最後に残ったほうが願いを叶えるってやつ。順番に教えてあげる。'),
+  thanks=T('에이, 뭘 이런 걸로. …근데 고맙다는 말, 은근 좋다. 한 번 더 해 줘.','Aw, it\'s nothing. ...But hearing "thank you" is kind of nice. Say it one more time.','えー、こんなことで。……でも、ありがとうって言われるの、なんかいいね。もう一回言って。'),
+  flee=T('튀자는 거지? 오케이. 지는 싸움에 목숨 거는 건 완전 비효율이니까.','You want to bail? Okay. Betting your life on a losing fight is seriously inefficient.','逃げるってこと？オッケー。負け戦に命かけるとか、マジ非効率だし。'),
+  seals0=T('령주가 없다고 내가 갈 줄 알았어? 마스터랑 끝까지 간다고 정했거든. 번복 안 해.','Thought I\'d leave just because you\'re out of Command Spells? I decided I\'m seeing this through with you, Master. No take-backs.','令呪がないから私が帰るとでも思った？マスターと最後まで行くって決めたの。取り消しなし。'),
+  dawn=T('굿모닝, 마스터. 오늘 운세 봤는데 대길이래. 기분 좋게 가자.','Good morning, Master. I checked today\'s fortune — great luck. Let\'s go in a good mood.','おはよ、マスター。今日の運勢見たら大吉だって。いい気分でいこ。'),
+  refuse=T('흐응, 마스터가 그렇게 정했으면 됐어. 나중에 내 말 들을걸 하고 후회하지나 마.','Hmm, if that\'s your call, Master, fine. Just don\'t come crying later that you should\'ve listened to me.','ふーん、マスターがそう決めたならいいけど。あとで私の言うこと聞けばよかったって後悔しないでよ。'),
+  grailNo=T('이 잔, 완전 별로야. 하늘에서 내려다본 어떤 것보다 탁해. 이런 걸로 소원 빌면 안 돼.','This cup is seriously bad news. It\'s murkier than anything I ever looked down on from the heavens. You can\'t wish on something like this.','この杯、マジでない。天から見下ろしたどんなものより濁ってる。こんなので願い事しちゃダメ。'),
+  grailYes=T('이겼다! 마스터, 우리 완전 레전드 아니야? 기념사진 찍자!','We won! Master, aren\'t we total legends? Let\'s take a commemorative photo!','勝った！マスター、私たちマジで伝説じゃない？記念写真撮ろ！'),
+  bye=[T('그럼 나 먼저 하늘로 간다? 마스터, 다음엔 방과 후에 만나.','Well then, I\'m heading back to the heavens first, okay? Master, let\'s meet after school next time.','じゃ、先に天に帰るね？マスター、次は放課後に会お。'), T('재밌었어. 진짜로. 이번 생, 꽤 괜찮았다.','That was fun. Really. This life was pretty good.','楽しかった。マジで。今回の生、けっこうよかったよ。')],
+  cold=T('…마스터는 나한테 관심 1도 없지? 됐어, 기대한 내가 바보지.','...You don\'t care about me even a little, do you, Master? Whatever. I was dumb to expect anything.','……マスターって、私に興味ゼロでしょ？もういい、期待した私がバカだった。'),
+  askWish=T('마스터는 성배에 뭘 빌 거야? 연애 관련이면 내가 상담해 줄 수 있는데.','What are you going to wish for on the Grail, Master? If it\'s about romance, I can give you advice.','マスターは聖杯に何を願うの？恋愛系なら相談に乗れるけど。')),
+ hline=[T('대통련, 소통련, 현명련. 셋 다 간다!','Daitsuren, Shoutsuren, Kenmyouren. All three, let\'s go!','大通連、小通連、顕明連。三振りまとめていくよ！'), T('하늘이 내 편이거든?','Heaven\'s on my side, you know?','天は私の味方なんだけど？'), T('눈 마주쳤지? 이미 끝났어.','You met my eyes, right? It\'s already over.','目、合ったよね？もう終わってるから。')],
+ hday=[T('스즈카는 아침부터 거울 앞에서 교복 리본 각도를 십 분 넘게 맞췄다. "오늘은 이 각도가 정답."','Suzuka spent over ten minutes in front of the mirror that morning adjusting the angle of her uniform ribbon. "Today, this angle is the right answer."','鈴鹿は朝から鏡の前で制服のリボンの角度を十分以上も直していた。「今日はこの角度が正解」'),
+       T('스즈카는 편의점 신상 디저트를 전부 사 와서 별점을 매겼다. 일등은 딸기 크레이프였다.','Suzuka bought every new dessert at the convenience store and rated them all. First place went to the strawberry crepe.','鈴鹿はコンビニの新作スイーツを全部買ってきて星をつけていた。一位はいちごクレープだった。'),
+       T('스즈카는 소파에 엎드려 연애 잡지를 넘기며 형광펜으로 줄을 쳤다. 표시된 곳은 전부 "첫 데이트" 부분이었다.','Suzuka lay on the sofa flipping through a romance magazine, marking it with a highlighter. Every marked part was about "the first date."','鈴鹿はソファにうつ伏せで恋愛雑誌をめくりながら、蛍光ペンで線を引いていた。印がついていたのは全部「初デート」のところだった。')],
+ talk=dict(t=[T('마스터, 이번 주말에 시간 돼? …아, 작전 회의라는 뜻이야. 장소는 역 앞 카페. 순수하게 작전 회의.','Master, are you free this weekend? ...Ah, I mean for a strategy meeting. Location: the café in front of the station. Purely a strategy meeting.','マスター、今週末ひま？……あ、作戦会議って意味だから。場所は駅前のカフェ。純粋に作戦会議。'),
+              T('있잖아, 하늘에서 보면 사람들 사는 게 다 반짝반짝해 보였어. 그래서 내려와 보고 싶었던 거야. …막상 내려와 보니 숙제도 있고 귀찮은 것도 많더라. 그래도 좋아.','You know, from up in the heavens, people\'s lives all looked so sparkly. That\'s why I wanted to come down. ...Once I actually did, there was homework and plenty of hassle. Still, I like it.','あのさ、天から見ると、人の暮らしってみんなキラキラして見えたの。だから降りてみたかったんだ。……いざ降りてみたら宿題もあるし面倒なことも多かったけど。それでも好き。')],
+           w=[T('스즈카는 하굣길처럼 당신과 나란히 상점가를 걸었다. 붕어빵 가게 앞에서 그녀가 멈춰 서더니 하나를 둘로 갈라 큰 쪽을 내밀었다. "반띵. 이게 하굣길 국룰이야."','Suzuka walked side by side with you through the shopping street, as if on the way home from school. She stopped in front of a taiyaki stand, split one in two, and held out the bigger half. "Halfsies. That\'s the after-school rule."','鈴鹿は下校のときみたいにあなたと並んで商店街を歩いた。たい焼き屋の前で立ち止まると、一つを半分に割って大きいほうを差し出した。「半分こ。これが帰り道のお約束」')]),
+ weak=T('사랑하는 사람 앞에서 무뎌지는 칼끝','A blade that dulls before the one she loves','愛する人の前で鈍る刃'),
+ lastw=[T('아… 여기까지인가. 마스터, 데이트 약속은 다음 생으로 미룰게.','Ah... so this is it. Master, I\'ll push our date back to the next life.','あー……ここまでか。マスター、デートの約束は来世に持ち越しね。'), T('하늘로 돌아가도… 너 있는 쪽 보고 있을게.','Even back in the heavens... I\'ll keep looking your way.','天に帰っても……あんたのいるほう、見てるから。')],
+ artx=dict(n=T('천귀우','Tenkiu','天鬼雨'), r='B+', k=T('대군보구','Anti-Army','対軍宝具'),
+   x=T('세 자루 신검의 힘으로 수많은 칼날을 불러내, 하늘에서 비처럼 쏟아붓는다.','Calls forth countless blades with the power of her three divine swords and pours them down from the sky like rain.','三振りの神剣の力で無数の刃を呼び出し、天から雨のように降り注がせる。')),
+ sk=[['대마력','A',1],['기승','B',1],['신성','A',1],['신통력','B'],['마안(매료)','B+'],['재지의 축복','C']],
+ npr='Aa', hx='쾌활 중립 악', hal='NE', cas=1, demonic=1,
+))
+
+B.append(dict(
+ id='tamamocat', fem=1, cls='berserk', name=T('타마모 캣','Tamamo Cat','タマモキャット'), title=T('여우 꼬리 하나의 분신','Avatar of a Single Fox Tail','狐の尾ひとつの分身'),
+ frm=T('일본 전승','Japanese legend','日本の伝承'),
+ s=['B+','A','E','A','B'],
+ art=dict(n=T('산산일광오수궁주지육림','Sansan Nikkou Gosuikyuu Shuchinikurin','燦々日光午睡宮酒池肉林'), d=T('실컷 날뛴 뒤 볕 좋은 곳에서 낮잠을 즐기는 고양이의 연회','The feast of a cat who runs wild to her heart\'s content, then naps in a sunny spot','好きなだけ暴れたあと、日なたで昼寝を楽しむ猫の宴')),
+ traits=['충성','연민'],
+ wish=T('주인에게 최고의 밥을 지어 바치는 것','To cook the finest meals for her master','ご主人に最高のご飯を作ってささげること'),
+ relic=T('발톱 자국이 난 커다란 고양이 발 장갑 한 짝','A single large cat-paw glove, scored with claw marks','爪痕のついた大きな猫の手袋片方'),
+ frags=[
+  T('캣은 원래 어느 여우의 꼬리 하나였다. 떨어져 나오면서 머리가 조금 이상해졌다. 이상해진 덕분에 즐겁다. 손해 본 건 없다.','Cat was originally one tail of a certain fox. When she split off, her head went a little strange. Thanks to that, she\'s having fun. Nothing lost.','キャットはもともと、とある狐の尻尾の一本だった。分かれるときに頭が少しおかしくなった。おかしくなったおかげで楽しい。損はしていない。'),
+  T('캣은 요리를 한다. 오므라이스가 특기다. 케첩으로 그림을 그린다. 무슨 그림인지는 그날 기분이다.','Cat cooks. Omurice is her specialty. She draws on it with ketchup. What she draws depends on her mood that day.','キャットは料理をする。得意はオムライス。ケチャップで絵を描く。何の絵かはその日の気分だ。'),
+  T('좋은 주인을 만나면 캣은 좋은 고양이가 된다. 나쁜 주인을 만나면 캣은 낮잠을 잔다. 간단한 이치다.','When Cat meets a good master, Cat becomes a good cat. When Cat meets a bad master, Cat takes a nap. Simple logic.','いいご主人に会えば、キャットはいい猫になる。悪いご主人に会えば、キャットは昼寝をする。簡単な理屈だ。')],
+ voice=dict(reg='plain', ord=2,
+  greet=T('버서커, 타마모 캣이다. 오늘부터 캣이 이 집의 고양이다. 밥은 맡겨라. 대신 쓰다듬는 건 잊지 마라.','Berserker, Tamamo Cat. From today, Cat is this house\'s cat. Leave the cooking to her. But don\'t forget the head pats.','バーサーカー、タマモキャットだ。今日からキャットがこの家の猫だ。ご飯は任せろ。そのかわり、なでるのを忘れるな。'),
+  bow=T('예의 바른 주인이다. 캣은 그런 주인을 좋아한다. 오늘 저녁은 한 접시 더 준다.','A polite master. Cat likes that kind of master. Tonight you get an extra plate.','礼儀正しいご主人だ。キャットはそういうご主人が好きだ。今夜はひと皿おまけしてやる。'),
+  wish=T('소원? 주인에게 최고의 밥을 짓는 것이다. 그리고 볕 좋은 자리. 그것뿐이다.','A wish? To cook the finest meals for my master. And a sunny spot. That\'s all.','願い？ご主人に最高のご飯を作ることだ。あと日当たりのいい場所。それだけだ。'),
+  order=T('명령인가. 좋다, 캣이 간다. 발톱은 잘 갈아 두었다.','An order? Fine, Cat goes. Her claws are nicely sharpened.','命令か。よし、キャットが行く。爪はよく研いである。'),
+  plan=T('작전은 간단하다. 할퀸다. 먹는다. 잔다. 이 순서를 지키면 진 적이 없다.','The plan is simple. Scratch. Eat. Sleep. Cat has never lost when she keeps that order.','作戦は簡単だ。引っかく。食べる。寝る。この順番を守れば負けたことはない。'),
+  naive=T('아무것도 모르고 불렀나. 괜찮다, 캣도 다 알지는 않는다. 성배전쟁이다. 끝까지 남으면 이긴다. 그 사이 밥은 캣이 맡는다.','You summoned Cat knowing nothing? That\'s fine, Cat doesn\'t know everything either. It\'s the Holy Grail War. Last one standing wins. In the meantime, Cat handles the meals.','何も知らずに呼んだのか。大丈夫だ、キャットも全部は知らない。聖杯戦争だ。最後まで残れば勝ちだ。その間のご飯はキャットが担当する。'),
+  thanks=T('고맙다는 말은 좋다. 하지만 캣은 쓰다듬는 쪽이 더 좋다. 머리는 여기다.','"Thank you" is nice. But Cat prefers head pats. Her head is right here.','ありがとうはいい言葉だ。でもキャットはなでられるほうが好きだ。頭はここだ。'),
+  flee=T('도망인가. 현명하다. 고양이는 질 싸움은 하지 않는다. 담장 위로 간다.','Running away? Wise. A cat doesn\'t pick fights she\'ll lose. Over the wall we go.','逃げるのか。賢い。猫は負ける喧嘩はしない。塀の上へ行くぞ。'),
+  seals0=T('령주가 없어도 캣은 안 간다. 밥그릇이 여기 있으니까. 그리고 주인도.','Even without Command Spells, Cat isn\'t leaving. Her food bowl is here. And so is her master.','令呪がなくてもキャットは行かない。ご飯のお皿がここにあるからな。あと、ご主人も。'),
+  dawn=T('아침이다. 밥은 다 됐다. 오늘은 당근이 들어간다. 남기지 마라.','Morning. Breakfast is ready. Today there are carrots in it. Don\'t leave any.','朝だ。ご飯はできてる。今日はにんじん入りだ。残すなよ。'),
+  refuse=T('흠, 주인이 정했다면 따른다. 고양이는 변덕스럽지만 오늘은 착하다.','Hmm, if my master decided, Cat follows. Cats are fickle, but today she\'s being good.','ふむ、ご主人が決めたなら従う。猫は気まぐれだが、今日はいい子だ。'),
+  grailNo=T('이 잔, 냄새가 고약하다. 상한 우유 같다. 캣은 이런 건 안 마신다. 주인도 마시지 마라.','This cup smells foul. Like spoiled milk. Cat won\'t drink this. Neither should you, Master.','この杯、くさい。腐った牛乳みたいだ。キャットはこんなの飲まない。ご주인も飲むな。'),
+  grailYes=T('이겼다! 오늘은 축하 밥이다. 메뉴는 주인이 좋아하는 걸로 전부다. 멍!','We won! Tonight is a celebration feast. The menu is everything you like, Master. Woof!','勝った！今日はお祝いご飯だ。メニューはご主人の好きなもの全部だ。ワン！'),
+  bye=[T('캣은 먼저 간다. 밥은 냉장고에 있다. 데워 먹어라.','Cat\'s heading off first. Food\'s in the fridge. Heat it up before you eat.','キャットは先に行く。ご飯は冷蔵庫にある。温めて食べろ。'), T('좋은 주인이었다. 캣은 좋은 고양이였을까.','You were a good master. Was Cat a good cat?','いいご主人だった。キャットはいい猫だったかな。')],
+  cold=T('…이 집은 볕이 안 든다. 캣은 다른 담장을 찾아야겠다.','...No sunlight reaches this house. Cat will have to find another wall to sit on.','……この家は日が当たらない。キャットは別の塀を探さないとな。'),
+  askWish=T('주인은 성배에 뭘 비나. 맛있는 밥이라면 성배 없이도 캣이 해 준다.','What will you wish for on the Grail, Master? If it\'s good food, Cat can make that without any Grail.','ご主人は聖杯に何を願う？おいしいご飯なら、聖杯なしでもキャットが作ってやる。')),
+ hline=[T('발톱 맛 좀 봐라!','Have a taste of these claws!','爪の味を見ろ！'), T('캣의 영역에 들어왔다. 각오해라.','You\'ve entered Cat\'s territory. Brace yourself.','キャットの縄張りに入ったな。覚悟しろ。'), T('다 끝나면 낮잠이다!','When this is over, nap time!','全部終わったら昼寝だ！')],
+ hday=[T('캣이 아침부터 오므라이스를 다섯 접시 만들었다. 케첩으로 각각 다른 동물이 그려져 있었다. 하나는 무엇인지 알 수 없었다.','Cat made five plates of omurice first thing in the morning. Each had a different animal drawn on it in ketchup. One of them was impossible to identify.','キャットが朝からオムライスを五皿作った。ケチャップでそれぞれ違う動物が描いてあった。ひとつは何なのかわからなかった。'),
+       T('캣은 창가 볕이 드는 자리를 따라 하루 종일 조금씩 자리를 옮기며 낮잠을 잤다.','Cat napped all day by the window, shifting a little at a time to follow the patch of sunlight.','キャットは窓辺の日だまりを追いかけて、一日中少しずつ場所を移しながら昼寝していた。'),
+       T('캣은 장을 봐 오더니 당근만 열 개를 내려놓았다. "세일이었다. 캣은 잘못하지 않았다."','Cat came back from shopping and set down ten carrots and nothing else. "They were on sale. Cat did nothing wrong."','キャットは買い物から帰ってくると、にんじんだけを十本置いた。「セールだった。キャットは悪くない」')],
+ talk=dict(t=[T('주인, 손을 내밀어라. …아니다, 악수가 아니다. 캣의 머리 위에 올려라. 그렇다, 그거다.','Master, hold out your hand. ...No, not a handshake. Put it on Cat\'s head. Yes, that\'s it.','ご主人、手を出せ。……違う、握手じゃない。キャットの頭の上に置け。そうだ、それだ。'),
+              T('캣은 가끔 생각한다. 꼬리 하나였을 때도 이렇게 밥이 맛있었나. …기억 안 난다. 그러니 지금이 제일 맛있는 거다.','Cat sometimes wonders. When she was just one tail, did food taste this good? ...She can\'t remember. So now must be the tastiest.','キャットはときどき考える。尻尾一本だったころも、ご飯はこんなにおいしかったか。……覚えてない。だから今がいちばんおいしいんだ。')],
+           w=[T('캣은 공원 벤치 위에서 동네 고양이들과 나란히 볕을 쬐었다. 당신이 다가가자 고양이들은 흩어졌지만, 캣만은 그대로 누운 채 꼬리로 옆자리를 두드렸다. 앉으라는 뜻이었다.','Cat sunbathed on a park bench alongside the neighborhood cats. When you approached, the cats scattered, but Cat stayed lying there and patted the seat beside her with her tail. It meant: sit.','キャットは公園のベンチで近所の猫たちと並んで日向ぼっこしていた。あなたが近づくと猫たちは散ったが、キャットだけは寝そべったまま、尻尾で隣の席をぽんぽんと叩いた。座れという意味だった。')]),
+ weak=T('떨어져 나온 꼬리의 흐트러진 이성','The scattered sanity of a tail that split away','分かれた尻尾の乱れた理性'),
+ lastw=[T('캣은… 조금 잔다. 깨우지 마라. 아니, 깨워라.','Cat is going to... sleep a little. Don\'t wake her. No — do wake her.','キャットは……少し寝る。起こすな。いや、起こせ。'), T('주인, 밥… 제때 챙겨 먹어라. 멍.','Master... eat your meals on time. Woof.','ご主人、ご飯……ちゃんと食べろよ。ワン。')],
+ artx=dict(n=T('산산일광오수궁주지육림','Sansan Nikkou Gosuikyuu Shuchinikurin','燦々日光午睡宮酒池肉林'), r='D', k=T('대인보구','Anti-Unit','対人宝具'),
+   x=T('발톱으로 상대를 마구 할퀴며 날뛴 뒤, 볕 좋은 자리에 드러누워 낮잠을 잔다.','Runs wild, raking her target with her claws, then flops down in a sunny spot for a nap.','爪で相手を引っかき回して暴れたあと、日当たりのいい場所に寝転んで昼寝をする。')),
+ sk=[['광화','C',1],['괴력','B'],['주술','E'],['변화','B']],
+ npr='Ap', hx='쾌활 혼돈 선', hal='CG', demonic=1,
+ npi=T('보구를 쓴 다음 합은 낮잠을 자느라 거의 싸우지 못한다(합 −30). 깨어난 뒤 두 합 동안 체력이 8씩 회복된다. 낮잠과 회복이 끝날 때까지 보구를 다시 쓸 수 없다',
+       'The round after using her Noble Phantasm, she naps and can barely fight (−30 to that round). After waking, she recovers 8 HP per round for two rounds. She can\'t use her Noble Phantasm again until the nap and recovery are over',
+       '宝具を使った次の合は昼寝をしていてほとんど戦えない（その合−30）。起きたあと二合のあいだ体力が8ずつ回復する。昼寝と回復が終わるまで宝具は使えない'),
+))
+
+SKX = {
+ '신통력': ('power', T('하늘에서 받은 신통한 힘으로 세 자루 칼을 부린다','Wields her three swords with divine power granted by the heavens','天から授かった神通力で三振りの刀を操る')),
+ '마안(매료)': ('sabotage', T('눈을 마주친 상대를 홀려 기세를 꺾는다. 남성 서번트에게 더 잘 듣는다','Charms whoever meets her eyes and breaks their momentum. Works better on male Servants','目を合わせた相手を魅了して勢いをくじく。男性サーヴァントにはよりよく効く')),
+ '재지의 축복': ('insight', T('하늘이 내린 재치로 싸움의 흐름을 빠르게 읽는다','Quickly reads the flow of battle with heaven-sent wit','天から授かった機知で戦いの流れを素早く読む')),
+}
+SKN = {
+ '신통력': ('Divine Power','神通力'),
+ '마안(매료)': ('Mystic Eyes (Charm)','魔眼（魅了）'),
+ '재지의 축복': ('Blessing of Wit','才知の祝福'),
+}
+RIVAL = []  # 타마모노마에와의 만남 대사는 짝 대사(시트 검수 중)로 넣는다
