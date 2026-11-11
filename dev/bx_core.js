@@ -3,7 +3,7 @@
      c.type==='beast' · c.stage 0 시작 · 1 휩쓸기 · 2 봉인 · 3 강림
      유닛: cx 'sent' 센티넬(KP를 품음, 강림 뒤 guard=1 호위) · 'bb' 달에서 온 BB · 'boss'(bx=1) 키아라 */
   // 수치 (상세안 16판 · 17 · 18장)
-  const BXK={pw:92, kpT:[0,.5,1.25,2.25,3.5,5], hpD:.05, hpA:.02, wdM:.85, npM:2, hp2:50, desc:-56, nd:-45, bbAdj:-10, relAdj:-.4,
+  const BXK={pw:92, kpT:[0,.5,1.25,2.25,3.5,5], hpD:.05, hpA:.02, wdM:.85, npM:2, hp2:50, desc:-56, nd:-41, bbAdj:-10, relAdj:-.4,
     heal:15, healSm:20, npHeal:15, logos:1.25, nwD:11, nwR:.7, sentR:.7, bbHit:[10,15], gAct:.3, gCover:.6, gChip:.2, nunKeep:30, bbKeep:30};
   if(typeof globalThis!=='undefined'&&globalThis.__BXK) Object.assign(BXK,globalThis.__BXK); // 시험용 덮어쓰기
   const KP_N=['Body','Site','Mouth','Spice','Organ'];
@@ -238,19 +238,50 @@
     const grp=contracted().filter(p=>!busy.has(p.i)&&!(p.halt>0)&&(w.heroAlive?p.cxGo===w.day&&p.hp>=40:(last&&ch(.7)||p.hp>=55&&ch(.5))));
     if(grp.length) bxNpcJoint(grp,false);
     grp.forEach(p=>busy.add(p.i)); }
-  function bxNpcJoint(grp,final){ const k=bxKiara(); if(!k||!grp.length) return; const w=W();
-    const order=grp.slice().sort((a,b)=>npcPower(b,false,1)-npcPower(a,false,1));
-    for(let i=0;i<order.length&&k.alive;i++){ const p=order[i]; if(!p.alive) continue; const rest=order.filter(q=>q!==p&&q.alive).length;
-      p.cxAssist=5*bxFreed()+4*rest; bxNpcVsKiara(p,final); p.cxAssist=0;
-      for(const q of order) if(q!==p&&q.alive) q.hp=Math.max(5,q.hp-ri(4,10));
+  // NPC 공동전 (18-G · 18-I): 가장 강한 조가 이끌고, 나머지 조는 합마다 함께 움직인다. 마지막 밤에는 이끄는 조가 쓰러지면 다음 조가 이어받는다
+  let BX_COMP=null;
+  function bxNpcJoint(grp,final){ const k=bxKiara(); if(!k||!grp.length) return;
+    const order=grp.slice().sort((a,b)=>npcPower(b,false,1)-npcPower(a,false,1)), out=[];
+    for(let i=0;i<order.length&&k.alive;i++){ const p=order[i]; if(!p.alive||out.includes(p.i)) continue;
+      const comp=order.filter(q=>q!==p&&q.alive&&!out.includes(q.i)); bxNpcVsKiara(p,final,comp,out);
       if(!final) break; } }
   const bxFreed=()=>{ const c=BXW(); return c?(c.freed||[]).length:0; };
-  function bxNpcVsKiara(p,final){ const k=bxKiara(); if(!k) return; BX_VS=[p,k]; const g0=bxGuards().length; npcFight(p,k,!!final); BX_VS=null;
-    for(const g of bxGuards()){ g.hp=clamp(g.hp-ri(5,12)); if(g.hp<=0) bxUnitDown(g,p); }
+  function bxNpcVsKiara(p,final,comp,out){ const k=bxKiara(); if(!k) return; out=out||[];
+    BX_VS=[p,k]; BX_COMP={lead:p,comp:comp||[],out,np:[],final:!!final}; p.cxAssist=5*bxFreed(); // 풀려난 멜트릴리스 · 패션립은 판정 보정으로만 붙는다
+    try{ npcFight(p,k,!!final); } finally{ BX_VS=null; BX_COMP=null; p.cxAssist=0; }
     if(k.hp<=0) bxUnitDown(k,p);
-    if(p.hp<=0&&p.alive){ const lh=H_BY[p.hero]; if(lh.sp==='revive'&&!p.usedRevive){ p.usedRevive=true; p.hp=45; return; }
-      p.alive=false; p.revealed=true; pairOut(p,'키아라 앞에서 쓰러졌다'); log(`감독관의 통지: ${cn(p)} 조 탈락. 키아라 앞에서.`,'notice'); if(p.ally) log(`동맹 ${p.mname}의 조가 무너졌다.`,'loss'); } }
-
+    for(const q of [p,...(comp||[])]) bxNpcFall(q); }
+  function bxNpcFall(p){ if(!p||!p.alive||p.hp>0) return; const lh=H_BY[p.hero]; if(lh.sp==='revive'&&!p.usedRevive){ p.usedRevive=true; p.hp=45; return; }
+    p.alive=false; p.revealed=true; pairOut(p,'키아라 앞에서 쓰러졌다'); log(`감독관의 통지: ${cn(p)} 조 탈락. 키아라 앞에서.`,'notice'); if(p.ally) log(`동맹 ${p.mname}의 조가 무너졌다.`,'loss'); }
+  // NPC끼리 키아라와 싸우는 합마다 (npcDuel 안에서 부른다): 호위의 엄호 · 견제 · 협공, 함께 간 조의 휘말림 · 보구 · 엄호 · 견제 · 협공
+  // X: 키아라와 맞선 조(대표) · K: 키아라. h0: 합이 시작될 때의 체력 · fire: 이번 합에 보구를 쏜 쪽
+  const BX_AOE=/대군|대성|대계|대국|대왕|대마/;
+  function bxDuelRound(A,B,r,h0,fire,final,hit){ const K=A.p.bx?A:B.p.bx?B:null; if(!K||!K.p.alive) return; const X=K.o, k=K.p, x=X.p, C=BX_COMP&&BX_COMP.lead===x?BX_COMP:null;
+    const m=Math.min(bxMult(true),2), kLost=()=>Math.max(0,h0.get(K)-k.hp), xLost=()=>Math.max(0,h0.get(X)-x.hp), weakG=()=>bxGuards().sort((a,b)=>a.hp-b.hp)[0];
+    const gHit=(g,d,by)=>{ g.hp=clamp(g.hp-Math.round(d)); if(g.hp<=0){ bxUnitDown(g,by||x); bxLater(1,`밤사이 ${CX().grail}에서 ${pName(g)}${J(pName(g),이)} 쓰러졌다고 한다.`); } };
+    // 대표 조의 범위 보구는 호위를 휩쓴다
+    if(fire.get(X)&&BX_AOE.test(artOf(X.h).k||'')) for(const g of bxGuards()) gHit(g,kLost()*m*.5);
+    // 호위: 합마다 하나당 30%(체력 비례)로 엄호 60% · 견제 20% · 협공 20%
+    let cov=false;
+    for(const g of bxGuards()){ if(!ch(BXK.gAct*Math.max(.2,g.hp/100))) continue; const t=rnd();
+      if(t<BXK.gCover){ const l=kLost(); if(l>=6&&!cov){ cov=true; const a=Math.round(l*(.4+rnd()*.2)); k.hp=Math.min(k.phase2?BXK.hp2:100,k.hp+a); gHit(g,a*m); } }
+      else if(t<BXK.gCover+BXK.gChip) K.bxCh={r:r+1,v:ri(3,6)};
+      else hit(X,Math.max(1,(4+ri(0,5))*.6)); }
+    if(!C) return;
+    // 함께 간 조
+    for(const q of C.comp){ if(!q.alive||C.out.includes(q.i)) continue; const qh=H_BY[q.hero];
+      if(ch(.3)) q.hp=clamp(q.hp-ri(3,8)); // 휘말림
+      { const cost=Math.round(npCostM(qh)*(22+npRV(qh)*3)), sm=npcSmOf(q);
+        if(!C.np.includes(q.i)&&q.hp>20&&sm>=cost&&(k.hp<=35||x.hp<=35||r>=2&&ch(.15))&&ch(.7)){ C.np.push(q.i); q.sm=Math.max(0,sm-cost);
+          const k0=k.hp, d=Math.max(3,Math.round(npDmg(qh,H_BY[k.hero],false,false,npcParams(q).p)*CXB.np)); k.hp=Math.max(0,k.hp-d);
+          if(BX_AOE.test(artOf(qh).k||'')) for(const g of bxGuards()) gHit(g,(k0-k.hp)*m*.5,q); continue; } }
+      const act=Math.max(.3,Math.min(.85,.5+(npcPower(q,false,1)-CXB.ref)*.01))*(.5+.5*q.hp/100);
+      if(ch(act)){ const l=xLost();
+        if(l>=6&&ch(Math.min(.9,cxTacP(q,1)))){ const a=Math.round(l*(.35+rnd()*.2)); x.hp=clamp(x.hp+a); q.hp=clamp(q.hp-Math.round(a*1.2)); }
+        else if(ch(.25)) K.bxCh={r:r+1,v:-ri(6,10)};
+        else { const PP=npcParams(q).p, EP=npcParams(k).p; if(!ch(dodgeP(EP[1],PP[1]))){ const d=Math.max(2,Math.round((4+ri(0,5))*CXB.ad*(.6+.4*q.hp/100))); const g=bxGuards().length&&ch(.4)?weakG():null; if(g) gHit(g,d*m,q); else k.hp=Math.max(0,k.hp-d); } } }
+      if(q.hp<=0){ C.out.push(q.i); continue; }
+      if(!final&&q.hp<25&&ch(cxTacP(q,2))) C.out.push(q.i); } }
   // ---- 유닛이 쓰러질 때 ----
   function bxUnitDown(u,by){ const w=W(), c=BXW();
     if(u.cx==='boss'){ if(!u.phase2){ u.phase2=true; u._phase=1; const inB=w.battle&&w.battle.e===u; log('키아라의 몸이 한 번 녹아내렸다가, 웃음소리와 함께 다시 빚어졌다. 단독현현.','war',inB?{fx:{t:'bossp2',line:'아아, 이 아픔마저 이토록 달콤하다니요.'}}:undefined); u.hp=BXK.hp2; if(inB) log('키아라: “아아, 이 아픔마저 이토록 달콤하다니요.”','enemy'); return false; }
@@ -336,7 +367,7 @@
   // 키아라의 힘: 플레이어 결전 · NPC 결전
   function bxPow(p,bt){ const c=BXW(), w=W(), b=w.battle; if(!c) return 0;
     if(bt){ let v=BXK.desc+(c.bbAlly?BXK.bbAdj:0)-5*bxFreed()+BXK.relAdj*bxFreed(); if(b){ if(b.bxChip&&b.bxChip.r===b.round) v+=b.bxChip.v; if(b.bxCharm===b.round) v+=10; if(b.bxMan) v+=5; } return v; }
-    return BXK.nd+4*bxGuards().length; }
+    return BXK.nd; }
   function bxBattleStart(e,ctx){ const w=W(), c=BXW(); if(!c||!e||!e.bx) return; const b=w.battle; if(!b||b.bxMS) return; b.bxMS=1;
     if(!chk('정신',S.st.will+ri(0,40),55)){ add({will:-3}); b.bxMan=1; log('만색유체. 키아라의 목소리가 머릿속까지 스며들었다. 생각이 자꾸 단 쪽으로 미끄러진다.','war'); } }
   // 센티넬의 능력치: 원래 서번트 위에 KP 한 단계 · 키아라: 남은 KP 둘마다 가장 낮은 능력치 한 단계
@@ -379,6 +410,7 @@
   { const f0=cxRep; cxRep=()=>BXW()?bxRep():f0(); }
   { const f0=cxThreat; cxThreat=()=>{ if(!BXW()) return f0(); const w=W(); if(!w.cxHit) return false; const u=cxUnit(w.cxHit); w.cxHit=null; if(!u||!u.alive||!w.heroAlive) return false;
       log(`결계 바깥에서 낯선 기척이 났다. ${pName(u)}${J(pName(u),이)} 이쪽을 찾아왔다.`,'war'); battle(u,{defend:true,cx:true}); return true; }; }
+  { const f0=cxNpcVs; cxNpcVs=(p,u,withMe)=>{ if(BXW()&&u&&u.bx){ bxNpcVsKiara(p,W().final,[],[]); if(withMe&&u.alive&&p.alive) log(`${pName(p)}${J(pName(p),이)} 키아라를 한 차례 몰아붙였다.`,'war'); return; } return f0(p,u,withMe); }; }
   { const f0=cxCompRound; cxCompRound=(b,hp0)=>{ f0(b,hp0); if(b&&b.e&&b.e.bx) bxRound(b,hp0); }; }
   { const f0=battleRound; battleRound=()=>{ const b=W()&&W().battle; if(b&&b.e&&b.e.bx){ b.bxK0=b.e.hp; bxBattleStart(b.e,b.ctx); } return f0(); }; }
   { const f0=npcDuel; npcDuel=(a,b,f,i)=>{ const keep=BX_VS; if(!BX_VS) BX_VS=[a,b]; try{ return f0(a,b,f,i); } finally{ BX_VS=keep; } }; }

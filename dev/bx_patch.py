@@ -43,6 +43,8 @@ for P in sys.argv[1:]:
       if(!final&&!(a.bxHunt||b.bxHunt)){ const fl=""")
     rp("""maxR=final?12:a.cx||b.cx?40:ri(5,6);""", """maxR=final?(a.bx||b.bx?99:12):a.bxHunt||b.bxHunt?12:a.cx||b.cx?40:ri(5,6);""")
     rp("""    if(final) lose.hp=0;""", """    if(final&&!(lose.bxNun&&!lose.bxFake)) lose.hp=0;""")
+    rp("""      // 5) 합이 끝날 때\n""", """      if(a.bx||b.bx) bxDuelRound(A,B,r,h0,fire,final,hit); // 키아라전: 호위 · 함께 간 조\n      // 5) 합이 끝날 때\n""")
+    rp("""const pw=x=>{ let v=npcPower(x.p,false,r,x===A&&init)+""", """const pw=x=>{ let v=npcPower(x.p,false,r,x===A&&init)+(x.bxCh&&x.bxCh.r===r?x.bxCh.v:0)+""")
     rp("""      for(const x of [A,B]) if(fire.get(x)&&x.h.id==='georgios'&&x.o.p.hp<h0.get(x.o)) x.o.dragon=1;""",
        """      for(const x of [A,B]) if(fire.get(x)&&x.h.id==='georgios'&&x.o.p.hp<h0.get(x.o)) x.o.dragon=1;
       for(const x of [A,B]) if(fire.get(x)&&x.p.bx) bxNpHeal(x.p);""")

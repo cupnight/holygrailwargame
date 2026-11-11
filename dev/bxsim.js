@@ -11,7 +11,7 @@ for(let n=0;n<N;n++){ const seed=(opt.seed||1)*1000+n; try{ Sim.newLife({seed,le
   cnt('end',S.flags.bxEnd?'kiara down by '+S.flags.bxEnd:S.flags.bxDream?'dream':c.done?'done?':'open');
   cnt('kpGot',c.kpGot||0); cnt('kpMe',c.kpMe||0); cnt('meAlive@end',w.heroAlive?1:0);
   if(c.descD) add('descD',c.descD),add('nDesc',1); if(c.revealD) add('revD',c.revealD),add('nRev',1);
-  cnt('guards@desc',(c.units||[]).filter(u=>u.cx==='sent'&&u.guard).length);
+  cnt('guardsDead',(c.units||[]).filter(u=>u.cx==='sent'&&u.guard&&!u.alive).length); cnt('guards@desc',(c.units||[]).filter(u=>u.cx==='sent'&&u.guard).length);
   if(opt.show&&n<opt.show) console.log(S.log.filter(e=>/키아라|센티넬|BB|수녀|봉인|토벌령|KP/.test(e.t)).map(e=>`[${e.k}] ${e.t}`).slice(0,80).join('\n'),'\n-----');
  }catch(e){err++;if(errs.length<5)errs.push(seed+': '+String(e.stack||e).split('\n').slice(0,5).join(' | '));}}
 console.log(JSON.stringify({N,err,descD:(sum.descD/sum.nDesc).toFixed(1),revD:(sum.revD/sum.nRev).toFixed(1)}));for(const k in T)console.log(k,JSON.stringify(T[k]));errs.forEach(x=>console.log(x));
