@@ -1,3 +1,7 @@
 node_modules/
 .wrangler/
 .dev.vars
+dev/__pycache__/
+dev/base.html
+dev/build/
+dev/*.uicheck.html
