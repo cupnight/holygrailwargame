@@ -1,5 +1,11 @@
 """② 비스트 위기 문장의 영어 · 일본어. bx_patch.py가 불러 넣는다."""
 D = [  # 그대로 맞는 문장
+('키아라가 녹아 사라진 자리에 성배만 남았다. 어디선가 흩어졌던 목소리가 들렸다. “…늦었지만, 이건 제가 가져갈게요.” 성배가 한 줄기 빛이 되어 달 쪽으로 올라갔다.',
+ 'Where Kiara had melted away, only the Grail remained. From somewhere, a voice that had scattered spoke. “…I\'m late, but I\'ll be taking this.” The Grail became a single ray of light and rose toward the Moon.',
+ 'キアラが溶けて消えた跡に、聖杯だけが残った。どこからか、散ったはずの声がした。「…遅くなりましたけど、これはわたしが持っていきますね」聖杯は一筋の光となって月のほうへ昇っていった。'),
+('키아라가 녹아 사라진 자리에 가득 찬 성배만 남았다. 그 안에서 누군가 한숨처럼 웃었다. “…이번엔 제가 한참 늦었네요. 그래도 뒷정리는 할게요.” 성배가 달빛 속으로 가라앉듯 사라졌다.',
+ 'Where Kiara had melted away, only the brimming Grail remained. From inside it, someone laughed like a sigh. “…I\'m really late this time. Still, I\'ll clean up.” The Grail sank away into the moonlight.',
+ 'キアラが溶けて消えた跡に、満ちた聖杯だけが残った。その中で、誰かがため息のように笑った。「…今回はずいぶん遅れちゃいましたね。でも、後片付けはしますから」聖杯は月明かりの中へ沈むように消えていった。'),
 ('사라스바티 멜트아웃','Saraswati Meltout','弁財天五弦琵琶'),('브륀힐드 로만시아','Brynhildr Romantia','死がふたりを別離つとも'),('커스드 커팅 크레이터','Cursed Cutting Crater','C.C.C.'),
 ('셋쇼인 키아라','Sessyoin Kiara','殺生院キアラ'),('키아라 킷쇼인','Kiara Kissyoin','キアラ・キッショウイン'),('이름 모를 수녀','The Nameless Nun','名も知れぬ修道女'),
 ('달의 이레귤러','The Irregular from the Moon','月のイレギュラー'),('비스트 Ⅲ/R','Beast III/R','ビーストIII/R'),('달의 뒷면','The far side of the Moon','月の裏側'),

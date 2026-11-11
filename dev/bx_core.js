@@ -323,7 +323,12 @@
     rest(); return true; }
   function bxAfterBoss(){ const w=W(), c=BXW(); c.done=true; w.ended=true; w.queue=[];
     const me=c.bossDown==='me'||w.heroAlive&&(w.cxWent&&w.cxWent.d===w.day);
-    log(S.hero==='bb'&&w.heroAlive?`${hero().name}${J(hero().name,이)} 봉인한 성배를 품에 안았다. “이건 제가 가져갈게요. 달은 꽤 멀지만, 금방이에요.”`:'BB가 남은 성배를 품에 안았다. “이건 제가 가져갈게요. 이 도시에 두기엔, 아직 좀 달거든요.”','war');
+    // BB가 있는가: 내 BB가 살아 있음 · 다른 BB가 살아 있음 · 흩어졌음(13일차 강제 · 결전 전에 쓰러짐) · 7일차 전에 탈락한 생(성배가 차는 밤)
+    const bbMe=S.hero==='bb'&&w.heroAlive, bbLive=!bbMe&&c.bb&&(c.bb.at==='moon'||c.bb.at==='npc')&&!!bxBBP();
+    log(bbMe?`${hero().name}${J(hero().name,이)} 봉인한 성배를 품에 안았다. “이건 제가 가져갈게요. 달은 꽤 멀지만, 금방이에요.”`
+      :bbLive?'BB가 남은 성배를 품에 안았다. “이건 제가 가져갈게요. 이 도시에 두기엔, 아직 좀 달거든요.”'
+      :c.noBB?'키아라가 녹아 사라진 자리에 가득 찬 성배만 남았다. 그 안에서 누군가 한숨처럼 웃었다. “…이번엔 제가 한참 늦었네요. 그래도 뒷정리는 할게요.” 성배가 달빛 속으로 가라앉듯 사라졌다.'
+      :'키아라가 녹아 사라진 자리에 성배만 남았다. 어디선가 흩어졌던 목소리가 들렸다. “…늦었지만, 이건 제가 가져갈게요.” 성배가 한 줄기 빛이 되어 달 쪽으로 올라갔다.','war');
     log('성배는 달로 갔다. 아무도 소원을 빌지 않았다. 수녀가 머물던 성당은 비어 있었다.','joy');
     S.flags.bxEnd=c.bossDown==='me'?'me':'npc'; if((c.kpGot||0)>=5) S.flags.bxFive=1;
     if(c.bossDown==='me'&&w.heroAlive){ S.flags.war='victor'; mark('war'); S.flags.wishText='BB가 성배를 달로 가져갔다'; S.flags.brokeCup=1; add({will:8,lore:4}); wrec('mine','셋쇼인 키아라를 쓰러뜨렸다'); farewell(); return; }
