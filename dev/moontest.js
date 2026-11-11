@@ -1,10 +1,10 @@
 // BB · 멜트 · 립 소환 길 시험: node dev/moontest.js <game.html> [N] [vow 0/1]
-const fs=require('fs'),vm=require('vm');const file=process.argv[2],N=+(process.argv[3]||20000),vow=+(process.argv[4]||0);
+const fs=require('fs'),vm=require('vm');const file=process.argv[2],N=+(process.argv[3]||20000),vow=+(process.argv[4]||0),send=+(process.argv[5]||0);
 const src=fs.readFileSync(file,'utf8');const a=src.indexOf('<script id="sim">')+17,b=src.indexOf('</script>',a);
 const code=src.slice(a,b).replace('  return {cn,ACH:','  globalThis.__M={doSummon,S:()=>S,dayStart};\n  return {cn,ACH:');
 const ctx={console};ctx.globalThis=ctx;vm.createContext(ctx);vm.runInContext(code+';globalThis.Sim=Sim;',ctx);const Sim=ctx.Sim,M=ctx.__M;Sim.setHooks(new Proxy({},{get:()=>()=>{}}));
 const c={full:0,me:{},npc:{},hij:0,n9:0,err:0};let ex=null;
-for(let n=0;n<N;n++){ try{ Sim.newLife({seed:300000+n,len:20,moon:!!vow}); const S=M.S(); M.doSummon(null); const w=S.war;
+for(let n=0;n<N;n++){ try{ Sim.newLife({seed:300000+n,len:20,moon:!!vow,send:!!send}); const S=M.S(); M.doSummon(null); const w=S.war;
   if(w.fullMoon) c.full++; if(S.flags.bbHijack){ c.hij++; if(!ex) ex=S.log.slice(-3).map(e=>e.t).join(' / '); }
   if(['bb','meltryllis','passionlip'].includes(S.hero)) c.me[S.hero]=(c.me[S.hero]||0)+1;
   for(const p of w.pairs) if(['bb','meltryllis','passionlip'].includes(p.hero)){ const k=p.hero+(w.fullMoon?'@full':'')+(S.hero==='bb'?'@meBB':''); c.npc[k]=(c.npc[k]||0)+1; }

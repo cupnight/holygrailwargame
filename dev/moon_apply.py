@@ -14,6 +14,9 @@ FULL = k('그날 밤, 보름달이 떠 있었다.', 'That night, the moon was fu
 HIJ = k('보름달빛이 마법진 위로 쏟아져 내렸다. 그어 둔 선이 하나씩 낯선 문양으로 고쳐 쓰였다. 빛이 걷히자, 부르지 않은 누군가가 원 한가운데서 웃고 있었다.',
         'Full moonlight poured down onto the circle. One by one, the lines you had drawn were rewritten into unfamiliar patterns. When the light cleared, someone you hadn\'t called was smiling at the centre of the circle.',
         '満月の光が魔法陣の上に降り注いだ。引いた線がひとつずつ見知らぬ紋様へと書き換えられていく。光が晴れると、呼んでいない誰かが円の真ん中で微笑んでいた。')
+HIJE = k('보름달빛이 마법진 위로 쏟아져 내렸다. 그어 둔 선이 하나씩 낯선 문양으로 고쳐 쓰였다. 빛이 걷히자, 원 한가운데 누군가 서 있었다. 달 쪽에서 등을 떠밀려 온 듯한 얼굴이었다.',
+         'Full moonlight poured down onto the circle. One by one, the lines you had drawn were rewritten into unfamiliar patterns. When the light cleared, someone was standing at the centre of the circle, looking as though they had been pushed here from the direction of the moon.',
+         '満月の光が魔法陣の上に降り注いだ。引いた線がひとつずつ見知らぬ紋様へと書き換えられていく。光が晴れると、円の真ん中に誰かが立っていた。月のほうから背中を押されてきたような顔だった。')
 VOW = k('어딘가 낯익은 웃음이었다.', 'It was a strangely familiar smile.', 'どこか見覚えのある笑みだった。')
 RUM = k('도시 어딘가에 서번트가 하나 더 떠돌고 있다는 소문이 돌았다. 마스터도 없이 누군가를 찾아다닌다고 한다.',
         'A rumour went round that one more Servant was wandering somewhere in the city, searching for someone without a Master.',
@@ -37,7 +40,7 @@ CORE = f"""
   // ---- BB · 멜트릴리스 · 패션립 전용 소환 길 (11-12) ----
   const MOON_GATED=new Set(['bb','meltryllis','passionlip']), MOON_EGO=['meltryllis','passionlip'];
   const moonHijP=()=>.025*(S&&S.moonVow?2:1);   // 촉매 없는 보름 밤, BB가 마법진을 가로챈다 (달의 약속이면 ×2)
-  {{ const f0=newLife; newLife=(opt={{}})=>{{ const r=f0(opt); if(S) S.moonVow=!!opt.moon; return r; }}; }}
+  {{ const f0=newLife; newLife=(opt={{}})=>{{ const r=f0(opt); if(S){{ S.moonVow=!!opt.moon; S.moonSend=!!opt.send; }} return r; }}; }}
   // 내가 BB의 마스터면: 떼어 낸 조각(멜트 · 립)이 전쟁 중에 끼어든다 (2~8일차 아침마다 4%, 전쟁에 한 번, 다음 날 합류)
   {{ const f0=dayStart; dayStart=()=>{{ f0(); const w=S&&S.war; if(!w||w.ended||S.dead||S.phase!=='war') return;
       if(w.egoPend&&w.day>=w.egoPend.day){{ const id=w.egoPend.h; w.egoPend=null; if(w.pairs.some(p=>p.hero===id)) return;
@@ -61,7 +64,7 @@ for P in sys.argv[1:]:
        "  function doSummon(id){\n    const A=S.aff||{avenger:0,judge:0};\n    const full=ch(1/8); if(full) log(" + J(FULL) + ",'war');")
     # 보름 밤의 가로채기: 촉매 · 인연 소환이 없을 때만
     rp("    else if(ch(pSp)){ const k=wpick(['avenger','judge'],x=>A[x]+.5); h=pick(HEROES.filter(x=>x.cls===k)); }",
-       "    else if(full&&ch(moonHijP())){ h=H_BY.bb; S.flags.bbHijack=1; log(" + J(HIJ) + "+(S.moonVow?' '+" + J(VOW) + ":''),'war'); }\n"
+       "    else if(full&&ch(moonHijP())){ const eg=!!S.moonSend&&ch(1/3); h=H_BY[eg?pick(MOON_EGO):'bb']; S.flags.bbHijack=eg?'ego':1; log(eg?" + J(HIJE) + ":" + J(HIJ) + "+(S.moonVow?' '+" + J(VOW) + ":''),'war'); }\n"
        "    else if(ch(pSp)){ const k=wpick(['avenger','judge'],x=>A[x]+.5); h=pick(HEROES.filter(x=>x.cls===k&&!MOON_GATED.has(x.id))); }")
     rp("const k=wpick(['avenger','judge'],x=>A[x]+.5); h=pick(HEROES.filter(x=>x.cls===k)); log(",
        "const k=wpick(['avenger','judge'],x=>A[x]+.5); h=pick(HEROES.filter(x=>x.cls===k&&!MOON_GATED.has(x.id))); log(")
@@ -76,11 +79,18 @@ for P in sys.argv[1:]:
     rp("      const hs=HEROES.filter(x=>x.cls===c&&!used.has(x.id)); const hh=pick(hs); used.add(hh.id);",
        "      const fh=fq.find(id=>H_BY[id].cls===c&&!used.has(id)); const hs=fh?[H_BY[fh]]:HEROES.filter(x=>x.cls===c&&!used.has(x.id)&&!MOON_GATED.has(x.id)); const hh=pick(hs); used.add(hh.id);")
     rp("    S.war.bt={n:0,win:0,lose:0,ret:0,fled:0,draw:0,asn:0};", "    S.war.fullMoon=full; S.war.bt={n:0,win:0,lose:0,ret:0,fled:0,draw:0,asn:0};")
+    rp("      if(u.ego){ (c.freed=c.freed||[]).push(u.hero);", "      if(u.ego){ (c.freed=c.freed||[]).push(u.hero); if(by==='me'||w.battle){ const F=S.flags.egoFreed=S.flags.egoFreed||[]; if(!F.includes(u.hero)) F.push(u.hero); }")
     rp("  return {cn,ACH:", CORE + "  return {cn,ACH:")
     # 화면 쪽: 달의 약속 기록(키아라를 쓰러뜨린 생) · 새 생에 넘기기. 도감 ach 칸에 숨은 표시로 둔다(기기 연결로 함께 옮겨진다)
     rp("r.newDex={newC:m.newC,newM:m.newM}; LIFE_NEW=[]; }",
-       "r.newDex={newC:m.newC,newM:m.newM}; LIFE_NEW=[]; if(Sim.S&&Sim.S.flags&&Sim.S.flags.bxEnd&&!c.ach._bbmoon){ c.ach._bbmoon={t:Date.now(),n}; store.set(K_CODEX,c); } }")
-    rp("bond:bid?{id:bid,p:bondChance(bid)}:null})", "bond:bid?{id:bid,p:bondChance(bid)}:null,moon:moonVow()})")
-    rp("function birth(){", "function moonVow(){ try{ const c=dexLoad(); return !!(c&&c.ach&&c.ach._bbmoon); }catch(e){ return false; } }\nfunction birth(){")
+       "r.newDex={newC:m.newC,newM:m.newM}; LIFE_NEW=[]; { const S2=Sim.S, F=S2&&S2.flags, mk=k=>{ if(!c.ach[k]){ c.ach[k]={t:Date.now(),n}; return 1; } return 0; }; let ch2=0; if(F&&F.bxEnd) ch2|=mk('_bbmoon'); if(S2&&S2.hero==='bb'&&S2.war&&S2.war.ended&&S2.war.heroAlive) ch2|=mk('_bbsend'); for(const id of (F&&F.egoFreed)||[]) ch2|=mk('_free_'+id); if(ch2) store.set(K_CODEX,c); } }")
+    rp("bond:bid?{id:bid,p:bondChance(bid)}:null})", "bond:bid?{id:bid,p:bondChance(bid)}:null,moon:moonVow(),send:moonMark('_bbsend')})")
+    rp("function birth(){", "function moonMark(k){ try{ const c=dexLoad(); return !!(c&&c.ach&&c.ach[k]); }catch(e){ return false; } }\nfunction moonVow(){ return moonMark('_bbmoon'); }\nfunction birth(){")
+    # 풀어 준 멜트 · 립은 계약한 적이 없어도 인연 목록에 오른다 (확률 30%, 한 번 계약하면 원래 규칙)
+    rp("function bondList(){ const c=dexLoad(); return Sim.HEROES.filter(x=>dexState(c,x.id)==='c'); }",
+       "function bondList(){ const c=dexLoad(); return Sim.HEROES.filter(x=>dexState(c,x.id)==='c'||!!(c.ach&&c.ach['_free_'+x.id])); }")
+    rp("function bondChance(id){ const e=dexLoad().heroes[id]; if(!e||!e.c) return 0;",
+       "function bondChance(id){ const e=dexLoad().heroes[id]; if(!e||!e.c) return (dexLoad().ach||{})['_free_'+id]?.3:0;")
+    rp("CO=['sword','lance','bow','rider','caster','shadow','berserk','judge','avenger'];", "CO=['sword','lance','bow','rider','caster','shadow','berserk','judge','avenger','moon','ego'];")
     s, nd, nt = i18n.add(s, TR, TT)
     open(P, 'w', encoding='utf-8').write(s); print(os.path.basename(P), 'miss', miss, 'tr', nd, nt)
