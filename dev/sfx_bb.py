@@ -1,8 +1,6 @@
-"""BB 전용 소환 연출 (11-12 시안 2): 평범한 소환을 가로챈다 → 달 위의 얼굴 없는 그림자
-- 0~1.4초: 기본 소환(금빛 마법진 · 둥근 빛가루)처럼 시작한다
-- 1.3~2.0초: 금빛이 줄 단위로 어긋나며 보랏빛으로 고쳐 쓰이고, 달이 떠오른다
-- 1.9초~: 달 위에 얼굴 없는 그림자(긴 머리 · 긴 소매 코트 · 지시봉)가 선다
-- 2.5~2.8초: 지시봉 끝이 반짝이다 톡 친다 → 2.8초 터짐, 그림자는 네모 조각으로 흩어지고 초상이 그려진다
+"""BB 전용 소환 연출 (11-12 시안 3): 평범한 소환을 가로챈다 → 달 위의 얼굴 없는 그림자
+실제 시간(tr) 기준: 0~2.6초 기본 소환 그대로(금빛 마법진이 다 그려지고 빛줄기가 오름) · 2.6~3.3초 금빛이 어긋나며 보랏빛으로 · 2.75초~ 달 ·
+3.2초~ 달 위의 그림자 · 3.75~4.1초 지시봉 반짝임과 톡 · 4.1초 터짐 · 8.2초 끝. 나머지 연출은 기존 시간표(t)를 1.3초 늦춰 쓴다(t = tr−1.3초, 앞 2.6초는 절반 빠르기).
 문 캔서 클래스가 아니라 BB(id)에게만 붙는다. sfx_apply.py 다음에 쓴다. 사용: python3 sfx_bb.py <game.html>"""
 import sys
 for P in sys.argv[1:]:
@@ -59,4 +57,11 @@ for P in sys.argv[1:]:
        "      if(BBX) for(let k=0;k<90;k++){ const u=(rnd()-.5)*.5, v=.05+rnd()*.9, [x,y]=BBP(u,v); burst.push({x,y,vx:u*8+(rnd()-.5)*2,vy:-(.5+rnd()*2.5),s:1+rnd()*2,l:1}); }\n"
        "      if(K==='ego'){ for(let k=0;k<3;k++) ripples.push(")
     rp('"j_summon_moon":{"d":8.2},', '"j_summon_moon":{"d":8.2},"j_summon_bb":{"d":8.2},')
+    # 시간: BB는 앞 2.6초를 기본 소환으로 길게 보여 준다
+    rp("function frame(now){ if(done) return; const t=now-t0;", "function frame(now){ if(done) return; const tr=now-t0, t=BBX?(tr<2600?tr*.5:tr-1300):tr;")
+    rp("else circle(t,glow);", "else circle(BBX?tr:t,glow);")
+    rp("    const pre=ss((t-200)/2600), post=", "    const pre=BBX?ss((tr-200)/3900):ss((t-200)/2600), post=")
+    rp("if(t>1800&&t<3100&&K!=='shadow'&&K!=='avenger'&&K!=='moon'&&K!=='ego'){ const k=ss((t-1800)/1000);",
+       "if((t>1800&&t<3100&&K!=='shadow'&&K!=='avenger'&&K!=='moon'&&K!=='ego')||(BBX&&tr>1500&&tr<3100)){ const k=BBX?ss((tr-1500)/900)*(1-ss((tr-2550)/450)):ss((t-1800)/1000);")
+    rp('"j_summon_bb":{"d":8.2}', '"j_summon_bb":{"d":9.5}')
     open(P, 'w', encoding='utf-8').write(s); print('sfx_bb', 'miss', miss)
