@@ -63,5 +63,22 @@ for P in sys.argv[1:]:
     rp("    const pre=ss((t-200)/2600), post=", "    const pre=BBX?ss((tr-200)/3900):ss((t-200)/2600), post=")
     rp("if(t>1800&&t<3100&&K!=='shadow'&&K!=='avenger'&&K!=='moon'&&K!=='ego'){ const k=ss((t-1800)/1000);",
        "if((t>1800&&t<3100&&K!=='shadow'&&K!=='avenger'&&K!=='moon'&&K!=='ego')||(BBX&&tr>1500&&tr<3100)){ const k=BBX?ss((tr-1500)/900)*(1-ss((tr-2550)/450)):ss((t-1800)/1000);")
+    # 가로챌 때 화면 전체가 치직인다: 맨 위 캔버스에 잡음 · 굵은 줄 띠 · 흐르는 줄 · 한 프레임 암전, 그리고 화면이 덜컥 어긋남
+    rp("  for(const c of [c1,c2]){ c.width=W*dpr; c.height=H*dpr; } g.setTransform(dpr,0,0,dpr,0,0); g2.setTransform(dpr,0,0,dpr,0,0);",
+       "  for(const c of [c1,c2]){ c.width=W*dpr; c.height=H*dpr; } g.setTransform(dpr,0,0,dpr,0,0); g2.setTransform(dpr,0,0,dpr,0,0);\n"
+       "  const c3=BBX?document.createElement('canvas'):null, g3=c3&&c3.getContext('2d'), nz=BBX?document.createElement('canvas'):null, nzx=nz&&nz.getContext('2d');\n"
+       "  if(c3){ c3.width=W*dpr; c3.height=H*dpr; g3.setTransform(dpr,0,0,dpr,0,0); c2.after(c3); nz.width=192; nz.height=108; }")
+    rp("  const pf=fly.querySelector('.pf');",
+       """  function bbStatic(tr){ g3.clearRect(0,0,W,H); let I=ss((tr-2560)/110)*(1-ss((tr-2980)/300))*(rnd()<.35?.35:.8); if(Math.abs(tr-2180)<50||Math.abs(tr-2440)<40) I=Math.max(I,.3); if(I<=0) return;
+    const d=nzx.createImageData(192,108), a=d.data; for(let i=0;i<a.length;i+=4){ const v=rnd()*255; a[i]=v; a[i+1]=v*(.85+.3*rnd()); a[i+2]=v; a[i+3]=255; } nzx.putImageData(d,0,0);
+    g3.save(); g3.imageSmoothingEnabled=false; g3.globalAlpha=.5*I; g3.drawImage(nz,0,0,W,H); g3.globalAlpha=1;
+    for(let k=0;k<3+Math.floor(6*I);k++){ const y=rnd()*H, hh=2+rnd()*26*I; g3.fillStyle=rnd()<.5?`rgba(255,255,255,${.28*I})`:`rgba(0,0,0,${.65*I})`; g3.fillRect(0,y,W,hh); }
+    const ry=(tr*.9)%H; g3.fillStyle=`rgba(0,0,0,${.5*I})`; g3.fillRect(0,ry,W,H*.07); g3.fillStyle=`rgba(255,255,255,${.18*I})`; g3.fillRect(0,ry-2,W,2);
+    if(I>.6&&rnd()<.1){ g3.fillStyle='rgba(0,0,0,.88)'; g3.fillRect(0,0,W,H); }
+    g3.restore(); }
+  const pf=fly.querySelector('.pf');""")
+    rp("    if(BBX) bbTap(t);", "    if(BBX){ bbTap(t); bbStatic(tr); }")
+    rp("if(K==='moon'&&t>2780&&t<3300&&rnd()<.45) sx=Math.round((rnd()-.5)*18);",
+       "if(K==='moon'&&t>2780&&t<3300&&rnd()<.45) sx=Math.round((rnd()-.5)*18);\n    if(BBX&&tr>2560&&tr<3200&&rnd()<.6){ sx=Math.round((rnd()-.5)*34); sy=Math.round((rnd()-.5)*10); }")
     rp('"j_summon_bb":{"d":8.2}', '"j_summon_bb":{"d":9.5}')
     open(P, 'w', encoding='utf-8').write(s); print('sfx_bb', 'miss', miss)
