@@ -11,11 +11,11 @@ for p in sys.argv[1:]:
     rp("""    judge:{n:'룰러',d:'일곱 자리 바깥의 서번트. 상대의 정체를 꿰뚫고 판결을 내린다.',sp:1},
   };""","""    judge:{n:'룰러',d:'일곱 자리 바깥의 서번트. 상대의 정체를 꿰뚫고 판결을 내린다.',sp:1},
     moon:{n:'문 캔서',d:'일곱 자리 바깥의 서번트. 달의 권능으로 도시의 기록을 고쳐 쓴다.',sp:1},
-    ego:{n:'알터 에고',d:'일곱 자리 바깥의 서번트. 여러 신성을 합친 몸이라, 쓰러뜨린 상대의 힘을 빨아들인다.',sp:1},
+    ego:{n:'얼터 에고',d:'일곱 자리 바깥의 서번트. 여러 신성을 합친 몸이라, 쓰러뜨린 상대의 힘을 빨아들인다.',sp:1},
     beast:{n:'비스트',d:'인류가 스스로 낳은 재앙. 소환되지 않는다.',sp:1,boss:1},
   };""")
     rp("SPECIAL=Object.keys(CLS).filter(c=>CLS[c].sp);","SPECIAL=Object.keys(CLS).filter(c=>CLS[c].sp&&!CLS[c].boss);")
-    rp("const k=wpick(['avenger','judge'],x=>A[x]+.5);","const k=wpick(['avenger','judge','moon','ego'],x=>A[x]!=null?A[x]+.5:.3);",2)
+    # 문 캔서 · 얼터 에고는 성향 뽑기에 끼지 않는다: BB · 멜트 · 립 전용 길은 moon_apply.py
     rp("const CLS_ORD=['sword','lance','bow','rider','caster','shadow','berserk','judge','avenger']","const CLS_ORD=['sword','lance','bow','rider','caster','shadow','berserk','judge','avenger','moon','ego']")
     # 속성(HAL)은 al_apply.py에서 신규 서번트까지 함께 넣는다
     m=re.search(r'const CAS_V=new Set\(\[',s)
@@ -31,11 +31,11 @@ for p in sys.argv[1:]:
   // 정찰 클래스 보정: 선택지 배지와 결과 칩으로 보여 준다""")
     rp("""  function npcFight(a,b,final,init){ const r=npcDuel(a,b,final,init); addKnow(a,b,20); addKnow(b,a,20); famSeeFight(a,b); return r; }""",
        """  function npcFight(a,b,final,init){ const r=npcDuel(a,b,final,init); addKnow(a,b,20); addKnow(b,a,20); famSeeFight(a,b);
-    if(r&&r.win&&r.lose&&r.lose.hp<=0&&!r.win.cx&&H_BY[r.win.hero]&&H_BY[r.win.hero].cls==='ego') r.win.hp=clamp(r.win.hp+15); // 알터 에고: 쓰러뜨린 상대의 힘을 빨아들인다
+    if(r&&r.win&&r.lose&&r.lose.hp<=0&&!r.win.cx&&H_BY[r.win.hero]&&H_BY[r.win.hero].cls==='ego') r.win.hp=clamp(r.win.hp+15); // 얼터 에고: 쓰러뜨린 상대의 힘을 빨아들인다
     return r; }""")
     rp("""    if(e.cx){ const dead=cxUnitDown(e,by==='우리'?'me':null);""","""    if(by==='우리'&&W().heroAlive&&hero().cls==='ego'){ const w=W(); w.hp=clamp(w.hp+15); w.sm=clamp(w.sm+15); log(`${hero().name}${J(hero().name,이)} 쓰러진 상대의 힘을 빨아들였다. 체력 +15 · 서번트 마력 +15`,'war'); }
     if(e.cx){ const dead=cxUnitDown(e,by==='우리'?'me':null);""")
-    D=[('문 캔서','Moon Cancer','ムーンキャンサー'),('알터 에고','Alter Ego','アルターエゴ'),('비스트','Beast','ビースト'),
+    D=[('문 캔서','Moon Cancer','ムーンキャンサー'),('얼터 에고','Alter Ego','アルターエゴ'),('비스트','Beast','ビースト'),
        ('일곱 자리 바깥의 서번트. 달의 권능으로 도시의 기록을 고쳐 쓴다.','A Servant outside the seven seats. With the power of the Moon, it rewrites the city\'s records.','七騎の外のサーヴァント。月の権能で街の記録を書き換える。'),
        ('일곱 자리 바깥의 서번트. 여러 신성을 합친 몸이라, 쓰러뜨린 상대의 힘을 빨아들인다.','A Servant outside the seven seats. A body fused from several divinities, it drinks in the strength of those it fells.','七騎の外のサーヴァント。複数の神性を束ねた身ゆえ、倒した相手の力を吸い上げる。'),
        ('인류가 스스로 낳은 재앙. 소환되지 않는다.','A calamity humanity bore of itself. It cannot be summoned.','人類が自ら生んだ災厄。召喚されることはない。'),

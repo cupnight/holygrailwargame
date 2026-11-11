@@ -49,8 +49,8 @@ B.append(dict(
 ))
 
 B.append(dict(
- id='meltryllis', fem=1, cls='ego', name=T('멜트릴리스','Meltryllis','メルトリリス'), title=T('쾌락의 알터 에고','Alter Ego of Pleasure','快楽のアルターエゴ'),
- frm=T('BB의 알터 에고 기록','Records of BB\'s Alter Egos','BBのアルターエゴの記録'), hint=T('여신을 합성한 알터 에고','An Alter Ego composed of goddesses','女神を合成したアルターエゴ'),
+ id='meltryllis', fem=1, cls='ego', name=T('멜트릴리스','Meltryllis','メルトリリス'), title=T('쾌락의 얼터 에고','Alter Ego of Pleasure','快楽のアルターエゴ'),
+ frm=T('BB의 얼터 에고 기록','Records of BB\'s Alter Egos','BBのアルターエゴの記録'), hint=T('여신을 합성한 얼터 에고','An Alter Ego composed of goddesses','女神を合成したアルターエゴ'),
  s=['E','A+','C','A','B'],
  art=dict(n=T('변재천오현비파','Saraswati Meltout','弁財天五弦琵琶'), d=T('닿은 것을 녹여 자기 안으로 흡수하는 춤','A dance that melts whatever it touches and absorbs it','触れたものを溶かし、自らの内に取り込む舞')),
  traits=['자유','야망'],
@@ -61,7 +61,7 @@ B.append(dict(
   T('발레를 좋아해. 아름다운 건 움직일 때 가장 아름다우니까. 멈춰 있는 것들은 금방 지루해져.','I love ballet. Beautiful things are most beautiful when they move. Things that stand still bore me quickly.','バレエが好きよ。美しいものは、動いているときがいちばん美しいもの。止まっているものはすぐ退屈になるわ。'),
   T('나를 만든 아이가 있어. 그 아이 마음 한구석이 나로 떨어져 나왔지. 고맙다고는 안 할 거야. …절대로.','There\'s a girl who made me. A corner of her heart broke off and became me. I won\'t thank her for it. ...Never.','私を作った子がいるの。あの子の心の片隅が、私として切り離された。お礼なんて言わないわ。……絶対に。')],
  voice=dict(reg='plain', ord=-4,
-  greet=T('알터 에고, 멜트릴리스. 네가 내 마스터? …흥, 생각보다 별 볼 일 없네. 실망시키지 마.','Alter Ego, Meltryllis. You\'re my Master? ...Hmph, less impressive than I thought. Don\'t disappoint me.','アルターエゴ、メルトリリス。あなたが私のマスター？……ふん、思ったより冴えないわね。がっかりさせないで。'),
+  greet=T('얼터 에고, 멜트릴리스. 네가 내 마스터? …흥, 생각보다 별 볼 일 없네. 실망시키지 마.','Alter Ego, Meltryllis. You\'re my Master? ...Hmph, less impressive than I thought. Don\'t disappoint me.','アルターエゴ、メルトリリス。あなたが私のマスター？……ふん、思ったより冴えないわね。がっかりさせないで。'),
   bow=T('예의는 아는구나. 좋아, 조금은 봐줄게.','So you know some manners. Fine, I\'ll go easy on you a little.','礼儀は知ってるのね。いいわ、少しは見逃してあげる。'),
   wish=T('누구에게도 지배받지 않는 것. 원하는 건 전부 내 거야. 너도 포함해서.','To be ruled by no one. Everything I want is mine. You included.','誰にも支配されないこと。欲しいものは全部私のもの。あなたも含めてね。'),
   order=T('명령? 나한테? …좋아, 이번만 들어줄게. 착각하지 마.','An order? To me? ...Fine, just this once. Don\'t get the wrong idea.','命令？私に？……いいわ、今回だけ聞いてあげる。勘違いしないで。'),
@@ -94,8 +94,8 @@ B.append(dict(
 ))
 
 B.append(dict(
- id='passionlip', fem=1, cls='ego', name=T('패션립','Passionlip','パッションリップ'), title=T('애정의 알터 에고','Alter Ego of Love','愛情のアルターエゴ'),
- frm=T('BB의 알터 에고 기록','Records of BB\'s Alter Egos','BBのアルターエゴの記録'),
+ id='passionlip', fem=1, cls='ego', name=T('패션립','Passionlip','パッションリップ'), title=T('애정의 얼터 에고','Alter Ego of Love','愛情のアルターエゴ'),
+ frm=T('BB의 얼터 에고 기록','Records of BB\'s Alter Egos','BBのアルターエゴの記録'),
  s=['A+','C','A','B','E'],
  art=dict(n=T('죽음이 두 사람을 갈라놓을지라도','Brynhild Romantia','死が二人を別離つとも'), d=T('거대한 손톱으로 붙잡은 것을 작게 접어 버리는 사랑','A love that folds whatever her giant claws catch into something small','巨大な爪で掴んだものを小さく折り畳んでしまう愛')),
  traits=['충성','연민'],
@@ -106,7 +106,7 @@ B.append(dict(
   T('언니가 둘 있어요. 한 명은 무섭고, 한 명은 짓궂어요. …그래도, 둘 다 싫지는 않아요.','I have two older sisters. One is scary, and one is mean. ...But I don\'t hate either of them.','お姉ちゃんが二人いるんです。一人は怖くて、一人は意地悪です。……でも、どっちも嫌いじゃないです。'),
   T('사랑하는 사람은 작게, 작게 접어서 가슴에 넣어 두면 어디에도 안 가잖아요. …그게 틀렸다는 거, 이제는 알아요. 조금은요.','If you fold the one you love small, small, and keep them in your heart, they can\'t go anywhere. ...I know now that\'s wrong. A little.','好きな人は小さく、小さく畳んで胸にしまっておけば、どこにも行かないでしょう？……それが間違ってるって、今はわかります。少しだけ。')],
  voice=dict(reg='polite', ord=2,
-  greet=T('아, 알터 에고, 패션립이에요… 저기, 무섭지 않으세요? 손이 이렇게 큰데…','Ah, Alter Ego, Passionlip... Um, aren\'t you scared? My hands are so big...','あ、アルターエゴ、パッションリップです……あの、怖くないですか？手がこんなに大きいのに……'),
+  greet=T('아, 얼터 에고, 패션립이에요… 저기, 무섭지 않으세요? 손이 이렇게 큰데…','Ah, Alter Ego, Passionlip... Um, aren\'t you scared? My hands are so big...','あ、アルターエゴ、パッションリップです……あの、怖くないですか？手がこんなに大きいのに……'),
   bow=T('아, 저한테 고개를… 고, 고맙습니다. 저도 열심히 할게요.','Ah, you bowed to me... Th-thank you. I\'ll do my best too.','あ、わたしに頭を……あ、ありがとうございます。わたしも頑張ります。'),
   wish=T('좋아하는 사람을… 다치게 하지 않고 안아 보고 싶어요. 우, 웃지 마세요.','I want to hold the one I love... without hurting them. D-don\'t laugh.','好きな人を……傷つけずに抱きしめてみたいです。わ、笑わないでください。'),
   order=T('네, 네! 마스터의 명령이라면, 뭐든지 할게요.','Y-yes! If it\'s your order, Master, I\'ll do anything.','は、はい！マスターの命令なら、なんでもします。'),
