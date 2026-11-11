@@ -4,7 +4,7 @@
      유닛: cx 'sent' 센티넬(KP를 품음, 강림 뒤 guard=1 호위) · 'bb' 달에서 온 BB · 'boss'(bx=1) 키아라 */
   // 수치 (상세안 16판 · 17 · 18장)
   const BXK={pw:92, kpT:[0,.5,1.25,2.25,3.5,5], hpD:.05, hpA:.02, wdM:.85, npM:2, hp2:50, desc:-56, nd:-41, bbAdj:-10, relAdj:-.4,
-    heal:15, healSm:20, npHeal:15, logos:1.25, nwD:11, nwR:.7, sentR:.7, bbHit:[10,15], gAct:.3, gCap:2, gMin:6, gMinMe:6, gCover:.6, gChip:.2, nunKeep:30, bbKeep:30};
+    heal:15, healSm:20, npHeal:15, logos:1.25, nwD:11, nwR:.7, sentR:.7, bbHit:[10,15], gAct:.3, gCap:99, gMin:0, gMinMe:0, gCover:.6, gChip:.2, nunKeep:30, bbKeep:30};
   if(typeof globalThis!=='undefined'&&globalThis.__BXK) Object.assign(BXK,globalThis.__BXK); // 시험용 덮어쓰기
   const KP_N=['Body','Site','Mouth','Spice','Organ'];
   const KP_STAT={Body:2,Site:1,Mouth:0,Spice:3};

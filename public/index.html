@@ -6205,7 +6205,7 @@ const Sim = (() => {
      유닛: cx 'sent' 센티넬(KP를 품음, 강림 뒤 guard=1 호위) · 'bb' 달에서 온 BB · 'boss'(bx=1) 키아라 */
   // 수치 (상세안 16판 · 17 · 18장)
   const BXK={pw:92, kpT:[0,.5,1.25,2.25,3.5,5], hpD:.05, hpA:.02, wdM:.85, npM:2, hp2:50, desc:-56, nd:-41, bbAdj:-10, relAdj:-.4,
-    heal:15, healSm:20, npHeal:15, logos:1.25, nwD:11, nwR:.7, sentR:.7, bbHit:[10,15], gAct:.3, gCover:.6, gChip:.2, nunKeep:30, bbKeep:30};
+    heal:15, healSm:20, npHeal:15, logos:1.25, nwD:11, nwR:.7, sentR:.7, bbHit:[10,15], gAct:.3, gCap:99, gMin:0, gMinMe:0, gCover:.6, gChip:.2, nunKeep:30, bbKeep:30};
   if(typeof globalThis!=='undefined'&&globalThis.__BXK) Object.assign(BXK,globalThis.__BXK); // 시험용 덮어쓰기
   const KP_N=['Body','Site','Mouth','Spice','Organ'];
   const KP_STAT={Body:2,Site:1,Mouth:0,Spice:3};
@@ -6458,14 +6458,14 @@ const Sim = (() => {
   // X: 키아라와 맞선 조(대표) · K: 키아라. h0: 합이 시작될 때의 체력 · fire: 이번 합에 보구를 쏜 쪽
   const BX_AOE=/대군|대성|대계|대국|대왕|대마/;
   function bxDuelRound(A,B,r,h0,fire,final,hit){ const K=A.p.bx?A:B.p.bx?B:null; if(!K||!K.p.alive) return; const X=K.o, k=K.p, x=X.p, C=BX_COMP&&BX_COMP.lead===x?BX_COMP:null;
-    const m=Math.min(bxMult(true),2), kLost=()=>Math.max(0,h0.get(K)-k.hp), xLost=()=>Math.max(0,h0.get(X)-x.hp), weakG=()=>bxGuards().sort((a,b)=>a.hp-b.hp)[0];
+    const m=Math.min(bxMult(true),BXK.gCap), kLost=()=>Math.max(0,h0.get(K)-k.hp), xLost=()=>Math.max(0,h0.get(X)-x.hp), weakG=()=>bxGuards().sort((a,b)=>a.hp-b.hp)[0];
     const gHit=(g,d,by)=>{ g.hp=clamp(g.hp-Math.round(d)); if(g.hp<=0){ bxUnitDown(g,by||x); bxLater(1,`밤사이 ${CX().grail}에서 ${pName(g)}${J(pName(g),이)} 쓰러졌다고 한다.`); } };
     // 대표 조의 범위 보구는 호위를 휩쓴다
     if(fire.get(X)&&BX_AOE.test(artOf(X.h).k||'')) for(const g of bxGuards()) gHit(g,kLost()*m*.5);
     // 호위: 합마다 하나당 30%(체력 비례)로 엄호 60% · 견제 20% · 협공 20%
     let cov=false;
     for(const g of bxGuards()){ if(!ch(BXK.gAct*Math.max(.2,g.hp/100))) continue; const t=rnd();
-      if(t<BXK.gCover){ const l=kLost(); if(l>=6&&!cov){ cov=true; const a=Math.round(l*(.4+rnd()*.2)); k.hp=Math.min(k.phase2?BXK.hp2:100,k.hp+a); gHit(g,a*m); } }
+      if(t<BXK.gCover){ const l=kLost(); if(l>0&&l>=BXK.gMin&&!cov){ cov=true; const a=Math.round(l*(.4+rnd()*.2)); k.hp=Math.min(k.phase2?BXK.hp2:100,k.hp+a); gHit(g,a*m); } }
       else if(t<BXK.gCover+BXK.gChip) K.bxCh={r:r+1,v:ri(3,6)};
       else hit(X,Math.max(1,(4+ri(0,5))*.6)); }
     if(!C) return;
@@ -6558,7 +6558,7 @@ const Sim = (() => {
     // 네가 세이버: 마력 A 이하 상대를 합마다 15%로 매료한다
     if(PV(myParams().p[3])<=5&&ch(.15)){ b.bxCharm=b.round+1; log(`키아라가 손을 내밀었다. ${hero().name}의 손끝이 한순간 그쪽으로 끌려갔다. 매료.`,'war'); }
     for(const g of bxGuards()){ if(!ch(BXK.gAct*Math.max(.2,g.hp/100))) continue; const gN=pName(g), r=rnd();
-      if(r<BXK.gCover){ if(lost>=6&&!cov){ cov=true; const a=Math.round(lost*(.4+rnd()*.2)); e.hp=Math.min(100,e.hp+a); g.hp=clamp(g.hp-Math.round(a*Math.min(m,2))); log(`${gN}${J(gN,이)} 키아라 앞을 막아서 일격을 대신 받았다.`,'war'); if(g.hp<=0) bxUnitDown(g,'me'); } }
+      if(r<BXK.gCover){ if(lost>0&&lost>=BXK.gMinMe&&!cov){ cov=true; const a=Math.round(lost*(.4+rnd()*.2)); e.hp=Math.min(100,e.hp+a); g.hp=clamp(g.hp-Math.round(a*Math.min(m,BXK.gCap))); log(`${gN}${J(gN,이)} 키아라 앞을 막아서 일격을 대신 받았다.`,'war'); if(g.hp<=0) bxUnitDown(g,'me'); } }
       else if(r<BXK.gCover+BXK.gChip){ b.bxChip={r:b.round+1,v:ri(3,6)}; log(`${gN}${J(gN,이)} 옆에서 ${hero().name}의 발을 묶었다.`,'war'); }
       else { const d=Math.max(1,Math.round((4+ri(0,5))*.6)); w.hp=clamp(w.hp-d); log(`${gN}${J(gN,이)} 키아라와 함께 ${hero().name}${J(hero().name,을)} 쳤다.`,'war'); } }
     for(const id of (c.freed||[])){ const nm=H_BY[id].name; c.egoNP=c.egoNP||{};
