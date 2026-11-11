@@ -1,7 +1,7 @@
 // 비스트 위기 요약 시험: node dev/bxsim.js <game.html> N '{"hero":"id","seed":1,"show":0}'
 const fs=require('fs'),vm=require('vm');const file=process.argv[2],N=+(process.argv[3]||50),opt=JSON.parse(process.argv[4]||'{}');
 const src=fs.readFileSync(file,'utf8');const a=src.indexOf('<script id="sim">')+17,b=src.indexOf('</script>',a);
-const ctx={console};ctx.globalThis=ctx;ctx.window=ctx;ctx.__FORCE_CRISIS='beast';if(opt.bxk)ctx.__BXK=opt.bxk;if(opt.hero)ctx.__FORCE_HERO=opt.hero;vm.createContext(ctx);
+const ctx={console};ctx.globalThis=ctx;ctx.window=ctx;ctx.__FORCE_CRISIS='beast3R';if(opt.bxk)ctx.__BXK=opt.bxk;if(opt.hero)ctx.__FORCE_HERO=opt.hero;vm.createContext(ctx);
 vm.runInContext(src.slice(a,b)+';globalThis.Sim=Sim;',ctx);const Sim=ctx.Sim;Sim.setHooks(new Proxy({},{get:()=>()=>{}}));
 const T={},cnt=(k,v)=>{T[k]=T[k]||{};T[k][v]=(T[k][v]||0)+1;};let err=0,errs=[];const sum={};const add=(k,v)=>{sum[k]=(sum[k]||0)+v;};
 for(let n=0;n<N;n++){ const seed=(opt.seed||1)*1000+n; try{ Sim.newLife({seed,len:20});Sim.start();let g=0;

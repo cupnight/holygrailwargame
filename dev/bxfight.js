@@ -2,7 +2,7 @@
 const fs=require('fs'),vm=require('vm');const file=process.argv[2],N=+(process.argv[3]||100),opt=JSON.parse(process.argv[4]||'{}');
 const src=fs.readFileSync(file,'utf8');const a=src.indexOf('<script id="sim">')+17,b=src.indexOf('</script>',a);
 const code=src.slice(a,b).replace('  return {cn,ACH:','  globalThis.__B={bxSeal,bxReveal,BXW,bxKiara,battle,cxUnits,W:()=>S.war};\n  return {cn,ACH:');
-const ctx={console};ctx.globalThis=ctx;ctx.window=ctx;ctx.__FORCE_CRISIS='beast';if(opt.bxk)ctx.__BXK=opt.bxk;vm.createContext(ctx);vm.runInContext(code+';globalThis.Sim=Sim;',ctx);
+const ctx={console};ctx.globalThis=ctx;ctx.window=ctx;ctx.__FORCE_CRISIS='beast3R';if(opt.bxk)ctx.__BXK=opt.bxk;vm.createContext(ctx);vm.runInContext(code+';globalThis.Sim=Sim;',ctx);
 const Sim=ctx.Sim,B=ctx.__B;Sim.setHooks(new Proxy({},{get:()=>()=>{}}));
 for(const L of (opt.left||[0,1,2,3])){ let win=0,tot=0;
  for(let n=0;n<N;n++){ Sim.newLife({seed:91000+n*7,len:20});Sim.start();let g=0;

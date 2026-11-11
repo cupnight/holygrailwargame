@@ -1,14 +1,16 @@
   /* ---------- 후반 위기 · 비스트 Ⅲ/R (셋쇼인 키아라) ----------
      「후반 위기 비스트 상세안」 16판. 검은 성배 위기의 틀(유닛 · 결전 · 공동전 · 마지막 밤)을 빌려 쓰고, 다른 곳은 갈래를 단다.
-     c.type==='beast' · c.stage 0 시작 · 1 휩쓸기 · 2 봉인 · 3 강림
+     c.type==='beast3R'(비스트 Ⅲ/R) · c.stage 0 시작 · 1 휩쓸기 · 2 봉인 · 3 강림
      유닛: cx 'sent' 센티넬(KP를 품음, 강림 뒤 guard=1 호위) · 'bb' 달에서 온 BB · 'boss'(bx=1) 키아라 */
   // 수치 (상세안 16판 · 17 · 18장)
+  // 후반 위기 목록 이름. 다른 비스트가 늘어날 수 있어 '비스트 Ⅲ/R'로 구분한다
+  const BX_ID='beast3R';
   const BXK={pw:92, kpT:[0,.5,1.25,2.25,3.5,5], hpD:.05, hpA:.02, wdM:.85, npM:2, hp2:50, desc:-56, nd:-41, bbAdj:-10, relAdj:-.4,
     heal:15, healSm:20, npHeal:15, logos:1.25, nwD:11, nwR:.7, sentR:.7, bbHit:[10,15], gAct:.3, gCap:99, gMin:0, gMinMe:0, gCover:.6, gChip:.2, nunKeep:30, bbKeep:30};
   if(typeof globalThis!=='undefined'&&globalThis.__BXK) Object.assign(BXK,globalThis.__BXK); // 시험용 덮어쓰기
   const KP_N=['Body','Site','Mouth','Spice','Organ'];
   const KP_STAT={Body:2,Site:1,Mouth:0,Spice:3};
-  const BXW=()=>{ const c=CXW(); return c&&c.type==='beast'?c:null; };
+  const BXW=()=>{ const c=CXW(); return c&&c.type===BX_ID?c:null; };
   const bxOn=()=>{ const c=BXW(); return !!(c&&!c.done); };
   const bxNunP=()=>{ const c=BXW(); return c&&c.nun?pairBy(c.nun):null; };
   const bxSents=()=>cxUnits().filter(u=>u.cx==='sent'&&u.alive&&!u.guard);
@@ -36,7 +38,7 @@
     for(const x of now){ const t=typeof x.t==='function'?x.t():x.t; if(t) log(t,x.k); } }
 
   // ---- 시작: 수녀 조 ----
-  function bxSetup(c,pairs){ const w=W(); c.type='beast'; c.kp=KP_N.map(k=>({k,at:'kiara'})); c.clues=[]; c.nunKills=0; c.sealDays=0; c.absorbed=0;
+  function bxSetup(c,pairs){ const w=W(); c.type=BX_ID; c.kp=KP_N.map(k=>({k,at:'kiara'})); c.clues=[]; c.nunKills=0; c.sealDays=0; c.absorbed=0;
     const ok=p=>p&&!p.ghost&&p.aid!=='sibling'&&!['bb','meltryllis','passionlip'].includes(p.hero)&&!CLS[p.cls].sp;
     let p=pairs.find(p=>p.aid==='burial'&&ok(p))||pick(pairs.filter(ok));
     if(!p) p=pairs.find(p=>!p.ghost)||pairs[0];
@@ -395,9 +397,9 @@
   function bxIntelCheck(t){ const c=BXW(); if(!c||c.nunKnown||!t||!t.bxNun) return; if((t.intel||0)>=70){ c.nunKnown=1; t.mname='키아라 킷쇼인'; log('기록을 맞춰 보다가 수녀의 이름을 찾아냈다. 키아라 킷쇼인. 매장기관의 수녀다. …왜인지 그 이름이 자꾸 혀끝에 걸렸다.','war'); } }
 
   // ---- 기존 갈래에 비스트를 단다 ----
-  CRISIS.list.push({id:'beast',w:1,wAv:1});
+  CRISIS.list.push({id:BX_ID,w:1,wAv:1});
   { const f0=crisisRoll; crisisRoll=(h,pairs)=>{ const f=typeof globalThis!=='undefined'?globalThis.__FORCE_CRISIS:undefined; let c=f0(h,pairs); if(!c) return c;
-      if(f==='beast'||f==='black') c.type=f; return c.type==='beast'?bxSetup(c,pairs):c; }; }
+      if(f===BX_ID) c.type=BX_ID; else if(f==='black') c.type='black'; return c.type===BX_ID?bxSetup(c,pairs):c; }; }
   { const f0=crisisDay; crisisDay=()=>BXW()?bxDay():f0(); }
   { const f0=crisisNight; crisisNight=()=>BXW()?bxNight():f0(); }
   { const f0=cxNightActs; cxNightActs=ch_=>{ if(BXW()){ const c=BXW(); if(c.stage<3) return bxNightActs(ch_); const k=bxKiara(); if(!k||!W().heroAlive) return; const w=W(), pc=cxNightComp(), pact=w.cxPact&&w.cxPact.d===w.day&&pc.some(p=>p.i===w.cxPact.i);

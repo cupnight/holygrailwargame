@@ -1,5 +1,5 @@
 // 자동 진행 시험: node dev/sim.js <game.html> [생 수] [옵션 JSON]
-// 옵션: {hero:'id', seed:1, pat:'정규식'(기록에서 셀 문장), crisis:'beast'|'black', lang:'ko'}
+// 옵션: {hero:'id', seed:1, pat:'정규식'(기록에서 셀 문장), crisis:'beast3R'|'black', lang:'ko'}
 const fs = require('fs'), vm = require('vm');
 const file = process.argv[2], N = +(process.argv[3] || 20), opt = JSON.parse(process.argv[4] || '{}');
 const src = fs.readFileSync(file, 'utf8');

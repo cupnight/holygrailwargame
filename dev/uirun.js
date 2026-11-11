@@ -1,6 +1,6 @@
 // 화면까지 돌려 보는 시험: node dev/uirun.js <game.html> [생 수] [lang] [crisis] [hero]
 const { chromium } = require('playwright'); const path = require('path'); const fs=require('fs');
-const file = path.resolve(process.argv[2]), N = +(process.argv[3] || 3), lang = process.argv[4] || 'ko', cr = process.argv[5] || 'beast', hero = process.argv[6] || '';
+const file = path.resolve(process.argv[2]), N = +(process.argv[3] || 3), lang = process.argv[4] || 'ko', cr = process.argv[5] || 'beast3R', hero = process.argv[6] || '';
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage(); const errs = [];
   p.on('pageerror', e => errs.push(String(e.stack || e).slice(0, 300)));

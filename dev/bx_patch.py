@@ -85,10 +85,10 @@ for P in sys.argv[1:]:
     rp("  // ---- 에필로그 연작", KI + "  // ---- 에필로그 연작")
     # 10) 업적 · 에필로그
     rp("""{id:'cxwinter',cat:'성배전쟁의 끝',n:'검은 겨울',d:'성배가 검게 물든 성배전쟁을 겪었다',t:()=>!!WV().crisis&&WV().crisis.stage>=2}""",
-       """{id:'cxwinter',cat:'성배전쟁의 끝',n:'검은 겨울',d:'성배가 검게 물든 성배전쟁을 겪었다',t:()=>!!WV().crisis&&WV().crisis.type!=='beast'&&WV().crisis.stage>=2},
+       """{id:'cxwinter',cat:'성배전쟁의 끝',n:'검은 겨울',d:'성배가 검게 물든 성배전쟁을 겪었다',t:()=>!!WV().crisis&&WV().crisis.type!=='beast3R'&&WV().crisis.stage>=2},
     {id:'bxmoon',cat:'성배전쟁의 끝',n:'달로 간 잔',d:'셋쇼인 키아라를 쓰러뜨렸다. 성배는 BB와 함께 달로 갔다',t:()=>S.flags.bxEnd==='me'},
     {id:'bxleft',cat:'성배전쟁의 끝',n:'남겨진 사람',d:'키아라에게 지고 살아남았다',t:()=>!!S.flags.bxDream&&!S.dead},
-    {id:'bxfive',cat:'성배전쟁의 끝',n:'다섯 조각',d:'카르마 파지 다섯을 모두 거두었다',t:()=>!!WV().crisis&&WV().crisis.type==='beast'&&(WV().crisis.kpGot||0)>=5}""")
+    {id:'bxfive',cat:'성배전쟁의 끝',n:'다섯 조각',d:'카르마 파지 다섯을 모두 거두었다',t:()=>!!WV().crisis&&WV().crisis.type==='beast3R'&&(WV().crisis.kpGot||0)>=5}""")
     rp("""    {id:'arc_crest',arc:1,w:2,""", """    {id:'bx_sweet',w:2,c:()=>!!S.flags.bxDream&&S.year-S.warYear>=2,f:()=>decide({title:'단맛',body:'그 겨울의 단맛이 문득 혀끝에 돌아왔다. 깨어나지 않는 꿈으로 돌아가고 싶다는 생각이 든다.',choices:[
       {t:'눈을 감는다',f:()=>{ add({will:-4}); return '한참 뒤 눈을 떴을 때, 무엇을 보았는지 기억나지 않았다. 단맛만 오래 남았다.'; }},
       {t:'뿌리친다',auto:true,f:()=>{ add({will:3}); return '찬물에 얼굴을 씻었다. 단맛이 조금씩 옅어졌다.'; }}]})},

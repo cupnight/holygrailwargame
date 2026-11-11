@@ -10,7 +10,7 @@
 - dev/bx_tr.py — 한·영·일 문장
 
 ## 단계 (끝나면 체크, 커밋)
-- [x] A. 틀: CRISIS.list에 beast(w:1,wAv:1), crisisDay/crisisNight/cxCheckEnd/cxFinalNight 등에서 type==='beast'면 bx 쪽으로
+- [x] A. 틀: CRISIS.list에 beast3R(w:1,wAv:1, 11-12 이름 바꿈), crisisDay/crisisNight/cxCheckEnd/cxFinalNight 등에서 type==='beast3R'이면 bx 쪽으로
 - [x] B. 수녀 조: 전쟁 시작 때 자리 하나(burial 우선) · pw 92 · 이름 "이름 모를 수녀" · 정보 70에 "키아라 킷쇼인"
       숨김 보정(상대보다 세 단계 위) · 쓰러지지 않음(30 아래 물러남, 한 방 30 넘으면 1) · NPC전 안 짐 · 암살/마스터 공격 막힘 · 1~3일 밤 사냥(두 조 쓰러뜨리면 멈춤)
 - [x] C. 7일차 봉인: BB 처지 4갈래(달 유닛 / NPC 조 / 7일 전 탈락 → BB 없는 생 / 플레이어) · 거짓 탈락 통지 · 토벌령 · 의심 점수(+20 수상함) · 센티넬·KP 배분(10장 순서) · BB ▲2 백업
