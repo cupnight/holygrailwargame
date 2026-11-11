@@ -1,0 +1,326 @@
+{
+ "bb|meltryllis": {
+  "bb": {
+   "meet": [
+    "어머, 멜트. 제가 떼어 낸 조각이 이렇게 버젓이 적으로 서 있다니. 키운 보람이 있네요.",
+    "My, Melt. A piece I split off from myself, standing before me as a full-fledged enemy. All that raising paid off.",
+    "あら、メルト。私が切り離したかけらが、こんなに堂々と敵として立ってるなんて。育てたかいがありましたね。"
+   ],
+   "fall": [
+    "…역시 멜트의 발끝은 아프네요. 이번 무대는 양보할게요. 넘어지지 말고 끝까지 춰요.",
+    "...Melt's toes really do hurt. I'll yield this stage to you. Dance to the end without falling.",
+    "……やっぱりメルトのつま先は痛いですね。今回の舞台は譲ってあげます。転ばずに最後まで踊ってくださいね。"
+   ],
+   "win": [
+    "(그녀는 흩어지는 빛을 손바닥으로 받았다.) 돌아와요, 멜트. …이번엔 꾸중하지 않을게요.",
+    "(She caught the scattering light in her palm.) Come back, Melt. ...I won't scold you this time.",
+    "（彼女は散っていく光を手のひらで受け止めた。）戻ってきなさい、メルト。……今回は叱りませんから。"
+   ]
+  },
+  "meltryllis": {
+   "meet": [
+    "BB. 네가 날 만들었다고 해서, 내가 네 말을 들을 이유는 없어. 비켜.",
+    "BB. Just because you made me doesn't mean I have to listen to you. Move.",
+    "BB。あなたが私を作ったからって、私があなたの言うことを聞く理由はないわ。どいて。"
+   ],
+   "fall": [
+    "…흥. 너한테 지는 게 제일 싫었는데. 그래도 춤은 끝까지 췄으니까, 그걸로 됐어.",
+    "...Hmph. Losing to you was what I hated most. But I danced to the end, so that's enough.",
+    "……ふん。あなたに負けるのがいちばん嫌だったのに。でも最後まで踊ったから、それでいいわ。"
+   ],
+   "win": [
+    "(그녀는 발끝으로 남은 빛을 흩었다.) 이걸로 빚은 갚았어. …고맙다는 말은, 끝까지 안 해.",
+    "(She scattered the remaining light with the tip of her toe.) That settles my debt. ...I'm never saying thank you, not even at the end.",
+    "（彼女はつま先で残った光を散らした。）これで借りは返したわ。……お礼なんて、最後まで言わない。"
+   ]
+  }
+ },
+ "bb|passionlip": {
+  "bb": {
+   "meet": [
+    "립, 그 손 내리세요. …라고 해도 안 듣겠죠. 좋아요, 선배를 위해서라면 동생이라도 봐주지 않아요.",
+    "Lip, lower those hands. ...You won't listen even if I say so, will you. Fine. For Senpai's sake, I won't go easy even on my little sister.",
+    "リップ、その手を下ろしなさい。……って言っても聞かないですよね。いいですよ、先輩のためなら妹でも手加減しません。"
+   ],
+   "fall": [
+    "아야… 립 손은 여전히 세네요. 괜찮아요, 울지 마요. 립이 이긴 거예요.",
+    "Ow... Lip's hands are as strong as ever. It's okay, don't cry. You won, Lip.",
+    "いたた……リップの手は相変わらず強いですね。大丈夫、泣かないで。リップの勝ちですよ。"
+   ],
+   "win": [
+    "(그녀는 잠시 눈을 감았다.) 미안해요, 립. 그 손으로 안아 주고 싶었던 사람한테, 다음엔 꼭 가요.",
+    "(She closed her eyes for a moment.) I'm sorry, Lip. Next time, be sure to go to the person you wanted to hold with those hands.",
+    "（彼女は少しの間目を閉じた。）ごめんなさい、リップ。その手で抱きしめたかった人のところに、次はちゃんと行ってね。"
+   ]
+  },
+  "passionlip": {
+   "meet": [
+    "BB… 정말로 싸워야 하는 거예요? 저, 마스터를 위해서라면… 물러서지 않을게요.",
+    "BB... do we really have to fight? For my Master's sake... I won't back down.",
+    "BB……本当に戦わなきゃいけないんですか？わたし、マスターのためなら……引きません。"
+   ],
+   "fall": [
+    "BB, 저 이번엔… 아무것도 안 부쉈어요. 그거 하나는 칭찬해 주세요.",
+    "BB, this time I... didn't break anything. At least praise me for that.",
+    "BB、わたし今回は……何も壊しませんでした。それだけはほめてください。"
+   ],
+   "win": [
+    "(그녀는 커다란 손을 가슴 앞에 모았다.) BB… 아프게 해서 미안해요. 그래도 저, 이겼어요.",
+    "(She brought her enormous hands together in front of her chest.) BB... I'm sorry I hurt you. But I won.",
+    "（彼女は大きな手を胸の前で合わせた。）BB……痛くしてごめんなさい。でもわたし、勝ちました。"
+   ]
+  }
+ },
+ "meltryllis|passionlip": {
+  "meltryllis": {
+   "meet": [
+    "립. 하필 너야? …좋아, 봐주지 않아. 그 손톱, 나한테 닿기 전에 녹여 줄 거야.",
+    "Lip. Of all people, you? ...Fine, I won't go easy. I'll melt those claws before they touch me.",
+    "リップ。よりによってあなた？……いいわ、手加減しない。その爪、私に届く前に溶かしてあげる。"
+   ],
+   "fall": [
+    "…너한테 지다니. 울지 마, 립. 이긴 쪽이 우는 건 꼴불견이야.",
+    "...Losing to you. Don't cry, Lip. The winner crying is unsightly.",
+    "……あなたに負けるなんて。泣かないで、リップ。勝ったほうが泣くなんてみっともないわ。"
+   ],
+   "win": [
+    "(그녀는 고개를 돌렸다.) …다음엔 좀 덜 아프게 져. 보는 쪽도 힘들어.",
+    "(She turned her head away.) ...Next time, lose a little less painfully. It's hard on the one watching too.",
+    "（彼女は顔をそむけた。）……次はもう少し痛くないように負けなさい。見てるほうもつらいの。"
+   ]
+  },
+  "passionlip": {
+   "meet": [
+    "멜트… 저, 멜트랑은 싸우기 싫은데요. 그래도 마스터가 기다리고 있어서…",
+    "Melt... I don't want to fight you. But my Master is waiting for me...",
+    "メルト……わたし、メルトとは戦いたくないです。でもマスターが待ってるから……"
+   ],
+   "fall": [
+    "멜트… 역시 멜트는 춤이 예뻐요. 저, 끝까지 보고 싶었어요.",
+    "Melt... your dancing really is beautiful. I wanted to watch until the end.",
+    "メルト……やっぱりメルトの踊りはきれいです。わたし、最後まで見たかったです。"
+   ],
+   "win": [
+    "(그녀는 흩어지는 빛을 감싸듯 손을 오므렸다.) 멜트, 미안해요… 안 접을게요. 그냥 보내 줄게요.",
+    "(She cupped her hands as if to shelter the scattering light.) Melt, I'm sorry... I won't fold you. I'll just let you go.",
+    "（彼女は散っていく光を包むように手をすぼめた。）メルト、ごめんなさい……畳みません。そのまま送ってあげます。"
+   ]
+  }
+ },
+ "bb|kiara": {
+  "bb": {
+   "meet": [
+    "키아라 씨. 그 얼굴, 다시는 보고 싶지 않았는데요. 선배한테는 손가락 하나 대지 마세요.",
+    "Kiara. I never wanted to see that face again. Don't lay a single finger on Senpai.",
+    "キアラさん。その顔、二度と見たくなかったんですけど。先輩には指一本触れないでください。"
+   ],
+   "fall": [
+    "…분하네요. 그래도 끝난 게 아니에요. 선배가 있는 한, 당신의 문은 다시 닫혀요.",
+    "...How frustrating. But it's not over. As long as Senpai is here, your door will close again.",
+    "……悔しいですね。でも終わりじゃありません。先輩がいる限り、あなたの扉はまた閉じますから。"
+   ],
+   "win": [
+    "(그녀는 웃지 않았다.) 이번엔 제가 고쳐 쓸 차례였어요. 안녕히, 키아라 씨. 두 번 다시 오지 마세요.",
+    "(She didn't smile.) This time it was my turn to do the rewriting. Goodbye, Kiara. Never come back.",
+    "（彼女は笑わなかった。）今回は私が書き換える番でした。さようなら、キアラさん。二度と来ないでください。"
+   ]
+  },
+  "kiara": {
+   "meet": [
+    "어머, BB 씨. 저를 그렇게 오래 붙잡아 두시다니. 정말 끈질긴 아이네요.",
+    "My, BB. To have held me back for so long. What a tenacious child you are.",
+    "あら、BBさん。私をあんなに長く引き留めておくなんて。本当にしつこい子ですこと。"
+   ],
+   "fall": [
+    "후후… 당신 같은 작은 프로그램에게 무너지다니. 이것도 처음 맛보는 쾌락이네요.",
+    "Fufu... to be brought down by a little program like you. This too is a pleasure I've never tasted before.",
+    "うふふ……あなたのような小さなプログラムに崩されるなんて。これも初めて味わう快楽ですわ。"
+   ],
+   "win": [
+    "(그녀는 흩어지는 빛을 손끝으로 쓸어 담았다.) 수고하셨어요, BB 씨. 당신의 봉인, 마지막 한 겹까지 달았답니다.",
+    "(She swept up the scattering light with her fingertips.) Thank you for your hard work, BB. Your seal was sweet, down to the very last layer.",
+    "（彼女は散っていく光を指先ですくい集めた。）お疲れさまでした、BBさん。あなたの封印、最後の一枚まで甘かったですわ。"
+   ]
+  }
+ },
+ "meltryllis|kiara": {
+  "meltryllis": {
+   "meet": [
+    "너. 그 미소, 보기만 해도 속이 울렁거려. 녹여 버릴 거야. 아무것도 남지 않게.",
+    "You. Just looking at that smile turns my stomach. I'll melt you. Until nothing is left.",
+    "あなた。その笑顔、見るだけで胸がむかむかする。溶かしてあげる。何も残らないように。"
+   ],
+   "fall": [
+    "…최악이야. 하필 너한테. 그래도 내 춤까지 삼키지는 못했어.",
+    "...The worst. To you, of all people. But you couldn't swallow my dance.",
+    "……最悪。よりによってあなたに。でも私の踊りまでは呑み込めなかったわね。"
+   ],
+   "win": [
+    "(그녀는 발끝을 털었다.) 끝까지 웃더라. 기분 나빠. …그래도 이제 이 도시는 조용해지겠지.",
+    "(She shook off the tips of her toes.) She smiled to the very end. Creepy. ...Still, this city should be quiet now.",
+    "（彼女はつま先を払った。）最後まで笑ってた。気持ち悪い。……でも、これでこの街も静かになるわね。"
+   ]
+  },
+  "kiara": {
+   "meet": [
+    "멜트릴리스 씨. 모든 걸 녹여 삼키는 분이라니, 저와 꽤 닮으셨네요.",
+    "Meltryllis. One who melts and swallows everything — you rather resemble me.",
+    "メルトリリスさん。すべてを溶かして呑み込む方だなんて、私とずいぶん似ていらっしゃるのね。"
+   ],
+   "fall": [
+    "어머… 녹아내리는 쪽이 저였네요. 아름다운 발끝이었어요.",
+    "My... so I was the one to melt away. Such beautiful toes.",
+    "あら……溶けていくのは私のほうでしたのね。美しいつま先でしたわ。"
+   ],
+   "win": [
+    "춤은 이걸로 끝인가요? 아쉽네요. 그 차가운 발끝까지, 제 안에서 편히 쉬게 해 드릴게요.",
+    "Is the dance over already? How unfortunate. I'll let you rest peacefully within me, right down to those cold toes.",
+    "踊りはこれでおしまいですか？残念ですわ。その冷たいつま先まで、私の中でゆっくり休ませてさしあげます。"
+   ]
+  }
+ },
+ "passionlip|kiara": {
+  "passionlip": {
+   "meet": [
+    "다, 당신이… 마스터를 그런 웃는 얼굴로 보지 마세요. 이 손으로, 막을 거예요.",
+    "Y-you... don't look at my Master with that smile. I'll stop you, with these hands.",
+    "あ、あなたが……マスターをそんな笑顔で見ないでください。この手で、止めます。"
+   ],
+   "fall": [
+    "무서웠어요… 그래도 도망 안 쳤어요. 마스터, 저 끝까지 서 있었죠?",
+    "I was scared... but I didn't run away. Master, I stayed standing to the end, didn't I?",
+    "怖かったです……でも逃げませんでした。マスター、わたし最後まで立ってましたよね？"
+   ],
+   "win": [
+    "(그녀는 떨리는 손을 천천히 내렸다.) 이번에는… 지킬 걸 부수지 않고 지켰어요.",
+    "(She slowly lowered her trembling hands.) This time... I protected what I had to protect without breaking it.",
+    "（彼女は震える手をゆっくり下ろした。）今度は……守るものを壊さずに守れました。"
+   ]
+  },
+  "kiara": {
+   "meet": [
+    "패션립 씨. 사랑하는 것을 작게 접어 품는 분이라고요. 참 사랑스러운 욕심이에요.",
+    "Passionlip. I hear you fold what you love up small and hold it close. What an adorable desire.",
+    "パッションリップさん。愛するものを小さく畳んで抱く方だとか。なんて愛らしい欲でしょう。"
+   ],
+   "fall": [
+    "어머나… 이렇게 상냥한 손에 붙잡히다니. 저도 조금, 접혀 버렸네요.",
+    "Oh my... to be caught in such gentle hands. I've been folded up a little myself.",
+    "あらあら……こんなに優しい手に捕まるなんて。私も少し、畳まれてしまいましたわ。"
+   ],
+   "win": [
+    "울지 마세요. 그 커다란 손이 끝내 아무것도 붙잡지 못한 것도, 제게는 아주 달콤했답니다.",
+    "Don't cry. That those great hands never managed to hold anything in the end — that too was very sweet to me.",
+    "泣かないでくださいな。その大きな手が最後まで何も掴めなかったことも、私にはとても甘かったのですから。"
+   ]
+  }
+ },
+ "tamamo|tamamocat": {
+  "tamamo": {
+   "meet": [
+    "어머, 캣! 제 꼬리였던 아이가 주인님께 칼끝을 겨누다니. 오늘은 엄하게 혼내 드릴게요!",
+    "Oh my, Cat! A girl who used to be my tail, pointing a blade at my master? Today I'm going to scold you sternly!",
+    "あら、キャット！私の尻尾だった子がご主人様に刃を向けるなんて。今日は厳しく叱ってあげますからね！"
+   ],
+   "fall": [
+    "아앗, 꼬리에게 지다니… 타마모 체면이 말이 아니네요. 캣, 주인님 밥은 잘 챙겨 드리세요.",
+    "Ahh, losing to my own tail... Tamamo's pride is in tatters. Cat, make sure my master gets fed properly.",
+    "ああっ、尻尾に負けるなんて……タマモの面目丸つぶれです。キャット、ご主人様のご飯はちゃんとお世話してくださいね。"
+   ],
+   "win": [
+    "(그녀는 흩어지는 빛을 꼬리로 감싸 주었다.) 돌아와요, 캣. 이번엔 꼬리 끝에 꼭 붙어 있어요.",
+    "(She wrapped the scattering light in her tail.) Come back, Cat. This time, stay firmly attached to the tip of my tail.",
+    "（彼女は散っていく光を尻尾で包んであげた。）戻ってきなさい、キャット。今度は尻尾の先にしっかりくっついていなさい。"
+   ]
+  },
+  "tamamocat": {
+   "meet": [
+    "본체다! 오늘 저녁은 유부 초밥으로 정했다. 이기는 쪽이 만든다.",
+    "It's the original! Tonight's dinner is decided: inari sushi. The winner cooks.",
+    "本体だ！今夜のご飯はいなり寿司に決めた。勝ったほうが作る。"
+   ],
+   "fall": [
+    "졌다멍… 본체는 역시 본체였다. 남은 밥은 냉장고에 있다. 데워 먹어라.",
+    "Lost, woof... the original really is the original. The leftovers are in the fridge. Heat them up.",
+    "負けたワン……本体はやっぱり本体だった。残りのご飯は冷蔵庫にある。温めて食べろ。"
+   ],
+   "win": [
+    "(그녀는 흩어지는 빛 앞에서 앞발을 모았다.) 본체, 미안. 캣은 지금 주인 밥을 지켜야 해서.",
+    "(She put her front paws together before the scattering light.) Sorry, original. Cat has to guard her master's meals right now.",
+    "（彼女は散っていく光の前で前足を合わせた。）本体、ごめん。キャットは今、ご主人のご飯を守らないといけないんだ。"
+   ]
+  }
+ },
+ "tamamo|suzuka": {
+  "tamamo": {
+   "meet": [
+    "스즈카 씨잖아요! 한 식구끼리 싸워야 하다니… 그래도 주인님 일이라면 양보 못 해요!",
+    "If it isn't Suzuka! To think family has to fight family... but when it comes to my master, I won't give way!",
+    "鈴鹿さんじゃないですか！身内同士で戦わなきゃいけないなんて……でもご主人様のことなら譲れません！"
+   ],
+   "fall": [
+    "칼솜씨는 여전하시네요… 스즈카 씨, 연애 이야기는 다음 생에 마저 해요.",
+    "Your swordsmanship is as sharp as ever... Suzuka, let's finish our romance talk in the next life.",
+    "剣の腕は相変わらずですね……鈴鹿さん、恋バナの続きは来世でしましょう。"
+   ],
+   "win": [
+    "(그녀는 소매로 입가를 가렸다.) 미안해요, 스즈카 씨. 주인님 곁에는 제가 남을게요.",
+    "(She covered her mouth with her sleeve.) I'm sorry, Suzuka. I'll be the one who stays by my master's side.",
+    "（彼女は袖で口元を隠した。）ごめんなさい、鈴鹿さん。ご主人様のそばには私が残りますね。"
+   ]
+  },
+  "suzuka": {
+   "meet": [
+    "엥, 타마모잖아. 진짜 여기서 붙어야 돼? …뭐, 마스터 일이니까 봐주는 건 없어.",
+    "Huh, it's Tamamo. We seriously have to go at it here? ...Well, it's for my Master, so no holding back.",
+    "えー、タマモじゃん。マジでここでやり合うの？……まあ、マスターのことだし手加減なしね。"
+   ],
+   "fall": [
+    "아, 졌다. 완전 분해. …타마모, 내 몫까지 그 사람 잘 챙겨.",
+    "Ah, I lost. So frustrating. ...Tamamo, take good care of that person for me too.",
+    "あー、負けた。マジ悔しい。……タマモ、私の分まであの人のことよろしくね。"
+   ],
+   "win": [
+    "(그녀는 칼을 거두고 머리를 쓸어 넘겼다.) 미안, 타마모. 이번 사랑은 내가 가져갈게.",
+    "(She sheathed her sword and swept back her hair.) Sorry, Tamamo. This love is mine to take.",
+    "（彼女は刀を収めて髪をかき上げた。）ごめん、タマモ。今回の恋は私がもらうね。"
+   ]
+  }
+ },
+ "suzuka|tamamocat": {
+  "suzuka": {
+   "meet": [
+    "뭐야, 고양이? 여우? …그 꼬리, 타마모노마에 쪽 핏줄이지? 처음 보는 사이니까 봐주는 건 없어.",
+    "What, a cat? A fox? ...That tail — you're related to Tamamo-no-Mae, aren't you? We've never met, so no holding back.",
+    "なに、猫？狐？……その尻尾、玉藻の前の系統でしょ？初対面だし、手加減はなしね。"
+   ],
+   "fall": [
+    "너 진짜 세다… 고양이 주제에. 마스터 잘 부탁해, 나 대신.",
+    "You're seriously strong... for a cat. Take care of my Master for me.",
+    "あんたマジで強い……猫のくせに。マスターのこと、私のかわりによろしく。"
+   ],
+   "win": [
+    "(그녀는 쭈그려 앉아 흩어지는 빛을 바라보았다.) 낮잠 자는 줄 알았네. …잘 자, 캣.",
+    "(She crouched down and watched the scattering light.) I thought you were just taking a nap. ...Sleep well, Cat.",
+    "（彼女はしゃがみこんで散っていく光を見つめた。）昼寝してるのかと思った。……おやすみ、キャット。"
+   ]
+  },
+  "tamamocat": {
+   "meet": [
+    "칼이 세 자루. 스즈카산의 그 귀신이다. 반칙이다. 캣은 앞발 두 개로 간다.",
+    "Three swords. The demon of Mount Suzuka. That's cheating. Cat goes with two front paws.",
+    "刀が三振り。鈴鹿山のあの鬼だ。反則だ。キャットは前足二本でいく。"
+   ],
+   "fall": [
+    "졌다. 스즈카의 칼은 날이 잘 섰다. 그 칼, 부엌에서도 쓰면 좋겠다.",
+    "Lost. Suzuka's swords have a fine edge. Cat would like to use those in the kitchen too.",
+    "負けた。鈴鹿の刀はよく切れる。その刀、台所でも使えたらいいのに。"
+   ],
+   "win": [
+    "(그녀는 앞발로 볼을 긁었다.) 스즈카, 미안. 다음엔 같이 낮잠 자자. 싸우지 말고.",
+    "(She scratched her cheek with a front paw.) Sorry, Suzuka. Next time let's nap together. No fighting.",
+    "（彼女は前足でほっぺたをかいた。）鈴鹿、ごめん。次は一緒に昼寝しよう。戦わずに。"
+   ]
+  }
+ }
+}
