@@ -59,6 +59,7 @@ for P in sys.argv[1:]:
     if(w.hp<=0&&e.hp<=0){
       log(pickNR([`${mN}${J(mN,과)} ${eN}${J(eN,이)} 동시에 무너졌다.""")
     rp("""    const intro = ctx.cx? (e.cx==='boss'?""", """    const intro = BXW()&&bxIntro(e,ctx)? bxIntro(e,ctx) : ctx.cx? (e.cx==='boss'?""")
+    rp("w.myOut={d:w.day,tod:w.tod,why:e?`${cn(e)} 조와 싸우다 쓰러졌다`:'쓰러졌다',", "w.myOut={d:w.day,tod:w.tod,why:e?(e.bx?'셋쇼인 키아라와 싸우다 쓰러졌다':e.cx==='sent'?'센티넬과 싸우다 쓰러졌다':`${cn(e)} 조와 싸우다 쓰러졌다`):'쓰러졌다',")
     # 8) 이름 · 말
     rp("""  const cn=x=>{ if(x&&x.cx) return (x.cx==='boss'?'검은 성배의 ':'검은 그림자의 ')+CLS[x.cls].n;""",
        """  const cn=x=>{ if(x&&x.cx==='sent') return '센티넬 '+CLS[x.cls].n; if(x&&x.cx==='bb') return CLS[x.cls].n; if(x&&x.bx) return CLS[x.cls].n; if(x&&x.cx) return (x.cx==='boss'?'검은 성배의 ':'검은 그림자의 ')+CLS[x.cls].n;""")

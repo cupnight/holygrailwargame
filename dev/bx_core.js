@@ -3,8 +3,9 @@
      c.type==='beast' · c.stage 0 시작 · 1 휩쓸기 · 2 봉인 · 3 강림
      유닛: cx 'sent' 센티넬(KP를 품음, 강림 뒤 guard=1 호위) · 'bb' 달에서 온 BB · 'boss'(bx=1) 키아라 */
   // 수치 (상세안 16판 · 17 · 18장)
-  const BXK={pw:92, kpT:[0,.5,1.25,2.25,3.5,5], hpD:.05, hpA:.02, wdM:.7, npM:2, hp2:50, desc:-56, nd:-25, bbAdj:-10, relAdj:-.4,
+  const BXK={pw:92, kpT:[0,.5,1.25,2.25,3.5,5], hpD:.05, hpA:.02, wdM:.85, npM:2, hp2:50, desc:-56, nd:-45, bbAdj:-10, relAdj:-.4,
     heal:15, healSm:20, npHeal:15, logos:1.25, nwD:11, nwR:.7, sentR:.7, bbHit:[10,15], gAct:.3, gCover:.6, gChip:.2, nunKeep:30, bbKeep:30};
+  if(typeof globalThis!=='undefined'&&globalThis.__BXK) Object.assign(BXK,globalThis.__BXK); // 시험용 덮어쓰기
   const KP_N=['Body','Site','Mouth','Spice','Organ'];
   const KP_STAT={Body:2,Site:1,Mouth:0,Spice:3};
   const BXW=()=>{ const c=CXW(); return c&&c.type==='beast'?c:null; };
@@ -138,11 +139,13 @@
     const busy=new Set(((w.cxWent&&w.cxWent.d===w.day)?w.cxWent.ids:[]));
     if(c.stage===2){
       // 센티넬: BB 쪽을 먼저(70%), 나머지는 도시를 돈다. BB가 없는 생은 70%로 사냥에 나선다
+      let atBB=0;
       for(const u of bxSents()){ if(!u.alive) continue; const bb=bxBBP(), me=c.bb.at==='me'&&w.heroAlive;
-        if(!c.noBB&&(bb||me)&&ch(BXK.sentR)){ if(me){ if(!w.cxHit) w.cxHit=u.i; continue; } bxHitBB(bb,ri(BXK.bbHit[0],BXK.bbHit[1])+Math.max(0,bxSents().length-2)*2,'sent'); continue; }
+        if(!c.noBB&&(bb||me)&&ch(BXK.sentR)){ if(me){ if(!w.cxHit) w.cxHit=u.i; continue; } atBB++; continue; }
         if(!ch(c.noBB?BXK.nwR:.3)) continue;
         const pool=[...(w.heroAlive&&!w.cxHit&&c.bb.at!=='me'?[{me:true}]:[]),...contracted().filter(p=>!busy.has(p.i)&&!p.bxBB)]; if(!pool.length) continue;
         const t=pick(pool); if(t.me){ w.cxHit=u.i; continue; } busy.add(t.i); bxNpcVsSent(t,u); }
+      if(atBB&&!c.revealD) bxHitBB(bxBBP(),ri(BXK.bbHit[0],BXK.bbHit[1])+(atBB-1)*2,'sent'); // 센티넬이 많을수록 더 깎인다(밤마다 10~15)
       // NPC: 수녀를 의심하는 조는 센티넬을 사냥하고, 토벌령을 믿는 조는 BB를 친다
       for(const p of contracted()){ if(busy.has(p.i)||p.halt>0||p.bxBB) continue;
         if((p.bxSus||0)>=70&&bxSents().length&&ch(.25)){ busy.add(p.i); bxNpcVsSent(p,pick(bxSents())); continue; }
@@ -371,7 +374,7 @@
   { const f0=cxDayActs; cxDayActs=ch_=>BXW()?bxDayActs(ch_):f0(ch_); }
   { const f0=cxCheckEnd; cxCheckEnd=()=>BXW()?bxCheckEnd():f0(); }
   { const f0=cxFinalNight; cxFinalNight=()=>BXW()?bxFinalNight():f0(); }
-  { const f0=cxZoneBattle; cxZoneBattle=ctx=>BXW()?(ctx&&ctx.descent?CX().grail:null):f0(ctx); }
+  { const f0=cxZoneBattle; cxZoneBattle=ctx=>BXW()?null:f0(ctx); }
   { const f0=cxUnitDown; cxUnitDown=(u,by)=>BXW()?bxUnitDown(u,by):f0(u,by); }
   { const f0=cxRep; cxRep=()=>BXW()?bxRep():f0(); }
   { const f0=cxThreat; cxThreat=()=>{ if(!BXW()) return f0(); const w=W(); if(!w.cxHit) return false; const u=cxUnit(w.cxHit); w.cxHit=null; if(!u||!u.alive||!w.heroAlive) return false;
