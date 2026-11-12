@@ -11,8 +11,9 @@
      TX.tickS.textContent=tr(`${opt.city} 전역에서 깊은 잠에 빠졌던 시민들 일제히 깨어나 · 밤사이 일을 기억하는 사람은 없어`);
      const tv=document.createElement('div'); tv.className='bxm-tv'; tv.innerHTML=`<i>● LIVE</i><span></span>`; o.appendChild(tv); this.tv=tv; this.tvS=tv.querySelector('span');
      const ms=document.createElement('div'); ms.className='bxm-msg'; ms.innerHTML=`<p class="a"></p><p class="b"></p>`; o.appendChild(ms); this.ma=ms.querySelector('.a'); this.mb=ms.querySelector('.b');
-     // 결말 곡: 도시 불빛이 켜질 때 본 곡이 들어오는 자리부터 아주 천천히 커지고(5초), 닫을 때까지 반복한다. 닫으면 3초 넘게 서서히 줄어 꺼진다
-     try{ const h=Snd.cue('end_f',{at:this.TK+.2,loop:true,off:26.3,fin:5,sync:true}); (o._snd=o._snd||[]).push({stop:tt=>h.stop(Math.max(tt||0,3.2))}); }catch(e){}
+     // 결말 곡: 제목이 뜰 무렵 본 곡이 들어오는 자리부터 아주 작게 시작해 7초에 걸쳐 커진다(연출 끝 무렵 또렷해짐). 닫을 때까지 반복하고, 닫으면 3초 넘게 서서히 줄어 꺼진다
+     this.MU={me:4.0,live:4.6,nobb:3.8,voice:3.8}[v]||4;
+     try{ const h=Snd.cue('end_f',{at:this.MU,loop:true,off:26.3,fin:7,sync:true}); (o._snd=o._snd||[]).push({stop:tt=>h.stop(Math.max(tt||0,3.2))}); }catch(e){}
      this.CAP=tr('달의 뒷면에서 · 긴급 방송'); this.M1=tr(v==='voice'?'…배, 들려요…? 이건 제가…':'선배, 그럼 이만! 이건 제가 달에 잘 넣어 둘게요.'); this.M2=tr('…고마웠어요. 이번엔 진심이에요.'); },
    frame(t,dt){ const s=S_(), cx=W/2, inA=io(seg(t,0,.45)), base=H*.62, mx=cx, my=H*.15, mr=Math.min(W,H)*.075, v=this.v, R=rng(3);
     const type=(el,str,a,b)=>{ const n=Math.round([...str].length*seg(t,a,b)); el.textContent=[...str].slice(0,n).join(''); };
