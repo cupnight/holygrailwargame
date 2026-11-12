@@ -24,7 +24,7 @@ for P in sys.argv[1:]:
         for k in ('not', 'only', 'wish', 'day', 'mon', 'wed', 'kid', 'track'):
             if e.get(k): d[k] = e[k]
         EVD.append(d)
-    ALT = {k: {'tag': v['tag'], 'b': [fx(b) for b in v['b']], 'r': {ck: [fx(r) for r in rr] for ck, rr in v['r'].items()}} for k, v in epi2_ev.ALT.items()}
+    ALT = {k: [{'tag': v['tag'], 'b': [fx(b) for b in v['b']], 'r': {ck: [fx(r) for r in rr] for ck, rr in v['r'].items()}} for v in L] for k, L in epi2_ev.ALT.items()}
     J = lambda o: json.dumps(o, ensure_ascii=False)
     js = ("  Object.assign(RLEP," + J(RL) + ");\n  const EP2_EV=" + J(EVD) + ";\n  const EP2_TAGS=" + J(epi2_ev.TAGS) + ";\n  const EP2_ALT=" + J(ALT)
           + ";\n  const EP2_DAY2=" + J([fixN(x) for x in epi2_ev4.DAY2]) + ", EP2_MON2=" + J({str(k): [fixN(x) for x in v] for k, v in epi2_ev4.MON2.items()}) + ", EP2_YR2=" + J([fixN(x) for x in epi2_ev4.YR2])
