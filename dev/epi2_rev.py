@@ -2,7 +2,7 @@
 import sys, json, re, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import epi2_ev as m1, epi2_ev2 as m2, epi2_ev3 as m3, epi2_ev4 as m4
-VN = {'cook': '요리를 하는 서번트', 'sage': '박식한 서번트', 'civil': '싸움이 본업이 아닌 서번트', 'bold': '성향에 야망이 있는 서번트', 'd': '그 밖', 'now': '현대 · 근미래 서번트', 'modern': '근대(19~20세기) 서번트'}
+VN = {'mage': '캐스터(마술사형) 서번트', 'cook': '요리를 하는 서번트', 'sage': '박식한 서번트', 'civil': '싸움이 본업이 아닌 서번트', 'bold': '성향에 야망이 있는 서번트', 'd': '그 밖', 'now': '현대 · 근미래 서번트', 'modern': '근대(19~20세기) 서번트'}
 FX = {'bond1': '관계 +1', 'bond2': '관계 +2', 'will1': '정신 +1', 'will2': '정신 +2', 'none': '변화 없음', 'rel4': '인연 +4', 'rel5': '인연 +5', 'rel6': '인연 +6', 'rel8': '인연 +8', 'trust2': '신뢰 +2', 'trust3': '신뢰 +3', 'trust4': '신뢰 +4',
       'health1': '건강 +1', 'health2': '건강 +2', 'wealth1': '재산 +1', 'wealth3': '재산 +3', 'wealth-5': '재산 −5 · 인연 +4', 'lore2': '지식 +2'}
 js = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'epi2.js'), encoding='utf8').read()
@@ -31,6 +31,7 @@ G = [{'id': 'tags', 'ph': 'A', 't': '서번트 갈래 (문장이 갈리는 기�
     {'id': 'tags.cook', 'slot': '요리', 'L': ['에미야, 에미야[얼터], 타마모 캣, 타마모노마에, 부디카, 미나모토노 라이코, 키르케, 로빈 후드, 아라쉬, 아탈란테, 센지 무라마사, 케이론, 레오나르도 다 빈치']},
     {'id': 'tags.now', 'slot': '현대', 'L': ['에미야, 에미야[얼터], 살생원 키아라']},
     {'id': 'tags.modern', 'slot': '근대', 'L': ['니콜라 테슬라, 셜록 홈즈, 히지카타 토시조, 오키타 소지, 안데르센, 암굴왕, 이서문, 잭 더 리퍼']},
+    {'id': 'tags.mage', 'slot': '마술사', 'L': ['클래스가 캐스터인 서번트 전원']},
     {'id': 'tags.bold', 'slot': '야망', 'L': ['성향에 「야망」이 있는 서번트 전원 (48명)']}]}]
 for n_, a in enumerate(m1.ALT['lv_morning']):
     pre = 'alt.lv_morning' + ('' if n_ == 0 else '.' + a['tag']); rows = [{'id': f'{pre}.b{i}', 'slot': f'본문 {i+1}', 'L': b} for i, b in enumerate(a['b'])]

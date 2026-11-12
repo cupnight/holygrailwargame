@@ -31,8 +31,8 @@
   const EP2_YR=['{N과} 맞는 봄이 하나 더 지났다.','집 안의 물건들이 조금씩 둘의 것이 되어 갔다.','{N은} 이제 전철 노선도를 보지 않고 갈아탔다.','동네 사람들은 {N을} 이름으로 불렀다. 이 세계에서 쓰는 이름으로.',
     '그 겨울 이야기를 꺼내는 날이 한 해에 한두 번으로 줄었다.','현관의 신발이 몇 번 바뀌었다. 놓이는 자리는 그대로였다.','{N이} 생전의 일을 농담처럼 말하게 되었다.','사진첩이 한 권 찼다.','평범한 해였다. 그게 얼마나 드문 일인지 둘 다 알고 있었다.'];
   const ep2N=(s)=>{ const h=H_BY[S.hero]; return nf(s.replace(/\{N(의|에게서|에게는|에게|에|도)\}/g,(_,j)=>h.name+j),h); };
-  // 서번트 갈래: 요리 > 현대 > 근대 > 박식 > 비전투 > 야망 순으로 먼저 맞는 변형을 쓴다
-  const ep2Tags=h=>['cook','now','modern','sage','civil'].filter(k=>EP2_TAGS[k].includes(h.id)).concat((h.traits||[]).includes('야망')?['bold']:[]);
+  // 서번트 갈래: 요리 > 현대 > 근대 > 마술사 > 박식 > 비전투 > 야망 순으로 먼저 맞는 변형을 쓴다
+  const ep2Tags=h=>['cook','now','modern','mage','sage','civil','bold'].filter(k=>k==='mage'?h.cls==='caster':k==='bold'?(h.traits||[]).includes('야망'):EP2_TAGS[k].includes(h.id));
   const ep2V=(x,h)=>{ if(Array.isArray(x)) return x; const k=ep2Tags(h).find(k=>x[k]); return k?x[k]:x.d; };
   const ep2Alt=(id,part)=>{ const T=ep2Tags(H_BY[S.hero]), a=(EP2_ALT[id]||[]).find(a=>T.includes(a.tag)); return a?a[part]:undefined; };
   const EP2_FX={bond1:()=>add({bond:1}),bond2:()=>add({bond:2}),will1:()=>add({will:1}),will2:()=>add({will:2}),none:()=>{},rel4:()=>relGain(4),rel5:()=>relGain(5),rel6:()=>relGain(6),rel8:()=>relGain(8),
