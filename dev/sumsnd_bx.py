@@ -77,17 +77,18 @@ def seal(nb):
     return reverb(B, 2.4, .32)
 
 def desc():
-    d = 6.4; B = buf(d); x = T(d)
+    d = 7.8; B = buf(d); x = T(d)
     put(B, (np.sin(2 * np.pi * 46 * x) + .5 * np.sin(2 * np.pi * 69 * x)) * ss(x / .5) * (1 - ss((x - 2.5) / .3)), 0, 0, .3)
     put(B, pad([138.59, 207.65, 277.18], 2.2, .8, .6, bright=900), .4, 0, .35)          # 수녀가 나타난다 (낮은 합창 결)
     for i, f in enumerate([587.33, 739.99, 880, 1174.66, 1479.98]): put(B, soft(f, .8), 1.2 + i * .15, (i - 2) / 3, .1)   # 잔이 오른다
     rv = hp(noise(.7), 1500) * (T(.7) / .7) ** 3; put(B, rv, 1.9, 0, .3)                 # 거꾸로 차오름
     put(B, thump(48, 1.2), 2.6, 0, .8)
-    put(B, pad(SWEET, 3.8, .25, 1.6, bright=3000), 2.6, 0, .55)
+    put(B, pad(SWEET, 5.2, .25, 2.2, bright=3000), 2.6, 0, .55)
     for i, f in enumerate(SWEET): put(B, bell(f * 2, 1.6), 2.62 + i * .03, (i - 2) / 2.5, .1)
     for k in range(3): put(B, whoosh(.7, 300, 2400, .25), 3.0 + k * .18, (-1) ** k * .6)
     z = crush(bp(noise(.3), 1200, 8000) * env(.3, .002, .1), 3, 10); put(B, z, 4.25, -.3, .35); put(B, z[::-1].copy(), 4.38, .3, .25)
-    put(B, bell(138.59, 2.0) * .6, 4.6, 0, .35); put(B, soft(69.3, 2.5), 4.6, 0, .35)
+    g = sweep(140, 38, .6) * env(.6, .01, .25); put(B, crush(g, 4, 8) * .6 + g * .4, 4.22, 0, .45)   # 그림자가 뒤틀린다
+    put(B, bell(138.59, 2.6) * .6, 4.6, 0, .35); put(B, soft(69.3, 3.2), 4.6, 0, .35)
     return reverb(B, 2.8, .35)
 
 def karma():

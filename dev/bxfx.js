@@ -30,9 +30,25 @@ const BXN=[[[-.075,.07],[-.06,.01],[0,-.025],[.06,.01],[.075,.07],[.13,.2],[.2,.
   [[-.09,.17],[-.17,.5],[-.25,.98],[.25,.98],[.17,.5],[.09,.17]],                                                     // 수도복
   [[-.08,.2],[-.16,.3],[-.11,.4],[-.02,.36],[-.04,.3]], [[.08,.2],[.16,.3],[.11,.4],[.02,.36],[.04,.3]]];               // 모은 두 소매
 BXN.forEach(q=>{ let A=0; q.forEach(([x1,y1],i)=>{ const [x2,y2]=q[(i+1)%q.length]; A+=x1*y2-x2*y1; }); if(A<0) q.reverse(); });
-function bxNun(c,cx,top,h,a,rim,D){ if(a<=0) return; const P=new Path2D(); for(const q of BXN){ q.forEach(([u,v],i)=>{ const x=cx+u*h, y=top+v*h; i?P.lineTo(x,y):P.moveTo(x,y); }); P.closePath(); }
-  P.moveTo(cx+.06*h,top+.08*h); P.arc(cx,top+.08*h,.06*h,0,Math.PI*2);
-  c.save(); c.fillStyle=`rgba(14,5,18,${.95*a})`; c.shadowColor=`rgba(${rim||BXF.pink},${.9*a})`; c.shadowBlur=18*D; c.fill(P); c.restore(); }
+// 비스트 그림자: 베일이 벗겨지고 머리칼이 크게 퍼진다 · 머리 양옆으로 휜 뿔 · 두 팔은 안아 들이듯 벌린다 · 옷자락 끝은 꽃잎처럼 갈라진다 (오른쪽 반만 적고 접어 만든다)
+const BXB=(()=>{ const mir=h=>[...h,...h.slice(1,-1).reverse().map(([x,y])=>[-x,y])], neg=q=>q.map(([x,y])=>[-x,y]);
+  const hair=mir([[0,-.012],[.055,0],[.09,.06],[.11,.15],[.13,.27],[.18,.4],[.26,.52],[.35,.64],[.28,.62],[.31,.74],[.23,.685],[.23,.8],[.155,.69],[.1,.45],[0,.3]]);
+  const horn=[[.03,.03],[.08,-.002],[.15,-.035],[.205,-.09],[.225,-.175],[.248,-.1],[.228,-.035],[.16,.018],[.07,.062]];
+  const body=mir([[0,.14],[.05,.155],[.07,.22],[.06,.32],[.09,.45],[.15,.62],[.22,.78],[.31,.9],[.24,.88],[.22,.975],[.15,.9],[.11,.995],[.06,.935],[0,1]]);
+  const arm=[[.045,.16],[.14,.215],[.26,.245],[.37,.235],[.43,.205],[.455,.19],[.44,.225],[.465,.23],[.425,.255],[.38,.285],[.27,.3],[.14,.29],[.06,.25]];
+  return [hair,horn,neg(horn),body,arm,neg(arm)]; })();
+for(const L of [BXN,BXB]) L.forEach(q=>{ let A=0; q.forEach(([x1,y1],i)=>{ const [x2,y2]=q[(i+1)%q.length]; A+=x1*y2-x2*y1; }); if(A<0) q.reverse(); });
+function bxSilP(L,cx,top,h,hr){ const P=new Path2D(); for(const q of L){ q.forEach(([u,v],i)=>{ const x=cx+u*h, y=top+v*h; i?P.lineTo(x,y):P.moveTo(x,y); }); P.closePath(); }
+  P.moveTo(cx+hr*h,top+.08*h); P.arc(cx,top+.08*h,hr*h,0,Math.PI*2); return P; }
+function bxSil(c,L,cx,top,h,a,rim,D,col){ if(a<=0) return; const P=bxSilP(L,cx,top,h,L===BXB?.055:.06);
+  c.save(); c.fillStyle=col||`rgba(14,5,18,${.95*a})`; if(!col){ c.shadowColor=`rgba(${rim||BXF.pink},${.9*a})`; c.shadowBlur=(L===BXB?26:18)*D; } c.fill(P); c.restore(); }
+function bxNun(c,cx,top,h,a,rim,D){ bxSil(c,BXN,cx,top,h,a,rim,D); }
+// 그림자가 바뀌는 순간: 가로 띠마다 옛 모습과 새 모습이 뒤섞이고 어긋나며, 색이 갈라진다 (k: 새 모습 쪽으로 넘어간 정도)
+function bxSilSwap(c,cx,top,h,a,k,D){ const n=14, y0=top-.16*h, hh=1.2*h/n;
+  for(let i=0;i<n;i++){ const y=y0+i*hh, B=Math.random()<k, dx=(Math.random()<.45?(Math.random()-.5)*.12*h:0);
+    c.save(); c.beginPath(); c.rect(0,y,c.canvas.width,hh+1); c.clip(); c.translate(dx,0);
+    if(Math.random()<.5){ bxSil(c,B?BXB:BXN,cx-5*D,top,h,a,null,D,`rgba(255,60,200,${.45*a})`); bxSil(c,B?BXB:BXN,cx+5*D,top,h,a,null,D,`rgba(80,220,255,${.4*a})`); }
+    bxSil(c,B?BXB:BXN,cx,top,h,a,BXF.pink,D); c.restore(); } }
 // 화면 잡음(가로채기와 같은 결): 낮은 해상도 잡음을 늘려 덮고 굵은 띠 몇 줄
 function bxStatic(c,W,H,D,I,t){ if(I<=0) return; const nw=160, nh=90; if(!bxStatic.cv){ bxStatic.cv=document.createElement('canvas'); bxStatic.cv.width=nw; bxStatic.cv.height=nh; }
   const x=bxStatic.cv.getContext('2d'), d=x.createImageData(nw,nh), A=d.data; for(let i=0;i<A.length;i+=4){ const v=Math.random()*255; A[i]=v; A[i+1]=v*.9; A[i+2]=v; A[i+3]=255; } x.putImageData(d,0,0);
@@ -83,11 +99,11 @@ function bxSealShow(fx){
 
 /* 강림: 수녀가 성배를 마시고, 연꽃이 피며 이름이 「킷쇼인 → 셋쇼인」으로 고쳐 쓰인다. 호위가 될 센티넬이 빨려 든다. 고쳐쓴 카르마면 마지막에 화면이 치직이며 덮어쓰인다 */
 function bxDescShow(fx){
-  const {seg,io,oc}=XF, K=!!fx.karma, T=K?8.2:6.4, rnd=XF.rng(23), NG=Math.max(0,Math.min(5,fx.g|0));
+  const {seg,io,oc}=XF, K=!!fx.karma, T=K?9.6:7.8, KA=6.7, rnd=XF.rng(23), NG=Math.max(0,Math.min(5,fx.g|0));
   const n0=tr('킷쇼인 키아라'), n1=tr('셋쇼인 키아라'), day=tr(`제${fx.d}일 · 강림`), cls=tr('비스트 Ⅲ/R'), km=tr('고쳐쓴 카르마');
   const html=`<div class="bxd"><div class="bxd-day">${esc(day)}</div><div class="bxd-nm"><span class="a">${esc(n0)}</span><span class="b">${esc(n1)}</span></div><div class="bxd-cls">${esc(cls)}</div>${K?`<div class="bxd-km">${esc(km)}</div>`:''}</div>`;
   const V=xfxOpen('bxdx',`${day} · ${n1} · ${cls}${K?' · '+km:''}`,html,T,frame);
-  fxSnd(V.o,'j_bx_desc'); if(K) fxSnd(V.o,'j_bx_karma',{at:5.3});
+  fxSnd(V.o,'j_bx_desc'); if(K) fxSnd(V.o,'j_bx_karma',{at:KA});
   const q=k=>V.o.querySelector(k), E={day:q('.bxd-day'),a:q('.bxd-nm .a'),b:q('.bxd-nm .b'),cls:q('.bxd-cls'),km:q('.bxd-km')};
   const PET=[...Array(40)].map(()=>({x:rnd(),y:rnd(),v:.04+rnd()*.08,r:rnd()*6,s:3+rnd()*5,w:rnd()*6}));
   const ORB=[...Array(NG)].map((_,i)=>({a0:rnd()*6.28,d:i*.18}));
@@ -95,14 +111,17 @@ function bxDescShow(fx){
     const dark=io(seg(t,0,.4))*(1-out); c.fillStyle=`rgba(10,3,10,${.9*dark})`; c.fillRect(0,0,W,H);
     const nh=Math.min(290*s,H*.5), ntop=H*.12, cyc=ntop+nh*.45;
     // 연꽃 · 만다라 (2.6초부터 핀다)
-    const bl=oc(seg(t,2.55,3.6)), la=bl*(1-out), sc=seg(t,K?5.6:99,K?6.6:99);
+    const bl=oc(seg(t,2.55,3.6)), la=bl*(1-out), sc=seg(t,K?KA+.3:99,K?KA+1.3:99);
     bxGlow(c,cx,cyc,nh*1.2,BXF.pk2,.35*la); bxMandala(c,cx,cyc,nh*.62,t,la,D); bxLotus(c,cx,cyc,nh*.6,bl,t*.05,la,D,false);
     if(sc>0){ // 고쳐쓴 카르마: 위에서 아래로 훑는 줄이 지나간 자리는 빛을 잃는다
       const yy=(cyc-nh*.8)+nh*1.6*sc; c.save(); c.beginPath(); c.rect(0,0,W,yy); c.clip(); c.fillStyle=`rgba(20,10,30,${.55*la})`; c.fillRect(0,0,W,H); bxLotus(c,cx,cyc,nh*.6,bl,t*.05,.6*la,D,true); c.restore();
       c.fillStyle=`rgba(${BXF.vio},${.9*(1-out)})`; c.fillRect(0,yy-1*D,W,2*D); }
     const up=io(seg(t,1.2,2.0)), drink=seg(t,2.0,2.5), cupA=oc(seg(t,.2,.7))*(1-io(seg(t,2.3,2.7)));
     // 수녀
-    const na=oc(seg(t,.5,1.3))*(1-out); bxNun(c,cx,ntop,nh,na,drink>0||t>2.5?BXF.pink:'120,90,140',D);
+    const na=oc(seg(t,.5,1.3))*(1-out), swS=seg(t,4.2,4.6);
+    if(swS<=0) bxNun(c,cx,ntop,nh,na,drink>0||t>2.5?BXF.pink:'120,90,140',D);
+    else if(swS<1) bxSilSwap(c,cx,ntop,nh,na,io(swS),D);
+    else { const k=seg(t,4.6,5.2); bxGlow(c,cx,ntop+nh*.35,nh*.7,BXF.pk2,.3*(1-k)*na); bxSil(c,BXB,cx,ntop,nh,na,BXF.pink,D); }
     // 성배: 수녀 앞에 떠 있다가 입가로 올라가고, 빛이 수녀에게 흘러든다(1.3~2.5초)
     const cb=H*.7-(H*.7-(ntop+nh*.3))*up, cs=s*.62*(1-.4*up);
     bxGlow(c,cx,cb-110*cs,150*cs,BXF.gold,.4*cupA); bxCupDraw(c,cx,cb,cs,cupA*(1-out),D,drink>0?BXF.pink:null);
@@ -113,8 +132,9 @@ function bxDescShow(fx){
     // 꽃잎이 흩날린다
     const pa=seg(t,2.7,3.4)*(1-out); if(pa>0) for(const p of PET){ const y=((p.y+t*p.v)%1.2-.1)*H, x=p.x*W+Math.sin(t*1.2+p.w)*24*D; c.save(); c.translate(x,y); c.rotate(p.r+t); c.fillStyle=`rgba(${BXF.pink},${.55*pa})`; c.beginPath(); c.ellipse(0,0,p.s*D,p.s*.5*D,0,0,Math.PI*2); c.fill(); c.restore(); }
     const fl=Math.exp(-Math.pow((t-2.6)/.09,2)); if(fl>.01){ c.fillStyle=`rgba(255,210,235,${.5*fl})`; c.fillRect(0,0,W,H); }
-    const sh=Math.max(0,1-Math.abs(t-2.62)/.25); if(G) G.style.transform=sh>0?`translate(${(Math.sin(t*90)*4*sh).toFixed(1)}px,0)`:'';
-    if(K){ const I=seg(t,5.3,5.45)*(1-seg(t,6.3,6.8))*(Math.random()<.35?.4:.85); bxStatic(c,W,H,D,I*(1-out),t); }
+    const sh=Math.max(0,1-Math.abs(t-2.62)/.25,(1-Math.abs(t-4.4)/.2)*.7); if(G) G.style.transform=sh>0?`translate(${(Math.sin(t*90)*4*sh).toFixed(1)}px,0)`:'';
+    const swI=Math.max(0,1-Math.abs(t-4.4)/.22); if(swI>0) bxStatic(c,W,H,D,swI*.55*(Math.random()<.4?.35:1),t);
+    if(K){ const I=seg(t,KA,KA+.15)*(1-seg(t,KA+1.0,KA+1.5))*(Math.random()<.35?.4:.85); bxStatic(c,W,H,D,I*(1-out),t); }
     // 글자: 날짜 → 「킷쇼인 키아라」 → 첫 글자가 깨지며 「셋쇼인 키아라」 → 비스트 Ⅲ/R
     const tout=1-io(seg(t,T-1.0,T-.3));
     E.day.style.opacity=oc(seg(t,2.9,3.3))*tout;
@@ -124,7 +144,7 @@ function bxDescShow(fx){
     E.a.style.filter=gl?`drop-shadow(-4px 0 rgba(255,60,200,.9)) drop-shadow(4px 0 rgba(80,220,255,.9))`:''; E.b.style.filter=gl?`drop-shadow(4px 0 rgba(255,60,200,.9))`:'';
     if(gl&&Math.random()<.5){ c.fillStyle='rgba(255,170,215,.35)'; const r=E.a.getBoundingClientRect(); c.fillRect(r.left*D,(r.top+Math.random()*r.height)*D,r.width*D,(2+Math.random()*5)*D); }
     E.cls.style.opacity=oc(seg(t,4.6,5.0))*tout;
-    if(E.km){ const k=oc(seg(t,6.0,6.4)); E.km.style.opacity=k*tout; E.km.style.clipPath=`inset(0 ${(100-100*seg(t,6.0,6.5)).toFixed(1)}% 0 0)`; } }
+    if(E.km){ const k=oc(seg(t,KA+.7,KA+1.1)); E.km.style.opacity=k*tout; E.km.style.clipPath=`inset(0 ${(100-100*seg(t,KA+.7,KA+1.2)).toFixed(1)}% 0 0)`; } }
 }
 
 /* 키아라 입장: 분홍 안개가 스며들고 연꽃 만다라가 열려 이름이 새겨진다. 끝에서 연꽃이 꽃잎으로 흩어진다 (처음 · 최후의 밤 5.2초, 다시 1.8초) */
