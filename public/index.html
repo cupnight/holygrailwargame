@@ -5561,7 +5561,8 @@ const Sim = (() => {
     const L=['E','D','C','B','A']; let i=L.indexOf(r.replace(/[+-]/g,'')); let plus=(r.match(/\+/g)||[]).length, minus=r.includes('-');
     if(d>=1){ if(minus) minus=false; else if(i<4){ i++; plus=0; } else plus++; }
     else if(d>0){ if(minus) minus=false; else plus++; }
-    else { if(plus) { plus=0; if(d<=-1){ if(i>0) i--; else minus=true; } } else if(i>0) i--; else minus=true; }
+    else if(d<=-1){ if(i>0) i--; else if(plus) plus=0; else minus=true; }
+    else { if(plus) plus=0; else if(i>0) i--; else minus=true; }
     return L[i]+(minus?'-':'')+'+'.repeat(plus);
   }
   // 마스터의 역량: 마술회로와 마력. [근력, 민첩, 내구, 마력, 행운]

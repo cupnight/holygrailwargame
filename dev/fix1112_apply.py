@@ -38,6 +38,9 @@ for P in sys.argv[1:]:
     rp("const TIER_MOD={S:[.5,0,.5,1],A:[0,0,0,.5],B:[0,0,0,0],C:[-1,0,0,-1],D:[-1,-1,-1,-1]};", "const TIER_MOD={S:[.5,0,.5,1,.5],A:[0,0,0,.5,0],B:[0,0,0,0,0],C:[-1,0,0,-1,0],D:[-1,-1,-1,-1,-1]};")
     rp("    const luck = S.st.will>=65? .5 : S.st.will<25? -1 : 0;\n", "    const luck = m[4];\n")
     rp("    let o=h.s.map((r,i)=> i<4? rankShift(r,TIER_MOD[t][i]) : r);", "    let o=h.s.map((r,i)=> rankShift(r,TIER_MOD[t][i]));")
+    # ⑥ 랭크를 한 단계 내릴 때 +는 그대로 둔다 (A+ → B+). 전에는 +까지 사라져 한 단계 반이 깎였다
+    rp("    else { if(plus) { plus=0; if(d<=-1){ if(i>0) i--; else minus=true; } } else if(i>0) i--; else minus=true; }",
+       "    else if(d<=-1){ if(i>0) i--; else if(plus) plus=0; else minus=true; }\n    else { if(plus) plus=0; else if(i>0) i--; else minus=true; }")
     # ② 죽마고우 → 지기
     n = s.count('죽마고우'); s = s.replace('죽마고우', '지기'); m = s.count('竹馬の友'); s = s.replace('竹馬の友', '無二の友')
     for o, x in EN: rp(o, x)
