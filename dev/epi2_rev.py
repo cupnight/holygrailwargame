@@ -45,7 +45,7 @@ def nar(key, src, V):
                 if t in seen: seen[t]['fx'] += ' · ' + VN[v]; continue
                 seen[t] = {'id': f'{key}.{i}@{v}', 'slot': r['slot'], 'L': [t], 'fx': VN[v]}; rs.append(seen[t])
     return rs
-G.append({'id': 'n_day', 'ph': 'A', 't': '매일 묘사 (열나흘)', 'note': '날마다 한 줄. 14번은 14일째 고정', 'rows': nar('n_day', list(enumerate(day)), m1.DAYV) + [{'id': f'n_day2.{i}', 'slot': str(15 + i), 'L': [x]} for i, x in enumerate(m4.DAY2)]})
+G.append({'id': 'n_day', 'ph': 'A', 't': '매일 묘사 (열나흘)', 'note': '날마다 한 줄. 14번은 14일째 고정', 'rows': nar('n_day', list(enumerate(day)), m1.DAYV) + sum(([dict({'id': f'n_day2.{i}', 'slot': str(15 + i), 'L': [x]}, **({'fx': VN['d']} if i in m4.DAY2V else {}))] + [{'id': f'n_day2.{i}@{v}', 'slot': str(15 + i), 'L': [t], 'fx': VN[v]} for v, t in m4.DAY2V.get(i, {}).items()] for i, x in enumerate(m4.DAY2)), [])})
 mr = []
 for k, x in mon:
     k = int(k); mr.append({'id': f'n_mon.{k}', 'slot': f'{k}달째', 'L': [x]}); mr += [{'id': f'n_mon2.{k}.{j}', 'slot': f'{k}달째', 'L': [t]} for j, t in enumerate(m4.MON2.get(k, []))]

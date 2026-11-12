@@ -71,7 +71,7 @@
     if(E.ph==='A'){
       if(E.d>=EP2_N.A){ E.ph='B'; log('열나흘이 지났다. 이제 달이 지나간다.','sys'); return ep2Step(); }
       E.d++; tick(); log(`봄 · ${E.d}일째`,'night');
-      const pool=EP2_DAY.map((_,i)=>i).filter(i=>i<EP2_DAY.length-1).concat(EP2_DAY2.map((_,i)=>100+i)).filter(i=>!E.dayU.includes(i)); const i=E.d>=EP2_N.A?EP2_DAY.length-1:pick(pool); E.dayU.push(i); log(ep2N(i>=100?EP2_DAY2[i-100]:ep2NV(EP2_DAYV[i],EP2_DAY[i])),'n');
+      const pool=EP2_DAY.map((_,i)=>i).filter(i=>i<EP2_DAY.length-1).concat(EP2_DAY2.map((_,i)=>100+i)).filter(i=>!E.dayU.includes(i)); const i=E.d>=EP2_N.A?EP2_DAY.length-1:pick(pool); E.dayU.push(i); log(ep2N(i>=100?ep2NV(EP2_DAY2V[i-100],EP2_DAY2[i-100]):ep2NV(EP2_DAYV[i],EP2_DAY[i])),'n');
       ep2Pick(); H.change(); return true; }
     if(E.ph==='B'){
       if(E.m>=EP2_N.B){ E.ph='C'; log('한 해가 지났다. 이제 해가 지나간다.','sys'); return ep2Step(); }
