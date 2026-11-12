@@ -21,3 +21,4 @@ python3 sfx_bb.py build/game.html              # 소환 연출: BB 전용(가로
 python3 kiara_bgm_apply.py build/game.html       # 키아라 · BB 전투 배경음악
 python3 ea_apply.py build/game.html              # 에미야[얼터]: 보구 특례 · 키아라 관계 대사
 python3 fix1112_apply.py build/game.html         # 11-12 문의: 교회 의뢰 보상 · 죽마고우 → 지기
+python3 alex_apply.py build/game.html            # 이스칸다르의 소원: 수육
