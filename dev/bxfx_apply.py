@@ -89,5 +89,9 @@ for P in sys.argv[1:]:
     rp("    const bbMe=S.hero==='bb'&&w.heroAlive, bbLive=!bbMe&&c.bb&&(c.bb.at==='moon'||c.bb.at==='npc')&&!!bxBBP();",
        "    const bbMe=S.hero==='bb'&&w.heroAlive, bbLive=!bbMe&&c.bb&&(c.bb.at==='moon'||c.bb.at==='npc')&&!!bxBBP();\n    S.flags.bxEndV=bbMe?'me':bbLive?'live':c.noBB?'nobb':'voice';")
     rp("    const k=f.cupSealed?'seal'", "    const k=f.bxEnd?'bxm_'+(f.bxEndV||'voice'):f.bxDream?'bxdream':f.cupSealed?'seal'")
+    # BB가 성배를 달로 가져간 결말은 밝은 결말 곡(end_f · 사용자 제공 곡)으로. 생의 기록에 비스트 결말을 남겨 지난 생 다시 보기에도 같은 곡
+    rp("wd:warDigest(), ach:(S.ach||[]).slice()};", "wd:warDigest(), bx:S.flags.bxEnd?'moon':S.flags.bxDream?'dream':'', ach:(S.ach||[]).slice()};")
+    rp("function sndEndOf(r){ if(r.wd", "function sndEndOf(r){ if(r.bx==='moon') return 'f'; if(r.wd")
+    rp('"j_boss2":{"d":2.7}', '"j_boss2":{"d":2.7},"end_f":{"d":223.5,"ls":26.3,"le":223.0},"j_end_f":{"d":12.0}')
     s, nd, nt = i18n.add(s, TR, TT)
     open(P, 'w', encoding='utf-8').write(s); print('bxfx', 'miss', miss, 'tr', nd, nt)
