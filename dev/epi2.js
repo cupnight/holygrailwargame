@@ -30,7 +30,7 @@
     11:'그 겨울로부터 한 해가 가까워졌다. 달력의 그 날짜에 {N이} 작은 동그라미를 쳐 두었다.',12:'한 해가 지났다. 눈이 녹고, 손등의 자국은 이제 햇빛 아래서만 보였다.'};
   const EP2_YR=['{N과} 맞는 봄이 하나 더 지났다.','집 안의 물건들이 조금씩 둘의 것이 되어 갔다.','{N은} 이제 전철 노선도를 보지 않고 갈아탔다.','동네 사람들은 {N을} 이름으로 불렀다. 이 세계에서 쓰는 이름으로.',
     '그 겨울 이야기를 꺼내는 날이 한 해에 한두 번으로 줄었다.','현관의 신발이 몇 번 바뀌었다. 놓이는 자리는 그대로였다.','{N이} 생전의 일을 농담처럼 말하게 되었다.','사진첩이 한 권 찼다.','평범한 해였다. 그게 얼마나 드문 일인지 둘 다 알고 있었다.'];
-  const ep2N=(s)=>{ const h=H_BY[S.hero]; return nf(s.replace(/\{N의\}/g,h.name+'의'),h); };
+  const ep2N=(s)=>{ const h=H_BY[S.hero]; return nf(s.replace(/\{N(의|에게서|에게는|에게|에|도)\}/g,(_,j)=>h.name+j),h); };
   // 서번트 갈래: 현대 > 근대 > 박식 > 비전투 > 야망 순으로 먼저 맞는 변형을 쓴다
   const ep2Tags=h=>['now','modern','sage','civil'].filter(k=>EP2_TAGS[k].includes(h.id)).concat((h.traits||[]).includes('야망')?['bold']:[]);
   const ep2V=(x,h)=>{ if(Array.isArray(x)) return x; const k=ep2Tags(h).find(k=>x[k]); return k?x[k]:x.d; };
@@ -41,13 +41,15 @@
   function ep2EvOk(e,r){ const E=S.epi, h=H_BY[S.hero], T=ep2Tags(h);
     if(e.ph!==E.ph||(E.relUsed||[]).includes(e.id)) return false;
     if(e.not&&[].concat(e.not).some(k=>T.includes(k))) return false; if(e.only&&!T.includes(e.only)) return false;
+    if(e.wed&&!S.flags.relWed) return false; if(e.kid&&!relKid()) return false; if(e.track&&(!r||r.track!==e.track)) return false;
     if(e.wish&&!ep2Wish()) return false; if(e.day&&E.d!==e.day) return false; if(e.mon&&(E.m<e.mon[0]||E.m>e.mon[1])) return false; return true; }
   function ep2EvGo(e){ const h=H_BY[S.hero], D=RLEP[e.id], r=relOf(), fx={}, R={};
     for(const c of D.c){ fx[c.key]=EP2_FX[e.fx[c.key]]; R[c.key]=c.r.map(x=>ep2V(x,h)); }
     epRel(e.id,{b:D.b.map(x=>ep2V(x,h)),r:R,fx,hide:k=>(e.love||[]).includes(k)&&!(r&&r.track==='love')}); }
 
   const ep2NV=(v,d)=>{ if(!v) return d; const k=ep2Tags(H_BY[S.hero]).find(k=>v[k]); return k?v[k]:d; };
-  function ep2Start(){ const E=S.epi; E.ph='A'; E.d=0; E.m=1; E.cy=0; E.k=0; E.n=ri(7,9); E.dayU=[]; }
+  function ep2YrLine(){ const E=S.epi; E.yrU=E.yrU||[]; const pool=EP2_YR.map((_,i)=>i).concat(EP2_YR2.map((_,i)=>100+i)).filter(i=>!E.yrU.includes(i)); if(!pool.length) return; const i=pick(pool); E.yrU.push(i); log(ep2N(i>=100?EP2_YR2[i-100]:ep2NV(EP2_YRV[i],EP2_YR[i])),'n'); }
+  function ep2Start(){ const E=S.epi; E.ph='A'; E.d=0; E.m=1; E.cy=0; E.k=0; E.n=ri(5,7); E.dayU=[]; }
   // A · B 구간의 사건 하나: 인연 장면 → 이어지는 장면 → 그 구간의 사건
   function ep2Pick(){ const E=S.epi, r=relOf(), ph=E.ph; if(S.pending) return true;
     if(r&&relDue()){ E.relK=E.k+(ph==='A'?2:1); relScene(); return true; }
@@ -69,17 +71,19 @@
     if(E.ph==='A'){
       if(E.d>=EP2_N.A){ E.ph='B'; log('열나흘이 지났다. 이제 달이 지나간다.','sys'); return ep2Step(); }
       E.d++; tick(); log(`봄 · ${E.d}일째`,'night');
-      const pool=EP2_DAY.map((_,i)=>i).filter(i=>i<EP2_DAY.length-1&&!E.dayU.includes(i)); const i=E.d>=EP2_N.A?EP2_DAY.length-1:pick(pool); E.dayU.push(i); log(ep2N(ep2NV(EP2_DAYV[i],EP2_DAY[i])),'n');
+      const pool=EP2_DAY.map((_,i)=>i).filter(i=>i<EP2_DAY.length-1).concat(EP2_DAY2.map((_,i)=>100+i)).filter(i=>!E.dayU.includes(i)); const i=E.d>=EP2_N.A?EP2_DAY.length-1:pick(pool); E.dayU.push(i); log(ep2N(i>=100?EP2_DAY2[i-100]:ep2NV(EP2_DAYV[i],EP2_DAY[i])),'n');
       ep2Pick(); H.change(); return true; }
     if(E.ph==='B'){
       if(E.m>=EP2_N.B){ E.ph='C'; log('한 해가 지났다. 이제 해가 지나간다.','sys'); return ep2Step(); }
-      E.m++; tick(); log(`첫 해 · ${E.m}달째`,'night'); log(ep2N(EP2_MON[E.m]),'n');
+      E.m++; tick(); log(`첫 해 · ${E.m}달째`,'night'); log(ep2N(pick([EP2_MON[E.m]].concat(EP2_MON2[E.m]||[]))),'n');
       if(E.m===EP2_N.B){ S.age++; S.year++; mark('calm'); if(S.age>=40) add({health:-ageWear()}); famYear(); if(S.pending) S.pending=null; }   // 첫 해의 끝: 한 살을 먹는다 (이 구간에는 사망 판정이 없다)
       ep2Pick(); H.change(); return true; }
     // C: 예전 방식 그대로, 한 해씩만 흐른다 (passYears가 1로 줄인다). 넷에 한 번은 사건 없는 해
     if(E.cy>=EP2_N.C){ E.ph='D'; return false; }
     E.cy++; E.k++;
-    if(ch(1-EP2_RATE.C)&&!E.arc&&!E.relNext&&!relDue()){ passYears(1); if(!S.dead){ const i=ri(0,EP2_YR.length-1); log(ep2N(ep2NV(EP2_YRV[i],EP2_YR[i])),'n'); } return true; }
+    const big=EP_REL.some(x=>['lv_child','lv_wed','lv_night'].includes(x.id)&&!(E.relUsed||[]).includes(x.id)&&relOf()&&x.c(relOf()));   // 결혼 · 아이 같은 고비가 열려 있으면 그쪽이 먼저
+    if(!big&&!E.arc&&!E.relNext&&!relDue()&&relOf()&&ch(.5)){ const c=EP2_EV.filter(e=>ep2EvOk(e,relOf())); if(c.length){ passYears(1); if(S.dead) return true; ep2YrLine(); ep2EvGo(pick(c)); return true; } }
+    if(ch(1-EP2_RATE.C)&&!E.arc&&!E.relNext&&!relDue()){ passYears(1); if(!S.dead) ep2YrLine(); return true; }
     return false; }
   // 화면에 보일 때: A · B 구간의 날짜
   function ep2When(){ const E=S&&S.epi; if(!E||!E.ph||S.phase!=='epi') return null; return E.ph==='A'?{u:'d',n:Math.max(1,E.d)}:E.ph==='B'?{u:'m',n:E.m}:null; }
