@@ -1,0 +1,137 @@
+# 에필로그 새 문장 번역 9: 열 해 사건(앞쪽)
+TR = {}
+def T(en, en_m, ja1, ja2, ja3): return [(en, ja1), (en, ja2), (en_m, ja3)]
+def E_(p, d): TR.update({p + '.' + i: v for i, v in d.items()})
+E_('c_morning', {
+'b0': ("When you opened your eyes, {N} was already up. Water coming to a boil, a newspaper page turning. The same morning for years now.", "目を開けると、{N}が先に起きていた。湯の沸く音、新聞をめくる音。もう何年も同じ朝だ。"),
+'b1': ("You woke before the alarm. Beside you, or in the next room, you heard {N} stirring. The day has begun with that sound for a long time now.", "目覚ましが鳴る前に目が覚めた。隣で、あるいは隣の部屋で、{N}の気配がした。その音で一日が始まるようになって久しい。"),
+'b2': ("The same things were on the breakfast table as always. Without being told, {N} knows what to pour into your cup.", "朝の食卓にはいつもと同じ物が並んだ。言わなくても、{N}はあなたのカップに何を注げばいいか知っている。"),
+'say.t': ("Thank them, out of nowhere", "あらためて礼を言う"),
+'say.r0': T("{N} looked at you over the newspaper. “What is this, all of a sudden? …The same to you.”", "{N} lowered the newspaper and looked at you for a long moment. Then raised their cup a little.", "{N}が新聞越しにあなたを見た。「急に何を言う。……私もだ」", "{N}が新聞越しにあなたを見た。「急にどうなさったのですか。……私もです」", "{N}が新聞を下ろして、あなたをしばらく見た。それからカップを少し持ち上げてみせた。"),
+'say.r1': ("{N} did not answer. Instead, that evening your favorite dish was on the table.", "{N}は答えなかった。代わりに、その夜の食卓にはあなたの好物が並んだ。"),
+'say.r2': ("Once said, it was embarrassing. Perhaps for {N} too; they left the house earlier than usual.", "言ってしまうと気恥ずかしかった。{N}もそうだったのか、いつもより早く家を出た。"),
+'usual.t': ("Eat as usual", "いつものように食べる"),
+'usual.r0': ("You ate without a word and cleared up without a word. A silence you could not have dreamed of that winter.", "何も言わずに食べ、何も言わずに片づけた。あの冬には夢にも見られなかった沈黙だった。"),
+'usual.r1': ("A morning like any other. On the way out {N} told you to take an umbrella. It rained in the afternoon.", "いつもと同じ朝だった。{N}が出がけに、傘を持っていけと言った。午後に雨が降った。"),
+'usual.r2': T("“I am off. For supper, the usual.”", "{N} raised a hand at the door. The same farewell for years.", "「行ってくる。夕飯はいつものでいい」", "「行ってまいります。夕飯はいつものでお願いします」", "{N}が玄関で手を上げた。もう何年も同じ挨拶だった。"),
+})
+E_('c_work', {
+'b0': ("{N} was recognized at work. They had been asked, they said, whether they would take on something bigger.", "{N}が職場で認められた。もっと大きな仕事を任されてみないかと言われたそうだ。"),
+'b1': ("{N} came home with an envelope of papers. It looked as though they could open a small shop of their own, they said.", "{N}が書類の封筒を持って帰ってきた。小さな店をひとつ出せそうだと言った。"),
+'b2': ("After some years in the same post, {N} was given people to train. Leading, they said, was nothing new to them.", "何年か勤めた職場で、{N}に人を教える役目が任された。率いることなら慣れていると言った。"),
+'push.t': ("Tell them to try", "やってみるよう言う"),
+'push.r0': ("{N} pulled it off. Not how to command people but how to work with them — that, they said, they had learned anew in this life.", "{N}はやり遂げた。人を使う術ではなく、人と働く術を、今度の生で新しく学んだと言った。"),
+'push.r1': T("“It is no great matter. One shop. And yet this makes me more nervous.”", "{N} showed the new name tag to you first. It bore their name in this world.", "「大したことではない。店ひとつだ。だがこちらの方が緊張するな」", "「大したことではありません。お店ひとつです。でもこちらの方が緊張しますね」", "{N}が新しい名札をまずあなたに見せた。この世界での名前が書かれていた。"),
+'push.r2': ("The first month was hard. Night after night {N} pored over the ledger. In the third month they came home smiling for the first time.", "最初の月は大変だった。{N}は毎晩帳簿を睨んでいた。三か月目に、初めて笑って帰ってきた。"),
+'ask.t': ("Ask if they truly want it", "本当にやりたいのか訊く"),
+'ask.r0': ("{N} thought for a long time. Then declined. They liked where they were, they said. They liked work that let them come home in the evening.", "{N}は長く考えた。そして断った。今の場所がいいと。夕方に家へ帰れる仕事がいいと。"),
+'ask.r1': T("“Climbing higher I have done once already. This time I want to try something else.”", "{N} shook their head. Then looked once around the house. It meant: this matters more.", "「高みへ昇るのは一度やった。今度は別のことをしてみたい」", "「高みへ昇るのは一度やりました。今度は別のことをしてみたいのです」", "{N}が首を横に振った。それから家の中をぐるりと見回した。こちらの方が大事だという意味だった。"),
+'ask.r2': ("In the end {N} accepted. But with one condition, they said. That supper would be eaten at home.", "結局、{N}は引き受けた。ただし条件をひとつ付けたと言った。夕飯は家で食べるという条件だった。"),
+})
+E_('c_house', {
+'b0': ("The house had grown small. Things had multiplied, and memories too. It was time to think of moving.", "家が手狭になった。物も、思い出も増えた。引っ越しを考える頃合いだった。"),
+'b1': ("The landlord said the house was to be sold. You had to decide: leave, or buy it. The house where the summoning circle had been.", "大家が家を売ると言った。出ていくか、この家を買うか、決めなければならなかった。召喚陣のあった家だ。"),
+'b2': ("{N} came home with a stack of property flyers. A sunny house, a house with a yard, a house near the station.", "{N}が不動産のちらしを集めてきた。日当たりのいい家、庭のある家、駅に近い家。"),
+'move.t': ("Go to a new house", "新しい家へ移る"),
+'move.r0': ("While packing, the map from that winter turned up. The two of you looked at it for a long while, and decided to bring it along.", "荷造りの最中に、あの冬の地図が出てきた。二人でしばらく眺めて、新しい家へ持っていくことにした。"),
+'move.r1': T("“Moving camp I am used to. This time it is the place to return to that moves.”", "At the threshold of the emptied house {N} looked back once and bowed their head. A farewell to the house.", "「陣を移すのには慣れている。今度は帰る場所を移すわけか」", "「陣を移すのには慣れています。今度は帰る場所を移すのですね」", "{N}が空になった家の敷居で一度振り返り、頭を下げた。家への挨拶だった。"),
+'move.r2': ("The first night in the new house, you ate cup noodles among the boxes. {N} said this too would soon be home.", "新しい家の最初の夜、段ボール箱の間でカップ麺を食べた。{N}が、ここもすぐに自分たちの家になると言った。"),
+'stay.t': ("Stay in this house", "この家に残る"),
+'stay.r0': ("You stretched your means and stayed. You could not leave the house with the room where {N} first appeared.", "無理をしてこの家に残った。{N}が初めて現れた部屋のある家を、離れることはできなかった。"),
+'stay.r1': T("“This is the door by which I came into this world. Living beside the door is no bad thing.”", "{N} ran a palm once across the floor of the workroom. The face of someone glad not to be leaving.", "「ここは私がこの世界へ来た扉だ。扉のそばで暮らすのも悪くない」", "「ここは私がこの世界へ来た扉です。扉のそばで暮らすのも悪くありませんね」", "{N}が修練室の床を掌で一度撫でた。離れずに済んで良かったという顔だった。"),
+'stay.r2': ("You decided to live with the lack of room. In exchange, a shelf went up on the wall. {N} put it up themselves, and it tilts a little.", "狭いなりに暮らすことにした。代わりに壁へ棚を付けた。{N}が自分で付けて、少し傾いている。"),
+})
+E_('c_far', {
+'b0': ("{N} pointed to a place on the map. The land where their story began, they said. They would like to go there once.", "{N}が地図の一点を指した。自分の物語が始まった土地だと言った。一度は行ってみたいと。"),
+'b1': ("There were savings now, and time off. You could go far. {N} said there was one place they wanted to go.", "貯えと休みができた。遠くへ行ける。{N}は行きたい場所が一か所あると言った。"),
+'b2': ("{N} was watching a documentary and stopped on the channel. A land they had known was on the screen.", "{N}がドキュメンタリーを見ていて、チャンネルを止めた。画面に、自分の知っていた土地が映っていた。"),
+'go.t': ("Go together", "一緒に行く"),
+'go.r0': ("Nothing {N} remembered was left in that land. Only the wind is the same, they said. And that it was enough.", "その土地には、{N}の覚えているものは何ひとつ残っていなかった。風だけが同じだと言った。それで十分だとも。"),
+'go.r1': T("“It began here, and it ends at your side. A long road.”", "{N} took up a handful of that land's soil and let it go. On the way back they did not turn around.", "「ここで始まって、お前の隣で終わるのか。長い道だった」", "「ここで始まって、あなたの隣で終わるのですね。長い道でした」", "{N}がその土地の土をひと握りつかんで、放した。帰るときは振り返らなかった。"),
+'go.r2': ("On the flight home {N} said: now, if anyone asks where home is, I can name two places.", "帰りの飛行機で{N}が言った。これからは、故郷はどこかと訊かれたら二か所挙げられると。"),
+'later.t': ("Say you'll go someday", "いつか行こうと言う"),
+'later.r0': ("{N} was in no hurry. Just knowing they could go made it different, they said.", "{N}は急がなかった。行けると分かっているだけで違うと言った。"),
+'later.r1': ("You stuck a pin in that spot on the map. Someday. The two of you could believe that word now.", "地図のその場所にピンを刺した。いつか。その言葉を、二人は今なら信じられた。"),
+'later.r2': T("“No hurry. That land has waited thousands of years already.”", "{N} folded the map and put it in a drawer. They did not throw it away.", "「急ぐことはない。あの土地は何千年も待ったのだから」", "「急ぐことはありません。あの土地は長いこと待ってくれたのですから」", "{N}が地図を畳んで引き出しにしまった。捨てはしなかった。"),
+})
+E_('c_line', {
+'b0': ("{N} was looking in the mirror and called you over. A line had appeared at the corner of the eye, they said. Not a startled face but a curious one.", "{N}が鏡を見ていて、あなたを呼んだ。目尻に線が一本できたと言った。驚いた顔ではなく、珍しがる顔だった。"),
+'b1': ("Sorting photographs, you laid one from the first year beside one from this year. Both of you had changed a little.", "写真を整理していて、最初の年の写真と今年の写真を並べた。二人とも少しずつ変わっていた。"),
+'b2': ("A single white hair turned up on {N}'s head. {N} did not pull it out.", "{N}の頭に白いものが一本出た。{N}はそれを抜かなかった。"),
+'good.t': ("Say it suits them", "似合っていると言う"),
+'good.r0': T("“Proof that time runs for me as well. I cannot throw that away.”", "{N} traced the line at their eye with a fingertip, and smiled. The line deepened a little.", "「時が私にも流れているという証だ。捨てられはしない」", "「時が私にも流れているという証です。捨てられはしません」", "{N}が目尻の線を指先でなぞって、笑った。その線が少し深くなった。"),
+'good.r1': ("Heroic Spirits do not age. {N} was aging. It meant they had become a person of this world.", "英霊は老いない。{N}は老いていた。それはこちらの世界の人になったということだった。"),
+'good.r2': ("{N} peered at the corners of your eyes too. They are coming in together, they said, satisfied.", "{N}があなたの目尻も覗き込んだ。一緒にできてきていると、満足そうに言った。"),
+'same.t': ("Say the same goes for you", "自分も同じだと言う"),
+'same.r0': ("The two of you stood side by side at the mirror. You argued a long while over who had aged more. No verdict was reached.", "二人で鏡の前に並んだ。どちらがより老けたか、しばらく言い争った。結論は出なかった。"),
+'same.r1': ("To wear out at the same pace. That, {N} said, was surer than any vow.", "同じ速さで古びていくこと。{N}は、それが誓いよりも確かだと言った。"),
+'same.r2': T("“So it is. We go side by side. Neither ahead nor behind.”", "{N} pointed to you and to themselves in turn, and showed two palms held level together.", "「そうだな。並んで行くのだ。先にも後にもならずに」", "「そうですね。並んで行くのです。先にも後にもならずに」", "{N}があなたと自分を交互に指して、掌を並べて合わせてみせた。"),
+})
+E_('c_winter', {
+'b0': ("The day of that winter came round again. The first few years you both let it pass in silence. This year {N} spoke first.", "あの冬の日がまた巡ってきた。最初の何年かは、二人とも黙って過ごした。今年は{N}が先に口を開いた。"),
+'b1': ("The first snow fell. These days, when you see snow, last winter comes to mind before that winter does.", "初雪が降った。今では雪を見ると、あの冬より去年の冬が先に思い浮かぶ。"),
+'b2': ("That date on the calendar gets the same circle every year. This year's was drawn by {N}.", "暦のその日付には、毎年同じ丸が描かれる。今年のものは{N}が描いた。"),
+'talk.t': ("Talk about that winter", "あの冬の話をする"),
+'talk.r0': ("With each year the telling grew shorter and the laughter grew. The things that had been frightening were war stories now.", "年を追うごとに話は短くなり、笑いは増えた。恐ろしかったことが、今では武勇伝になった。"),
+'talk.r1': T("“If you had not made that choice back then— …No. You made it, and so we are here.”", "{N} held out the back of their hand. You held out yours. The marks could hardly be seen now.", "「あの時、お前があの選択をしなかったら。……いや。したから、ここにいるのだな」", "「あの時、あなたがあの選択をなさらなかったら。……いいえ。したから、ここにいるのですね」", "{N}が手の甲を差し出した。あなたも差し出した。痕はもうほとんど見えなかった。"),
+'talk.r2': ("This year you spoke the names of the fallen, too. You had become able to say them without hatred.", "今年は、倒れた者たちの名前も口にした。憎む気持ちなしに呼べるようになっていた。"),
+'walk.t': ("Walk together without a word", "黙って一緒に歩く"),
+'walk.r0': ("The two of you walked the roads of that winter. The shops had changed, the street trees had grown. Only the two walking were the same.", "二人であの冬の道を歩いた。店は入れ替わり、街路樹は伸びた。歩く二人だけがそのままだった。"),
+'walk.r1': ("Along the way {N} bought hot pastries from a street stall. The same stall every year. The owner asked: here again this year?", "{N}が途中の屋台で焼き菓子を買った。毎年同じ店だ。主人が、今年も来たのかと言った。"),
+'walk.r2': ("Nothing was said. Your hand was cold, so you put it in your pocket — and {N}'s hand was already there.", "何も言わなかった。手が冷たくてポケットに入れると、そこに{N}の手が先に入っていた。"),
+})
+E_('c_wish', {
+'b0': ("The paper on the wall had yellowed. More than half its lines were crossed out. {N}'s wish had come this far without the Grail.", "壁に貼った紙が黄ばんだ。消された行が半分を超えた。{N}の願いは、聖杯なしでここまで来た。"),
+'b1': ("For the first time in a while {N} brought up the wish they had meant to make that winter. There is work they have done step by step over these years.", "{N}が久しぶりに、あの冬に願おうとしていたことの話をした。何年もの間、一歩ずつ続けてきたことがある。"),
+'b2': ("{N} showed you something. In this age, with their own hands, they had made one piece of the wish come true.", "{N}が何かを見せてくれた。この時代で、自分の手で、願いのひとかけらを叶えたものだった。"),
+'proud.t': ("Say you're proud of them", "誇らしいと言う"),
+'proud.r0': T("{N} said nothing for a long while. “…Had the Grail given it to me, I would never have known this feeling.”", "{N} said nothing for a long while. They wiped once at their eyes and pointed to the next line on the paper.", "{N}はしばらく何も言わなかった。「……聖杯にもらっていたら、この気持ちは知らなかっただろうな」", "{N}はしばらく何も言わなかった。「……聖杯にいただいていたら、この気持ちは知らなかったでしょうね」", "{N}はしばらく何も言わなかった。目元を一度拭って、紙の次の行を指した。"),
+'proud.r1': ("It was half. The other half can be done with the life that remains. {N} had a life now.", "半分だった。残りの半分は、残りの生でやればいい。{N}には今、生があった。"),
+'proud.r2': ("That day the two of you raised a modest glass. Not to a miracle but to hard work.", "その日、二人でささやかに杯を上げた。奇跡のためではなく、苦労のために。"),
+'next.t': ("Decide the next step together", "次の一歩を一緒に決める"),
+'next.r0': ("You wrote the paper out anew. Lines smaller and more concrete than before. Instead of how to dream, {N} had learned how to get things done.", "紙を新しく書き直した。前のものより小さく、具体的な行だった。{N}は夢見る術の代わりに、やり遂げる術を覚えた。"),
+'next.r1': ("The next step would take years. {N} laughed. Time, they said, was something they had.", "次の一歩は何年もかかることだった。{N}が笑った。時間ならあると。"),
+'next.r2': T("“It is fine if I never reach the end. The road is this good.”", "{N} put the new paper up on the wall, folded the old one, and laid it in a drawer.", "「最後まで行けなくてもいい。道がこれほど良いのだから」", "「最後まで行けなくても構いません。道がこれほど良いのですから」", "{N}が新しい紙を壁に貼り、古い紙は畳んで引き出しにしまった。"),
+})
+E_('c_pupil', {
+'b0': ("A young person has taken to following {N}. A junior from work. {N} calls it a nuisance and packs one more lunch.", "{N}を慕う若者ができた。職場の後輩だ。{N}は面倒だと言いながら、弁当をひとつ余分に詰める。"),
+'b1': ("Someone came to {N} asking to be taught. What they saw in them, {N} said, they could not tell. You thought you could.", "誰かが{N}に、教えてほしいと訪ねてきた。何を見てそう言うのか、{N}は分からないと言った。あなたには分かる気がした。"),
+'b2': ("Lately {N} talks often about a certain someone. Clumsy, stubborn, with good eyes, they say.", "{N}がこのところ、ある人の話をよくする。不器用で頑固で、目のいい奴だと。"),
+'teach.t': ("Tell them to teach well", "しっかり教えてやるよう言う"),
+'teach.r0': ("{N} was a good teacher. Strict, and watching to the very end. Just as they had been with you that winter.", "{N}は良い師だった。厳しく、最後まで見守った。あの冬のあなたにそうしたように。"),
+'teach.r1': T("“Not a subordinate but a pupil. Not sent out to die but taught to live. It is different.”", "Long after the young one had gone, {N} was still looking toward the door. A worried face.", "「部下ではなく弟子だ。死にに行かせるのではなく、生きろと教える。違うものだな」", "「部下ではなく弟子です。死にに行かせるのではなく、生きなさいと教えます。違うものですね」", "{N}は若者が帰った後も、しばらく戸の方を見ていた。心配する顔だった。"),
+'teach.r2': ("Some years later that young person struck out on their own. At the celebration {N} could not say a word; back home, they talked at length.", "何年か後、その若者が独り立ちした。{N}は祝いの席でひと言も言えずに帰ってきて、家で長々と語った。"),
+'home.t': ("Suggest having them over", "一度家に呼ぼうと言う"),
+'home.r0': ("The young one said they never knew {N}'s home was so ordinary. {N} did not say how long it had taken to live ordinarily.", "若者は、{N}の家がこんなに普通だとは思わなかったと言った。普通に暮らすまでにどれだけかかったかを、{N}は話さなかった。"),
+'home.r1': ("Three sat at the supper table. The young one asked: how did the two of you meet? You both laughed at once.", "夕食の卓に三人で座った。若者が訊いた。お二人はどうやって出会ったのかと。二人同時に笑った。"),
+'home.r2': T("“A noisy one. …May I ask them over again?”", "{N} washed clean the food container the young one had left. To fill it again next time.", "「騒がしい奴だ。……また呼んでもいいか」", "「賑やかな子です。……また呼んでもよろしいですか」", "{N}が、若者の置いていったおかずの容器をきれいに洗っておいた。次にまた詰めてやるつもりなのだ。"),
+})
+E_('c_spar', {
+'b0': ("{N} took out their arms for the first time in a long while. They wanted to see how much the body remembered, they said.", "{N}が久しぶりに武具を取り出した。体がどれだけ覚えているか見てみたいと言った。"),
+'b1': ("In an empty lot {N} was taking a stance alone. Years of rest, and the lines were unchanged. Passing children stood with their mouths open.", "空き地で{N}がひとり、構えを取っていた。何年も休んでいたのに、線はそのままだった。通りがかりの子どもたちが口を開けて立っていた。"),
+'b2': ("{N} said: face me, just once. Magecraft or a stick, either will do.", "{N}が言った。一度だけ相手をしてほしいと。魔術でも棒切れでもいいと。"),
+'spar.t': ("Face them", "相手をする"),
+'spar.r0': ("You were the only one out of breath. {N} smiled without a drop of sweat. They had plainly gone easy, and that was galling.", "息が切れたのはあなただけだった。{N}は汗ひとつかかずに笑った。手加減されたのは明らかで、それが悔しかった。"),
+'spar.r1': T("“I went easy three times. Did you notice? …Four, now.”", "{N} held out a hand to you where you had sunk down. With the other they held up four fingers. The number of times they had gone easy.", "「三度手加減した。気づいたか。……四度だな」", "「三度手加減いたしました。お気づきでしたか。……四度ですね」", "{N}が、へたり込んだあなたに手を差し出した。もう片方の手では指を四本立ててみせた。手加減した回数だった。"),
+'spar.r2': ("For all the years of rest, {N} still knew every habit of yours. You knew {N}'s as well. So it took a long time.", "何年休んでいても、{N}はあなたの癖をまだ全部知っていた。あなたも{N}の癖を知っていた。だから長くかかった。"),
+'watch.t': ("Watch to the end", "最後まで見守る"),
+'watch.r0': ("{N} moved alone until the sun went down. They held the last stance a long while, then laid down their arms.", "{N}は日が沈むまでひとりで動いた。最後の構えのまま長く止まって、それから武具を下ろした。"),
+'watch.r1': T("“Not rusted. In a world where rusting would be allowed.”", "{N} wiped down their arms and put them away. It was not a regretful face.", "「錆びていないな。錆びてもいい世界だというのに」", "「錆びていませんね。錆びてもいい世界だというのに」", "{N}が武具を拭いて、元に納めた。名残惜しそうな顔ではなかった。"),
+'watch.r2': ("On the way home {N} said they might forget how to fight now. Not that they ever could.", "帰り道に{N}が言った。もう戦い方を忘れてもいいだろうと。忘れられはしないだろうが。"),
+})
+E_('c_spell', {
+'b0': ("{N} said they wanted to weave a great working again after so long. There was no use for it. They only wanted to see whether the hands remembered.", "{N}が久しぶりに大きな術式を組んでみたいと言った。使い道はない。手が覚えているか見たいだけだと。"),
+'b1': ("On the roof {N} was drawing something in the air. Years of rest, and there was no hesitation in the lines.", "屋上で{N}が宙に何かを描いていた。何年も休んでいたのに、線に迷いがなかった。"),
+'b2': ("{N} asked: may I show you proper magecraft, just once? The first since that winter.", "{N}が尋ねた。一度だけ、ちゃんとした魔術を見せてもいいかと。あの冬以来、初めてだ。"),
+'see.t': ("Watch to the end", "最後まで見守る"),
+'see.r0': ("Light bloomed once in the night sky and faded. Magecraft that harmed no one. The neighbors took it for fireworks.", "夜空に光が一度咲いて、散った。誰も傷つけない魔術だった。近所の人たちは花火だと思った。"),
+'see.r1': T("“I learned it to fight, and used to show, it is this light.”", "{N} lowered their hands and turned to you. A face waiting for praise.", "「戦うために身につけたものだが、見せるために使うとこれほど軽いのか」", "「戦うために身につけたものですが、お見せするために使うとこれほど軽いのですね」", "{N}が手を下ろして、あなたを振り返った。褒められるのを待つ顔だった。"),
+'see.r2': ("Afterward {N}'s fingertips trembled a little. Not from tiredness but from joy.", "終わった後、{N}の指先が少し震えていた。疲れたからではなく、楽しかったからだ。"),
+'join.t': ("Lend a hand beside them", "隣で手伝う"),
+'join.r0': ("You stood side by side, not as Master and Servant but as two people who know magecraft. Your part was small, and {N} set it exactly where it was needed.", "マスターとサーヴァントではなく、魔術を知る二人として並んで立った。あなたの分は小さく、{N}はそれをちょうど必要な場所に置いてくれた。"),
+'join.r1': ("{N} took your hand and drew one line with you. Something there had been no time to teach that winter.", "{N}があなたの手を取って、線を一本、一緒に引いた。あの冬には教える暇のなかったことだ。"),
+'join.r2': T("“You have become passable. Whoever taught you.”", "{N} followed the line you had drawn with a finger, and nodded.", "「使えるようになったな。誰が教えたのかは知らないが」", "「ずいぶん上達なさいましたね。どなたが教えたのかは存じませんが」", "{N}が、あなたの引いた線を指でなぞって、頷いた。"),
+})
+UID = [
+ ('몇 번째 아침','Another Morning','何度目かの朝'),('맡겨진 일','The Work Entrusted','任された仕事'),('이사','Moving House','引っ越し'),('먼 길','The Long Road','遠い道'),('눈가의 주름','Lines at the Eyes','目尻の皺'),
+ ('해마다 그 겨울','That Winter, Every Year','毎年のあの冬'),('소원의 몇 해째','The Wish, Years On','願いの何年目'),('따르는 사람','One Who Follows','慕う人'),('오랜만의 대련','Sparring After So Long','久しぶりの手合わせ'),('오랜만의 마술','Magecraft After So Long','久しぶりの魔術')]
