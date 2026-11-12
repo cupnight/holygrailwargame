@@ -26,6 +26,18 @@ for P in sys.argv[1:]:
     rp("    e.master=false; e.mDied=true; e.byMe=true; S.flags.killedMaster=S.flags.killedMaster||1;\n",
        "    e.master=false; e.mDied=true; e.byMe=true; S.flags.killedMaster=S.flags.killedMaster||1;\n"
        "    if(W().churchQuest===e.i){ " + PAY + " }   // 사도는 마스터 쪽이다: 암살로 끝내도 의뢰는 이루어진 것\n")
+    # ③ 사건 본문과 성유물을 저장해 두었다가, 시작 화면에 다녀와도 그대로 다시 보여 준다
+    rp("    S.resumeEv={src:'GROW',id:e.id};\n", "    const K0=S.resumeEv&&S.resumeEv.src==='GROW'&&S.resumeEv.id===e.id&&S.resumeEv.body?S.resumeEv:null; if(K0&&K0.rel) S._rel=K0.rel;\n    S.resumeEv={src:'GROW',id:e.id};\n")
+    rp("    decide({title:`${S.age}세`,body:orf(e.txt()),choices});\n  }\n  function rollEvent(){", "    const body=K0?K0.body:orf(e.txt()); S.resumeEv.body=body; S.resumeEv.rel=S._rel||null;\n    decide({title:`${S.age}세`,body,choices});\n  }\n  function rollEvent(){")
+    rp("    S.resumeEv={src:'EV',id:e.id};\n    const body=orf(e.txt());\n", "    const K0=S.resumeEv&&S.resumeEv.src==='EV'&&S.resumeEv.id===e.id&&S.resumeEv.body?S.resumeEv:null; if(K0&&K0.rel) S._rel=K0.rel;\n    S.resumeEv={src:'EV',id:e.id};\n    const body=K0?K0.body:orf(e.txt()); S.resumeEv.body=body; S.resumeEv.rel=S._rel||null;\n")
+    # ④ 선택 창: 제자리에서 밝아지기만 한다 · 뜬 직후 0.3초는 터치(마우스)를 받지 않는다(키보드 · 자동 결정은 그대로)
+    rp("@keyframes rise{from{transform:translateY(12px);opacity:.6}to{transform:none;opacity:1}}", "@keyframes rise{from{opacity:.6}to{opacity:1}}")
+    rp("function showDecision(d){\n", "function showDecision(d){\n  if(window.__dD!==d){ window.__dD=d; window.__dT=performance.now(); }\n")
+    rp("function choose(i){ clearTimeout(autoTimer); const d=Sim.S.pending; if(!d) return;", "function choose(i){ { const ev=window.event; if(ev&&ev.isTrusted&&ev.type==='click'&&ev.detail>0&&performance.now()-(window.__dT||0)<300) return; } clearTimeout(autoTimer); const d=Sim.S.pending; if(!d) return;")
+    # ⑤ 행운도 마력 공급을 따른다 (마스터의 정신과는 무관). 상대 조도 같다
+    rp("const TIER_MOD={S:[.5,0,.5,1],A:[0,0,0,.5],B:[0,0,0,0],C:[-1,0,0,-1],D:[-1,-1,-1,-1]};", "const TIER_MOD={S:[.5,0,.5,1,.5],A:[0,0,0,.5,0],B:[0,0,0,0,0],C:[-1,0,0,-1,0],D:[-1,-1,-1,-1,-1]};")
+    rp("    const luck = S.st.will>=65? .5 : S.st.will<25? -1 : 0;\n", "    const luck = m[4];\n")
+    rp("    let o=h.s.map((r,i)=> i<4? rankShift(r,TIER_MOD[t][i]) : r);", "    let o=h.s.map((r,i)=> rankShift(r,TIER_MOD[t][i]));")
     # ② 죽마고우 → 지기
     n = s.count('죽마고우'); s = s.replace('죽마고우', '지기'); m = s.count('竹馬の友'); s = s.replace('竹馬の友', '無二の友')
     for o, x in EN: rp(o, x)

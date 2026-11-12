@@ -284,7 +284,7 @@ aside{display:grid;gap:18px;align-content:start}
 @media (min-width:700px){.dlg{align-items:center}}
 .sheet{width:100%;max-width:560px;max-height:calc(100% - 20px);overflow:auto;background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--gold);border-radius:var(--r);padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:rise .28s ease-out}
 .sheet.war{border-top-color:var(--seal)}
-@keyframes rise{from{transform:translateY(12px);opacity:.6}to{transform:none;opacity:1}}
+@keyframes rise{from{opacity:.6}to{opacity:1}}
 /* 결정 창 잠시 접기: 창을 내려 두고 아래쪽 알약 버튼으로 다시 펼친다 */
 .dfold{float:right;margin:-10px -10px 8px 12px;padding:6px 11px;background:transparent;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-family:var(--f-ui);font-size:12.5px;line-height:1;cursor:pointer}
 .dfold:hover,.dfold:focus-visible{color:var(--text);border-color:var(--gold)}
@@ -5243,11 +5243,13 @@ const Sim = (() => {
     showGrow(e);
   }
   function showGrow(e){
+    const K0=S.resumeEv&&S.resumeEv.src==='GROW'&&S.resumeEv.id===e.id&&S.resumeEv.body?S.resumeEv:null; if(K0&&K0.rel) S._rel=K0.rel;
     S.resumeEv={src:'GROW',id:e.id};
     const fv=v=>typeof v==='function'?v():v;
     const choices=e.ch.map(c=>({t:orf(c.t),d:c.d,st:fv(c.st),auto:fv(c.auto),off:c.off?c.off():false,src:c.f,f:()=>{ const r=c.f(); return typeof r==='string'?orf(r):r; }}));
     if(choices.every(c=>c.off)) choices[0].off=false;
-    decide({title:`${S.age}세`,body:orf(e.txt()),choices});
+    const body=K0?K0.body:orf(e.txt()); S.resumeEv.body=body; S.resumeEv.rel=S._rel||null;
+    decide({title:`${S.age}세`,body,choices});
   }
   function rollEvent(){
     const elig=EV.filter(e=>S.age>=e.a[0]&&S.age<=e.a[1]&&(!S.once[e.id]||e.rep&&S.age-(S.onceAt&&S.onceAt[e.id]||0)>=e.rep)&&(!e.c||e.c())&&(!e.cond||e.cond())); // rep: 그 햇수가 지나면 다시 나올 수 있다
@@ -5259,8 +5261,9 @@ const Sim = (() => {
     showEv(e);
   }
   function showEv(e){
+    const K0=S.resumeEv&&S.resumeEv.src==='EV'&&S.resumeEv.id===e.id&&S.resumeEv.body?S.resumeEv:null; if(K0&&K0.rel) S._rel=K0.rel;
     S.resumeEv={src:'EV',id:e.id};
-    const body=orf(e.txt());
+    const body=K0?K0.body:orf(e.txt()); S.resumeEv.body=body; S.resumeEv.rel=S._rel||null;
     const choices=e.ch.map(c=>({t:orf(c.t),d:c.d,auto:c.auto,k:c.k,off:c.off?c.off():false,src:c.f,f:()=>{ const r=c.f(); return typeof r==='string'?orf(r):r; }}));
     if(choices.every(c=>c.off)) choices[0].off=false;
     decide({title:`${S.age}세`,body,choices});
@@ -5564,7 +5567,7 @@ const Sim = (() => {
   // 마스터의 역량: 마술회로와 마력. [근력, 민첩, 내구, 마력, 행운]
   function masterScore(){ return S.circuit*12 + S.st.mana*.6 + (S.flags.crest?8:0); }
   function masterTier(sc){ return sc>=95?'S':sc>=75?'A':sc>=50?'B':sc>=30?'C':'D'; }
-  const TIER_MOD={S:[.5,0,.5,1],A:[0,0,0,.5],B:[0,0,0,0],C:[-1,0,0,-1],D:[-1,-1,-1,-1]};
+  const TIER_MOD={S:[.5,0,.5,1,.5],A:[0,0,0,.5,0],B:[0,0,0,0,0],C:[-1,0,0,-1,0],D:[-1,-1,-1,-1,-1]};
   const TIER_TXT={S:'마력 공급이 넘칩니다',A:'마력 공급이 넉넉합니다',B:'마력 공급이 알맞습니다',C:'마력 공급이 모자랍니다',D:'마력 공급이 크게 모자랍니다'};
   // 엘키두의 고유 스킬 「변용」: 마스터 역량만큼의 포인트를 다섯 능력치에 나눠 쓴다 (E3 D4 C5 B6 A7, +마다 2)
   const MORPH_PTS={D:29,C:32,B:35,A:37,S:40};
@@ -5576,7 +5579,7 @@ const Sim = (() => {
     const h=hero(); const t=masterTier(masterScore()); const m=TIER_MOD[t].slice();
     const sb=S.war&&S.war.battle&&S.war.battle.sealBuff===S.war.battle.round, _qf=sb&&fxGet(S.war.battle,'en','field'), _su=_qf&&(FIELD_SP[_qf.id]||{}).sealHalf?1:(S.war.trust<DIST?2:3), up=p=>sb?p.map(r=>r==='-'?r:r+' ▲'+_su):p;
     if(h.id==='enkidu'){ const k=(S.war&&S.war.morph)||'balance'; return {p:up(npCurse('me',morphAlloc(MORPH_PTS[t],k))),tier:t,starved:false,luck:0,morph:k}; }
-    const luck = S.st.will>=65? .5 : S.st.will<25? -1 : 0;
+    const luck = m[4];
     const starved = S.st.health<35 && !SV(h,'ind');
     let out=h.s.map((r,i)=> rankShift(r, i<4? m[i]+(starved&&(i===0||i===1)?-1:0) : luck));
     if(h.id==='bb'&&bxSealing()&&!sb) out=out.map(r=>r==='-'?r:r+' ▲2'); // 문 셀의 백업
@@ -5586,7 +5589,7 @@ const Sim = (() => {
     const h=H_BY[p.hero]; const t=p.pw>=83?'S':p.pw>=74?'A':p.pw>=48?'B':p.pw>=33?'C':'D';
     const _cu=a=>S.war&&S.war.battle&&S.war.battle.e===p?npCurse('en',a):a;
     if(h.id==='enkidu') return {p:_cu(morphAlloc(MORPH_PTS[t],'balance')),tier:t};
-    let o=h.s.map((r,i)=> i<4? rankShift(r,TIER_MOD[t][i]) : r);
+    let o=h.s.map((r,i)=> rankShift(r,TIER_MOD[t][i]));
     if(p.bxNun&&!p.bxFake) o=bxNunStats(p,o);
     if(p.cx==='sent') o=bxSentStats(p,o);
     if(p.cx==='shadow') o=o.map((r,i)=>i===0||i===2?rankShift(r,1):i===4?'E':r); else if(p.cx==='boss') o=p.bx?bxKiaraStats(h.s):cxBossStats(h);
@@ -14739,6 +14742,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 // 기술 사건의 설명 상자: 계통 · 본계 · 단계 칸, 그 아래 익히면 할 수 있는 것
 function artInfoHtml(o){ return `<div class="ai" id="dInfo"><div class="ai-h"><span class="ai-n">${esc(o.line)}</span>${o.main?'<span class="ai-main">본계</span>':''}<span class="ai-steps">${o.steps.map((t,i)=>`<span class="${i+1<o.tier?'stp-d':i+1===o.tier?'stp-c':''}">${esc(t)}</span>`).join('')}</span></div>${o.gain.length?`<div class="ai-l">${o.tier===1?'익히면 할 수 있는 것':'이 단계에 오르면'}</div><ul>${o.gain.map(g=>`<li>${esc(g)}</li>`).join('')}</ul>`:''}</div>`; }
 function showDecision(d){
+  if(window.__dD!==d){ window.__dD=d; window.__dT=performance.now(); }
   $('#dlg').classList.remove('busy');
   const sh=$('#sheet'); sh.classList.toggle('war',!!d.war);
   { const g=!!d.war&&d.title==='성배', W=Sim.S&&Sim.S.war, dk=g&&!!W&&!!W.cupKnown&&!W.cupPure; for(const el of [sh,$('#dlg')]){ el.classList.toggle('grail',g); el.classList.toggle('dark',dk); } }
@@ -14881,7 +14885,7 @@ function autoNote(d){ const n=$('#dAuto'), man=!!(d&&d.manual); n.textContent=ma
 function manualStop(d){ const man=!!(d&&d.manual); $('#autoBtn').disabled=man; if(man&&Sim.S.auto){ Sim.S.auto=false; syncCtrl(); } }
 function scheduleAuto(){ clearTimeout(autoTimer); const d=Sim.S.pending; if(!d||noAuto(d)) return; autoTimer=setTimeout(()=>{ if(!$('#info').classList.contains('hidden')||dFolded()) return; if(Sim.S.pending===d&&Sim.S.auto) choose(Sim.autoChoice(d)); }, Math.max(500,1800/Sim.S.speed)); }
 // 전투 중의 선택: 다음 합이나 전투 결과가 나올 때까지 창을 닫지 않고 기다린다 (닫혔다 다시 열리는 깜빡임을 없앤다)
-function choose(i){ clearTimeout(autoTimer); const d=Sim.S.pending; if(!d) return; try{ const ev=window.event; if(ev&&ev.isTrusted) Snd.sfx('u_choice',{gap:0}); }catch(e){} $('#autoBtn').disabled=false; const txt=d.input?$('#dInput').value:''; setFold(false);
+function choose(i){ { const ev=window.event; if(ev&&ev.isTrusted&&ev.type==='click'&&ev.detail>0&&performance.now()-(window.__dT||0)<300) return; } clearTimeout(autoTimer); const d=Sim.S.pending; if(!d) return; try{ const ev=window.event; if(ev&&ev.isTrusted) Snd.sfx('u_choice',{gap:0}); }catch(e){} $('#autoBtn').disabled=false; const txt=d.input?$('#dInput').value:''; setFold(false);
   if(d.battle&&!d.endE) $('#dlg').classList.add('busy'); else $('#dlg').classList.add('hidden');
   Sim.resolve(i,txt); busyCheck(); }
 function busyCheck(){ const dl=$('#dlg'); if(!dl.classList.contains('busy')) return; const S=Sim.S;
