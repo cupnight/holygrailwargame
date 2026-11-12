@@ -3,7 +3,8 @@ import json, re, sys, runpy, os
 H = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, H)
 import i18n
 R = runpy.run_path(H + '/rel6.py')['R']
-IDS = ['bb', 'meltryllis', 'passionlip', 'suzuka', 'tamamocat']
+IDS = ['bb', 'meltryllis', 'passionlip', 'suzuka', 'tamamocat', 'emiya_alter']
+R['emiya_alter'] = runpy.run_path(H + '/rel_ea.py')['KO']   # 에미야[얼터] (11-12)
 PAIRS = json.load(open(H + '/recovery/pairs.json', encoding='utf8'))
 
 def parts(l):
