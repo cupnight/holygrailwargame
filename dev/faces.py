@@ -4,7 +4,7 @@ import sys, os, re
 from PIL import Image
 from collections import Counter
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
-CROPS = {'bb': (655, 475, 290), 'kiara': (660, 445, 290), 'meltryllis': (655, 395, 290), 'passionlip': (655, 480, 290), 'suzuka': (670, 470, 290), 'tamamocat': (685, 455, 290), 'emiya_alter': (598, 350, 310)}
+CROPS = {'bb': (655, 475, 290), 'kiara': (660, 445, 290), 'meltryllis': (655, 395, 290), 'passionlip': (655, 480, 290), 'suzuka': (670, 470, 290), 'tamamocat': (685, 455, 290), 'emiya_alter': (628, 383, 344)}
 P = lambda *a: os.path.join(ROOT, *a)
 
 def dot72(src):
