@@ -1,5 +1,5 @@
 """비스트 Ⅲ/R 연출 소리 (11-12). 모두 직접 합성. 결말 둘은 결말 음악(j_end_d) 앞에 효과를 붙인 판.
-사용: python3 sumsnd_bx.py <소리 폴더(j_end_d.mp3가 있는 곳)> <출력 폴더>"""
+사용: python3 sumsnd_bx.py <소리 폴더(j_end_d.mp3가 있는 곳)> <출력 폴더> [이름,이름 — 이것만 만듦]"""
 import sys, os, subprocess, numpy as np
 from scipy.signal import fftconvolve, butter, sosfilt
 SR = 48000; rng = np.random.default_rng(5)
@@ -138,7 +138,77 @@ def end_dream():
     put(B, bell(2093, .6), 6.15, .3, .15)
     B = reverb(B, 2.2, .3); put(B, music[0], 4.2, -1, 1.414); put(B, music[1], 4.2, 1, 1.414); return B
 
+def kp():  # ⑦ 조각이 빠져나와 손에 내려앉고, 지켜보던 시선이 끊긴다
+    d = 4.8; B = buf(d); x = T(d)
+    gz = T(2.45); gaze = (np.sin(2 * np.pi * 1661 * gz) + .5 * np.sin(2 * np.pi * 1663.5 * gz)) * (.6 + .4 * np.sin(2 * np.pi * 5 * gz)) * ss(gz / .6)
+    put(B, gaze, .2, .2, .05); put(B, pad([92.5, 138.59], 2.6, .5, .1, bright=500), .1, 0, .3)
+    put(B, whoosh(.5, 600, 3000, .3), .45, 0); put(B, thump(80, .4), .58, 0, .35)
+    for i, f in enumerate(SWEET): put(B, bell(f * 2, 1.0), .6 + i * .04, (i - 2) / 2.5, .08)
+    put(B, pad(SWEET[1:4], 1.2, .3, .6, bright=3500), .9, 0, .2)
+    put(B, whoosh(.65, 3000, 500, .35), 1.8, 0)
+    put(B, thump(60, .5), 2.42, 0, .5); put(B, soft(587.33, 1.4), 2.43, 0, .2); put(B, soft(880, 1.2), 2.45, .2, .12)
+    sn = crush(bp(noise(.12), 1500, 9000) * env(.12, .001, .03), 3, 8); put(B, sn, 2.6, 0, .55); put(B, sweep(2400, 300, .4) * env(.4, .002, .12), 2.6, 0, .12)
+    put(B, pad(GOLD[:3], 2.0, .3, 1.2, bright=2000), 2.8, 0, .25); put(B, bell(1174.66, 1.2), 3.45, 0, .08)
+    return reverb(B, 2.2, .3)
+
+def free():  # ⑧ 가시 실이 하나씩 끊어지고 제 빛깔로 피어난다
+    d = 4.4; B = buf(d); x = T(d)
+    put(B, bp(noise(1.2), 300, 900) * np.sin(np.pi * T(1.2) / 1.2) * (1 + .5 * np.sin(2 * np.pi * 7 * T(1.2))), .1, 0, .18)
+    put(B, sweep(180, 260, 1.1) * env(1.1, .5, .6) * .5, .2, 0, .2)
+    for i, at in enumerate([1.55, 1.95, 1.35, 1.75, 2.05, 1.25, 1.65, 1.45, 1.85]):
+        z = bp(noise(.05), 2000, 8000) * env(.05, .001, .012); pl = np.sin(2 * np.pi * (700 + 90 * i) * T(.3)) * np.exp(-T(.3) / .05)
+        put(B, z, at, ((i * 5) % 9 - 4) / 5, .4); put(B, pl, at, ((i * 5) % 9 - 4) / 5, .12)
+    put(B, thump(55, .7), 2.28, 0, .55)
+    for i, f in enumerate([440, 659.25, 880, 1318.5]): put(B, bell(f, 1.6), 2.3 + i * .03, (i - 1.5) / 2, .1)
+    put(B, whoosh(1.0, 400, 6000, .35), 2.25, 0); put(B, pad([220, 329.63, 440, 554.37], 2.0, .1, 1.2, bright=3200), 2.3, 0, .3)
+    for k in range(14): put(B, soft(rng.choice([1760, 2217.5, 2637, 3520]), .2), 2.35 + rng.random() * .8, rng.uniform(-.9, .9), .05)
+    return reverb(B, 2.4, .32)
+
+def conf(v):  # ⑨ 봉인이 갈라짐: conf 고백 · force 찢어짐 · unseal 풀기
+    d = 5.0; B = buf(d); x = T(d); brk = 2.3 if v == 'force' else 2.8
+    put(B, pad(MOON, d - .3, .5, 1.4, bright=1600) * (1 - (ss((x[:int((d - .3) * SR)] - brk) / .3) * .7 if v != 'unseal' else 0)), .1, 0, .3)
+    if v == 'unseal':
+        for i in range(12): put(B, soft(rng.choice(MOON) * 4, .7), 1.0 + i * .08, ((i * 7) % 5 - 2) / 2.5, .07)
+        put(B, whoosh(1.6, 500, 3000, .2), 1.0, 0)
+        for i, f in enumerate(GOLD): put(B, soft(f, 1.8), 2.0 + i * .08, (i - 1.5) / 2, .1)
+        put(B, pad(GOLD[:3], 2.4, .5, 1.2, bright=2200), 2.0, 0, .25)
+        return reverb(B, 2.6, .35)
+    a0 = .6 if v == 'force' else 1.0
+    if v == 'force': put(B, sweep(45, 90, brk - .5) * ss(T(brk - .5) / (brk - .5)) * .8, .5, 0, .4)
+    t0 = a0
+    while t0 < brk - .05:
+        g = .1 + .5 * ((t0 - a0) / (brk - a0)) ** 2; put(B, hp(noise(.03), 2500) * env(.03, .001, .01), t0, rng.uniform(-.7, .7), g); t0 += rng.uniform(.03, .2) * (1.2 - (t0 - a0) / (brk - a0))
+    put(B, thump(50, 1.0), brk, 0, .8); put(B, bp(noise(.4), 1200, 9000) * env(.4, .002, .12), brk, 0, .6)
+    for k in range(30): put(B, soft(rng.choice(MOON) * rng.choice([4, 8]), .25), brk + rng.random() ** 1.5 * .7, rng.uniform(-.9, .9), .05)
+    put(B, pad(SWEET, d - brk, .2, 1.3, bright=3000), brk + .05, 0, .45)
+    for i, f in enumerate(SWEET): put(B, bell(f * 2, 1.5), brk + .06 + i * .03, (i - 2) / 2.5, .08)
+    if v == 'force': put(B, whoosh(.9, 200, 3000, .5), brk - .05, 0)
+    return reverb(B, 2.6, .33)
+
+def order():  # ⑩ 종 두 번 · 공문 · 도장
+    d = 3.8; B = buf(d)
+    def toll(at, g):
+        for f, a, dd in [(196, 1, 2.4), (392.4, .5, 1.8), (466.9, .35, 1.4), (587.3, .25, 1.0), (98, .4, 2.8)]: put(B, soft(f, dd) * a, at, 0, g)
+    toll(.15, .3); toll(.85, .25)
+    put(B, bp(noise(.35), 1500, 6000) * np.sin(np.pi * T(.35) / .35) ** 2, .4, .3, .15)
+    put(B, thump(70, .35), 1.55, 0, .7); put(B, bp(noise(.06), 300, 3000) * env(.06, .001, .02), 1.55, 0, .5)
+    put(B, pad([98, 146.83, 233.08], 1.8, .1, 1.0, bright=900), 1.56, 0, .25)
+    return reverb(B, 2.4, .3)
+
+def np_():  # ⑪ 키아라와의 격돌에 겹치는 단맛 (격돌 소리 위에 얹는다)
+    d = 3.0; B = buf(d); x = T(d)
+    put(B, pad(SWEET, 2.6, .9, .9, bright=2600), 0, 0, .3)
+    for k in range(10): put(B, soft(rng.choice(SWEET) * 2, .5), .1 + k * .09, rng.uniform(-.5, .9), .04)
+    for i, f in enumerate(SWEET): put(B, bell(f * 2, 1.2), 1.26 + i * .02, .4, .07)
+    for k in range(18): put(B, soft(rng.choice(SWEET) * 4, .2), 1.5 + rng.random() * .9, rng.uniform(-.9, .3), .035)
+    return reverb(B, 2.0, .3)
+
 os.makedirs(OUT, exist_ok=True)
+ONLY = sys.argv[3].split(',') if len(sys.argv) > 3 else None
+if ONLY:
+    F = {'j_bx_kp': kp, 'j_bx_free': free, 'j_bx_conf': lambda: conf('conf'), 'j_bx_tear': lambda: conf('force'), 'j_bx_open': lambda: conf('unseal'), 'j_bx_order': order, 'j_bx_np': np_, 'j_bx_desc': desc}
+    for n in ONLY: save(n, F[n](), -21.0 if n == 'j_bx_np' else -16.5)   # 격돌 소리 위에 얹는 단맛은 작게
+    raise SystemExit
 save('j_bx_seal', seal(False)); save('j_bx_empty', seal(True)); save('j_bx_desc', desc()); save('j_bx_karma', karma())
 save('j_bx_in', bin_(True)); save('j_bx_in_s', bin_(False)); save('j_bx_brk', brk(True)); save('j_bx_brk_s', brk(False)); save('j_bx_p2', p2())
 save('j_end_bxmoon', end_moon(), -16.0); save('j_end_bxdream', end_dream(), -16.0)
