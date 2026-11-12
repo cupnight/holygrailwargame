@@ -56,4 +56,5 @@ G.append({'id': 'n_mon', 'ph': 'B', 't': '매달 묘사 (첫 해)', 'note': '달
 G.append({'id': 'n_yr', 'ph': 'C', 't': '해마다 묘사 (열 해)', 'note': '', 'rows': nar('n_yr', list(enumerate(yr)), m1.YRV) + [{'id': f'n_yr2.{i}', 'slot': str(10 + i), 'L': [x]} for i, x in enumerate(m4.YR2)]})
 for e in m1.EV + m2.EV + m3.EV + m4.EV: G.append(ev(e))
 G.sort(key=lambda g: (0 if g['id'] == 'tags' or g['id'].startswith('alt_') else 1, 'ABC'.index(g['ph']), 0 if g['id'].startswith('n_') else 1))
-json.dump(G, open(sys.argv[1], 'w', encoding='utf8'), ensure_ascii=False); print(len(G), sum(len(g['rows']) for g in G))
+if __name__ == '__main__':
+    json.dump(G, open(sys.argv[1], 'w', encoding='utf8'), ensure_ascii=False); print(len(G), sum(len(g['rows']) for g in G))

@@ -47,4 +47,32 @@ for P in sys.argv[1:]:
     rp("newLife,start,tick,", "newLife,start,tick,ep2When,")
     rp("S.dead?'끝':S.phase==='epi'?'에필로그':'삶';", "S.dead?'끝':S.phase==='epi'?((w2=>w2?(w2.u==='d'?`봄 · ${w2.n}일째`:`첫 해 · ${w2.n}달째`):'에필로그')(Sim.ep2When())):'삶';")
     rp(":v.yrs>=1?`수육 · 함께 산 지 ${v.yrs}년`:'수육 · 함께 살기 시작함';", ":v.when?(v.when.u==='d'?`수육 · 함께 산 지 ${v.when.n}일`:`수육 · 함께 산 지 ${v.when.n}달`):v.yrs>=1?`수육 · 함께 산 지 ${v.yrs}년`:'수육 · 함께 살기 시작함';")
-    open(P, 'w', encoding='utf-8').write(s); print('epi2 miss', miss)
+    # 번역: 줄 번호(검수 페이지와 같다) → 문장 틀. 이름이 들어간 문장은 I18N_TPL에, 아니면 I18N_DICT에
+    import glob, epi2_rev, i18n; importlib.reload(epi2_rev)
+    ROW = {r['id']: r['L'] for g in epi2_rev.G for r in g['rows']}
+    TRS, UIT, UID = {}, [], []
+    for f in sorted(glob.glob(os.path.join(HERE, 'epi2_tr*.py'))):
+        ns = {}; exec(open(f, encoding='utf-8').read(), ns); TRS.update(ns.get('TR', {})); UIT += ns.get('UI', []); UID += ns.get('UID', [])
+    PT = {'은': '은', '이': '이', '을': '을', '과': '과', '으로': '으로'}
+    def kt(t): t = fixN(t); t = re.sub(r'\{N(은|이|을|과|으로)\}', r'{0~\1}', t); return t.replace('{N}', '{0}')
+    DI, TP, bad = [], [], []
+    for i, v in TRS.items():
+        L = ROW.get(i)
+        if not L: bad.append(i); continue
+        V = [v] if isinstance(v, tuple) else v
+        if len(V) != len(L): bad.append(i); continue
+        for ko, (en, ja) in zip(L, V):
+            k = kt(ko)
+            if '{0' in k: TP.append((k, en.replace('{N}', '{0}'), ja.replace('{N}', '{0}')))
+            else: DI.append((ko, en, ja))
+    s, nd, _ = i18n.add(s, DI + UID, [])
+    m_, T = i18n._blk(s, 'I18N_TPL'); nt = 0
+    for ko, en, ja in TP:
+        for lang, v in (('en', en), ('ja', ja)):
+            if not any(x[0] == ko for x in T[lang]): T[lang].append([ko, v, 1]); nt += 1
+    for ko, en, ja in UIT:
+        for lang, v in (('en', en), ('ja', ja)):
+            if not any(x[0] == ko for x in T[lang]): T[lang].append([ko, v]); nt += 1
+    s = s[:m_.start(1)] + json.dumps(T, ensure_ascii=False, separators=(',', ':')) + s[m_.end(1):]
+    todo = [i for i in ROW if i not in TRS and not i.startswith('tags.')]
+    open(P, 'w', encoding='utf-8').write(s); print('epi2 miss', miss, '| 번역 dict', nd, 'tpl', nt, '잘못된 번호', bad[:5], '남은 줄', len(todo))
