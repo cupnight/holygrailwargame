@@ -148,7 +148,7 @@ def p2():
 
 BRIGHT = [261.63, 329.63, 392.0, 587.33]       # 해피 엔딩: C 장조 add9 (결말 곡 「last piece again」과 같은 조)
 def end_moon(v):  # ⑤ 달로 간 잔 (3판, 갈래별): 밝고 희망차게 · BB다운 전자음. 효과 뒤 결말 곡(j_end_f)이 도시 불빛이 다시 켜질 때(TK) 들어온다
-    music = rd(os.path.join(SRC, 'j_end_f.mp3')); TK = {'me': 7.9, 'live': 6.6, 'nobb': 5.8, 'voice': 6.2}[v]; d = TK + .2 + music.shape[1] / SR; B = buf(d)
+    TK = {'me': 7.9, 'live': 6.6, 'nobb': 5.8, 'voice': 6.2}[v]; d = TK + 3.0; B = buf(d)   # 결말 곡(end_f)은 화면이 따로 틀어 닫을 때까지 이어 간다
     def sq(f, dd=.07, duty=.5):  # 네모파 '삐' (BB의 전자음)
         x = T(dd); return (((f * x) % 1) < duty).astype(float) * 2 - 1
     def blip(f, dd=.07): x = T(dd); return lp(sq(f, dd, .25), 6000) * .5 * np.exp(-x / (dd * .35))
@@ -186,7 +186,7 @@ def end_moon(v):  # ⑤ 달로 간 잔 (3판, 갈래별): 밝고 희망차게 ·
         arp(2.6, 3.1, [523.25, 783.99, 1046.5, 1567.98], .08, .1); put(B, bell(2093.0, 1.2), 3.05, 0, .12)
     arp(TK - .6, TK + .3, [523.25, 659.25, 783.99, 1046.5], .05, .156)                                        # ④ 불빛이 다시 켜짐: 짧은 전자 아르페지오
     for i, f in enumerate([523.25, 659.25, 783.99, 1046.5, 1318.51]): put(B, soft(f, 1.0), TK - .5 + i * .16, (i - 2) / 3, .07)
-    B = reverb(B, 2.4, .3); put(B, music[0], TK + .2, -1, 1.414); put(B, music[1], TK + .2, 1, 1.414); return B
+    return reverb(B, 2.4, .3)
 
 def end_dream():
     music = rd(os.path.join(SRC, 'j_end_d.mp3')); d = 4.2 + music.shape[1] / SR; B = buf(d)
