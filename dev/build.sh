@@ -8,6 +8,7 @@ python3 al_apply.py build/game.html            # ⓪ 속성·취향
 python3 inject3.py batch3 3차 build/game.html   # ① BB·멜트릴리스·패션립
 python3 cls_apply.py build/game.html           # ① 새 클래스 셋
 python3 inject3.py batch4 4차 build/game.html   # ③ 스즈카 고젠 · 타마모 캣
+python3 inject3.py batch5 5차 build/game.html   # 에미야[얼터]
 python3 extras4.py build/game.html             # ③ 성향 말투 · 마성 · 매료 마안 · 낮잠
 python3 bx_patch.py build/game.html            # ② 비스트 위기
 python3 bxe_apply.py build/game.html           # ② 키아라 패배 뒤 에필로그
@@ -18,3 +19,4 @@ python3 moon_apply.py build/game.html          # BB · 멜트 · 립 전용 소�
 python3 sfx_apply.py build/game.html           # 소환 연출: 문 캔서 · 얼터 에고
 python3 sfx_bb.py build/game.html              # 소환 연출: BB 전용(가로채는 소환)
 python3 kiara_bgm_apply.py build/game.html       # 키아라 · BB 전투 배경음악
+python3 ea_apply.py build/game.html              # 에미야[얼터]: 보구 특례 · 키아라 관계 대사
