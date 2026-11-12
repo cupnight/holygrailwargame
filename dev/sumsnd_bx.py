@@ -59,7 +59,7 @@ MOON = [233.08, 277.18, 349.23, 523.25]        # 달: B♭ 단조 add9 (BB 소�
 SWEET = [277.18, 349.23, 415.3, 523.25, 622.25]  # 키아라: D♭ 장조 maj7 add9 — 달콤하고 불안한
 
 def seal(nb):
-    d = 4.4 if nb else 4.8; B = buf(d); x = T(d)
+    d = 6.3 if nb else 6.7; B = buf(d); x = T(d)
     put(B, (np.sin(2 * np.pi * 55 * x) + .4 * np.sin(2 * np.pi * 110 * x)) * ss(x / .6) * (1 - ss((x - d + .8) / .8)), 0, 0, .25)
     for i, f in enumerate(GOLD): put(B, soft(f * 2, 1.4), .3 + i * .07, (-1) ** i * .4, .08)
     put(B, pad(GOLD[:3], d - .4, .6, 1.2, bright=2400) * (1 - (ss((x[:int((d - .4) * SR)] - 1.4) / 1.0) if nb else 0)), .2, 0, .22)
@@ -99,12 +99,12 @@ def karma():
     put(B, bell(233.08, 1.2), 1.0, 0, .2); return reverb(B, 1.8, .25)
 
 def bin_(full):
-    d = 5.2 if full else 1.8; B = buf(d); x = T(d)
+    d = 6.6 if full else 2.5; B = buf(d); x = T(d)
     put(B, pad(SWEET[:3], d - .1, .9 if full else .3, .8 if full else .5, bright=1600), .05, 0, .4)
     put(B, (np.sin(2 * np.pi * 41 * x)) * ss(x / .5) * (1 - ss((x - d + .6) / .6)), 0, 0, .3)
     a0 = .6 if full else .05
     for i, f in enumerate([277.18, 349.23, 415.3, 523.25, 698.46, 830.61]): put(B, soft(f, .9), a0 + i * (.08 if full else .04), (i - 2.5) / 3, .12)
-    if full: put(B, pad([69.3, 103.83, 138.59], 3.2, .5, 1.5, bright=700), 1.3, 0, .45); put(B, bell(554.37, 1.5), 1.3, 0, .15)
+    if full: put(B, pad([69.3, 103.83, 138.59], 4.6, .5, 2.0, bright=700), 1.3, 0, .45); put(B, bell(554.37, 1.5), 1.3, 0, .15)
     else: put(B, bell(554.37, 1.0), .15, 0, .14)
     return reverb(B, 2.2, .3)
 
@@ -114,10 +114,10 @@ def brk(full):
     put(B, whoosh(.9 if full else .6, 400, 5000, .35), 0, 0); put(B, thump(60, .4), 0, 0, .3); return reverb(B, 1.6, .3)
 
 def p2():
-    d = 2.7; B = buf(d); put(B, thump(52, .6), .28, 0, .7); put(B, bell(622.25, 1.0), .28, 0, .15)
+    d = 4.1; B = buf(d); put(B, thump(52, .6), .28, 0, .7); put(B, bell(622.25, 1.0), .28, 0, .15)
     for i in range(5): put(B, sweep(900 - i * 60, 220, .7) * env(.7, .02, .35), .32 + i * .04, (i - 2) / 3, .08)
     for i in range(5): put(B, sweep(220, 900 + i * 60, .7) * env(.7, .5, .2)[::-1].copy() * np.sin(np.pi * T(.7) / .7), 1.0 + i * .04, (2 - i) / 3, .08)
-    put(B, pad(SWEET, 1.0, .05, .6, bright=2800), 1.7, 0, .45); return reverb(B, 2.0, .3)
+    put(B, pad(SWEET, 2.3, .05, 1.3, bright=2800), 1.7, 0, .45); return reverb(B, 2.0, .3)
 
 def end_moon():
     music = rd(os.path.join(SRC, 'j_end_d.mp3')); d = 4.6 + music.shape[1] / SR; B = buf(d); x = T(4.8)
@@ -139,7 +139,7 @@ def end_dream():
     B = reverb(B, 2.2, .3); put(B, music[0], 4.2, -1, 1.414); put(B, music[1], 4.2, 1, 1.414); return B
 
 def kp():  # ⑦ 조각이 빠져나와 손에 내려앉고, 지켜보던 시선이 끊긴다
-    d = 4.8; B = buf(d); x = T(d)
+    d = 6.7; B = buf(d); x = T(d)
     gz = T(2.45); gaze = (np.sin(2 * np.pi * 1661 * gz) + .5 * np.sin(2 * np.pi * 1663.5 * gz)) * (.6 + .4 * np.sin(2 * np.pi * 5 * gz)) * ss(gz / .6)
     put(B, gaze, .2, .2, .05); put(B, pad([92.5, 138.59], 2.6, .5, .1, bright=500), .1, 0, .3)
     put(B, whoosh(.5, 600, 3000, .3), .45, 0); put(B, thump(80, .4), .58, 0, .35)
@@ -148,11 +148,11 @@ def kp():  # ⑦ 조각이 빠져나와 손에 내려앉고, 지켜보던 시선
     put(B, whoosh(.65, 3000, 500, .35), 1.8, 0)
     put(B, thump(60, .5), 2.42, 0, .5); put(B, soft(587.33, 1.4), 2.43, 0, .2); put(B, soft(880, 1.2), 2.45, .2, .12)
     sn = crush(bp(noise(.12), 1500, 9000) * env(.12, .001, .03), 3, 8); put(B, sn, 2.6, 0, .55); put(B, sweep(2400, 300, .4) * env(.4, .002, .12), 2.6, 0, .12)
-    put(B, pad(GOLD[:3], 2.0, .3, 1.2, bright=2000), 2.8, 0, .25); put(B, bell(1174.66, 1.2), 3.45, 0, .08)
+    put(B, pad(GOLD[:3], 3.8, .3, 2.0, bright=2000), 2.8, 0, .25); put(B, bell(1174.66, 1.2), 3.45, 0, .08)
     return reverb(B, 2.2, .3)
 
 def free():  # ⑧ 가시 실이 하나씩 끊어지고 제 빛깔로 피어난다
-    d = 4.4; B = buf(d); x = T(d)
+    d = 6.4; B = buf(d); x = T(d)
     put(B, bp(noise(1.2), 300, 900) * np.sin(np.pi * T(1.2) / 1.2) * (1 + .5 * np.sin(2 * np.pi * 7 * T(1.2))), .1, 0, .18)
     put(B, sweep(180, 260, 1.1) * env(1.1, .5, .6) * .5, .2, 0, .2)
     for i, at in enumerate([1.55, 1.95, 1.35, 1.75, 2.05, 1.25, 1.65, 1.45, 1.85]):
@@ -160,18 +160,18 @@ def free():  # ⑧ 가시 실이 하나씩 끊어지고 제 빛깔로 피어난�
         put(B, z, at, ((i * 5) % 9 - 4) / 5, .4); put(B, pl, at, ((i * 5) % 9 - 4) / 5, .12)
     put(B, thump(55, .7), 2.28, 0, .55)
     for i, f in enumerate([440, 659.25, 880, 1318.5]): put(B, bell(f, 1.6), 2.3 + i * .03, (i - 1.5) / 2, .1)
-    put(B, whoosh(1.0, 400, 6000, .35), 2.25, 0); put(B, pad([220, 329.63, 440, 554.37], 2.0, .1, 1.2, bright=3200), 2.3, 0, .3)
+    put(B, whoosh(1.0, 400, 6000, .35), 2.25, 0); put(B, pad([220, 329.63, 440, 554.37], 3.9, .1, 2.0, bright=3200), 2.3, 0, .3)
     for k in range(14): put(B, soft(rng.choice([1760, 2217.5, 2637, 3520]), .2), 2.35 + rng.random() * .8, rng.uniform(-.9, .9), .05)
     return reverb(B, 2.4, .32)
 
 def conf(v):  # ⑨ 봉인이 갈라짐: conf 고백 · force 찢어짐 · unseal 풀기
-    d = 5.0; B = buf(d); x = T(d); brk = 2.3 if v == 'force' else 2.8
+    d = {'force': 6.4, 'unseal': 6.3}.get(v, 6.9); B = buf(d); x = T(d); brk = 2.3 if v == 'force' else 2.8
     put(B, pad(MOON, d - .3, .5, 1.4, bright=1600) * (1 - (ss((x[:int((d - .3) * SR)] - brk) / .3) * .7 if v != 'unseal' else 0)), .1, 0, .3)
     if v == 'unseal':
         for i in range(12): put(B, soft(rng.choice(MOON) * 4, .7), 1.0 + i * .08, ((i * 7) % 5 - 2) / 2.5, .07)
         put(B, whoosh(1.6, 500, 3000, .2), 1.0, 0)
         for i, f in enumerate(GOLD): put(B, soft(f, 1.8), 2.0 + i * .08, (i - 1.5) / 2, .1)
-        put(B, pad(GOLD[:3], 2.4, .5, 1.2, bright=2200), 2.0, 0, .25)
+        put(B, pad(GOLD[:3], 4.1, .5, 2.0, bright=2200), 2.0, 0, .25)
         return reverb(B, 2.6, .35)
     a0 = .6 if v == 'force' else 1.0
     if v == 'force': put(B, sweep(45, 90, brk - .5) * ss(T(brk - .5) / (brk - .5)) * .8, .5, 0, .4)
@@ -186,13 +186,13 @@ def conf(v):  # ⑨ 봉인이 갈라짐: conf 고백 · force 찢어짐 · unsea
     return reverb(B, 2.6, .33)
 
 def order():  # ⑩ 종 두 번 · 공문 · 도장
-    d = 3.8; B = buf(d)
+    d = 4.6; B = buf(d)
     def toll(at, g):
         for f, a, dd in [(196, 1, 2.4), (392.4, .5, 1.8), (466.9, .35, 1.4), (587.3, .25, 1.0), (98, .4, 2.8)]: put(B, soft(f, dd) * a, at, 0, g)
     toll(.15, .3); toll(.85, .25)
     put(B, bp(noise(.35), 1500, 6000) * np.sin(np.pi * T(.35) / .35) ** 2, .4, .3, .15)
     put(B, thump(70, .35), 1.55, 0, .7); put(B, bp(noise(.06), 300, 3000) * env(.06, .001, .02), 1.55, 0, .5)
-    put(B, pad([98, 146.83, 233.08], 1.8, .1, 1.0, bright=900), 1.56, 0, .25)
+    put(B, pad([98, 146.83, 233.08], 2.9, .1, 1.6, bright=900), 1.56, 0, .25)
     return reverb(B, 2.4, .3)
 
 def np_():  # ⑪ 키아라와의 격돌에 겹치는 단맛 (격돌 소리 위에 얹는다)
@@ -206,7 +206,7 @@ def np_():  # ⑪ 키아라와의 격돌에 겹치는 단맛 (격돌 소리 위�
 os.makedirs(OUT, exist_ok=True)
 ONLY = sys.argv[3].split(',') if len(sys.argv) > 3 else None
 if ONLY:
-    F = {'j_bx_kp': kp, 'j_bx_free': free, 'j_bx_conf': lambda: conf('conf'), 'j_bx_tear': lambda: conf('force'), 'j_bx_open': lambda: conf('unseal'), 'j_bx_order': order, 'j_bx_np': np_, 'j_bx_desc': desc}
+    F = {'j_bx_seal': lambda: seal(False), 'j_bx_empty': lambda: seal(True), 'j_bx_in': lambda: bin_(True), 'j_bx_in_s': lambda: bin_(False), 'j_bx_p2': p2, 'j_bx_kp': kp, 'j_bx_free': free, 'j_bx_conf': lambda: conf('conf'), 'j_bx_tear': lambda: conf('force'), 'j_bx_open': lambda: conf('unseal'), 'j_bx_order': order, 'j_bx_np': np_, 'j_bx_desc': desc}
     for n in ONLY: save(n, F[n](), -21.0 if n == 'j_bx_np' else -16.5)   # 격돌 소리 위에 얹는 단맛은 작게
     raise SystemExit
 save('j_bx_seal', seal(False)); save('j_bx_empty', seal(True)); save('j_bx_desc', desc()); save('j_bx_karma', karma())

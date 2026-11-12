@@ -16,10 +16,10 @@ const BXC_E=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[
 function bxCubeP(cx,cy,R,rot){ const P=[]; for(const [a,b,cc] of [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]]){ const x=a*Math.cos(rot)-cc*Math.sin(rot), z=a*Math.sin(rot)+cc*Math.cos(rot), y=b*Math.cos(.35)-z*Math.sin(.35), zz=b*Math.sin(.35)+z*Math.cos(.35), k=1+zz*.12; P.push([cx+x*R*.75*k,cy+y*R*.75*k]); } return P; }
 function bxFacePt(P,f,u,v){ const [a,b,c,d]=BXC_F[f].map(i=>P[i]); return [(1-u)*(1-v)*a[0]+u*(1-v)*b[0]+u*v*c[0]+(1-u)*v*d[0],(1-u)*(1-v)*a[1]+u*(1-v)*b[1]+u*v*c[1]+(1-u)*v*d[1]]; }
 
-/* ⑦ KP 회수: 쓰러진 센티넬의 가슴께에서 빛 조각이 빠져나와 손으로 내려앉고, 위에서 이쪽을 보던 눈 하나가 갈라져 닫힌다 (4.8초) */
+/* ⑦ KP 회수: 쓰러진 센티넬의 가슴께에서 빛 조각이 빠져나와 손으로 내려앉고, 위에서 이쪽을 보던 눈 하나가 갈라져 닫힌다 (6.7초) */
 const BXKP={Body:'255,150,190',Site:'200,150,255',Mouth:'255,140,150',Spice:'255,200,130',Organ:'235,90,140'};
 function bxKpShow(fx){
-  const {seg,io,oc}=XF, T=4.8, col=BXKP[fx.k]||BXF.pink, n=Math.max(0,Math.min(5,fx.n|0)), g=!!fx.g, rnd=XF.rng(41);
+  const {seg,io,oc}=XF, T=6.7, col=BXKP[fx.k]||BXF.pink, n=Math.max(0,Math.min(5,fx.n|0)), g=!!fx.g, rnd=XF.rng(41);
   const title=`KP · ${fx.k||'?'}`, sub=tr(g?'키아라의 몸이 한 번 크게 일렁였다':n<=1?'익숙하지 않은 단맛이 혀끝에 남았다':'이쪽을 보던 시선이 하나 끊겼다');
   const slots=`<div class="bxkp-sl" aria-label="${esc(tr(`카르마 파지 다섯 가운데 ${n}`))}">${[0,1,2,3,4].map(i=>`<i class="${i<n?'on':''}${i===n-1?' nw':''}"></i>`).join('')}</div>`;
   const V=xfxOpen('dsc bxs',`${title} · ${sub}`,bxTxtH(title,sub,slots),T,frame); fxSnd(V.o,'j_bx_kp');
@@ -60,9 +60,9 @@ function bxKpShow(fx){
     text(t); if(sl) sl.style.opacity=(oc(seg(t,3.4,3.9))*(1-seg(t,T-.8,T-.1))).toFixed(3); }
 }
 
-/* ⑧ 멜트릴리스 · 패션립 해방: 가시 돋은 분홍 실이 빛을 꽁꽁 묶고 있다가 하나씩 끊어지고, 빛이 제 빛깔로 피어난다 (4.4초) */
+/* ⑧ 멜트릴리스 · 패션립 해방: 가시 돋은 분홍 실이 빛을 꽁꽁 묶고 있다가 하나씩 끊어지고, 빛이 제 빛깔로 피어난다 (6.4초) */
 function bxFreeShow(fx){
-  const {seg,io,oc}=XF, T=4.4, rnd=XF.rng(fx.h==='meltryllis'?51:52), melt=fx.h==='meltryllis', col=melt?'138,226,246':'255,172,216', col2='212,200,255';
+  const {seg,io,oc}=XF, T=6.4, rnd=XF.rng(fx.h==='meltryllis'?51:52), melt=fx.h==='meltryllis', col=melt?'138,226,246':'255,172,216', col2='212,200,255';
   const HB=(Sim.H_BY||{})[fx.h], nm=(HB&&HB.name)||'', title=tr(nm), sub=tr('센티넬의 사슬이 끊어졌다');
   const V=xfxOpen('dsc bxs',`${title} · ${sub}`,bxTxtH(title,sub),T,frame); fxSnd(V.o,'j_bx_free');
   const text=bxTxtF(V,2.55,T-.8), NT=9;
@@ -97,9 +97,9 @@ function bxFreeShow(fx){
     text(t); }
 }
 
-/* ⑨ 봉인이 갈라짐: 7일차의 보랏빛 상자. 고백 — 금이 번지다 깨져 분홍 빛이 터진다 · 찢어짐 — 안에서 부풀어 찢긴다 · 풀기 — 모서리가 하나씩 풀려 떠오른다 (5초, 뒤이어 강림) */
+/* ⑨ 봉인이 갈라짐: 7일차의 보랏빛 상자. 고백 — 금이 번지다 깨져 분홍 빛이 터진다 · 찢어짐 — 안에서 부풀어 찢긴다 · 풀기 — 모서리가 하나씩 풀려 떠오른다 (6.3~6.9초, 뒤이어 강림) */
 function bxConfShow(fx){
-  const {seg,io,oc}=XF, v=fx.v||'conf', T=5.0, rnd=XF.rng(31), BRK=v==='force'?2.3:2.8;
+  const {seg,io,oc}=XF, v=fx.v||'conf', T=v==='force'?6.4:v==='unseal'?6.3:6.9, rnd=XF.rng(31), BRK=v==='force'?2.3:2.8;
   const title=tr(v==='force'?`제${fx.d}일 · 봉인이 찢어지다`:v==='unseal'?`제${fx.d}일 · 봉인을 풀다`:`제${fx.d}일 · 고백`);
   const sub=tr(v==='force'?'“…미안해요. 끝까지는 못 버텼어요.”':v==='unseal'?'상자가 소리 없이 열렸다':'“그 수녀가 키아라예요. 성배를 삼키려고 해요.”');
   // 뒤이어 강림이 나오므로 어둠은 걷지 않고 그대로 넘긴다(강림이 어두운 채로 시작한다)
@@ -138,9 +138,9 @@ function bxConfShow(fx){
     text(t); }
 }
 
-/* ⑩ 토벌령: 교회 종이 두 번 울리고, 감독관의 공문이 내려앉아 붉은 도장이 찍힌다 (3.8초) */
+/* ⑩ 토벌령: 교회 종이 두 번 울리고, 감독관의 공문이 내려앉아 붉은 도장이 찍힌다 (4.6초) */
 function bxOrderShow(fx){
-  const {seg,io,oc,ob}=XF, T=3.8, me=!!fx.me, ST=1.55;
+  const {seg,io,oc,ob}=XF, T=4.6, me=!!fx.me, ST=1.55;
   const h=tr('감독관의 토벌령'), l1=tr('성배를 가로챈 자'), who=me?tr('당신의 조'):tr(fx.tgt||''), l2=tr('그 체력을 무너뜨린 조에게 령주 한 획을 준다'), stp=tr('토벌');
   const html=`<div class="bxo${me?' me':''}"><div class="bxo-h">${esc(h)}</div><div class="bxo-l">${esc(l1)}</div><div class="bxo-t">${esc(who)}</div><div class="bxo-s">${esc(l2)}</div><div class="bxo-st" aria-hidden="true"><b>†</b><span>${esc(stp)}</span></div></div>`;
   const V=xfxOpen('dsc bxo-x',`${h} · ${l1} ${who}`,html,T,frame); fxSnd(V.o,'j_bx_order');

@@ -57,7 +57,7 @@ function bxStatic(c,W,H,D,I,t){ if(I<=0) return; const nw=160, nh=90; if(!bxStat
 
 /* 7일차 봉인: 달빛이 내려와 성배를 상자째 가둔다 · 잠그기 직전 성배가 한 번 일렁이고 분홍 실오라기가 빠져나간다 (복선). BB가 없는 생은 성배가 사라지고 빈 자리만 남는다 */
 function bxSealShow(fx){
-  const {seg,io,oc}=XF, nb=!!fx.nb, T=nb?4.4:4.8;
+  const {seg,io,oc}=XF, nb=!!fx.nb, T=nb?6.3:6.7;
   const title=tr(nb?`제${fx.d}일 · 빈 자리`:`제${fx.d}일 · 봉인`), sub=tr(nb?'성배가 있던 자리가 텅 비어 있었다':'누군가 성배를 통째로 봉인했다');
   const V=xfxOpen('dsc bxs',`${title} · ${sub}`,`<div class="xd-txt"><div class="xd-d${[...title].length>8?' long':''}">${[...title].map(ch=>`<span>${ch===' '?'&nbsp;':esc(ch)}</span>`).join('')}</div><div class="xd-rule bx"></div><div class="xd-s">${esc(sub)}</div></div>`,T,frame);
   fxSnd(V.o,nb?'j_bx_empty':'j_bx_seal');
@@ -148,9 +148,9 @@ function bxDescShow(fx){
     if(E.km){ const k=oc(seg(t,KA+.7,KA+1.1)); E.km.style.opacity=k*tout; E.km.style.clipPath=`inset(0 ${(100-100*seg(t,KA+.7,KA+1.2)).toFixed(1)}% 0 0)`; } }
 }
 
-/* 키아라 입장: 분홍 안개가 스며들고 연꽃 만다라가 열려 이름이 새겨진다. 끝에서 연꽃이 꽃잎으로 흩어진다 (처음 · 최후의 밤 5.2초, 다시 1.8초) */
+/* 키아라 입장: 분홍 안개가 스며들고 연꽃 만다라가 열려 이름이 새겨진다. 끝에서 연꽃이 꽃잎으로 흩어진다 (처음 · 최후의 밤 6.6초, 다시 2.5초) */
 function bxBossShow(fx){
-  const {seg,io,oc}=XF, rnd=XF.rng(29), full=!!fx.full, rep=!!fx.reply, X=full?(rep?1.0:0):(rep||fx.line?1.4:0), T=(full?5.2:1.8)+X;
+  const {seg,io,oc}=XF, rnd=XF.rng(29), full=!!fx.full, rep=!!fx.reply, X=(full?(rep?1.0:0):(rep||fx.line?1.4:0))+(full?1.4:.7), T=(full?5.2:1.8)+X;
   const comp=fx.comp||[];
   const html=`<div class="xb-card bx">${fx.final?`<div class="xb-night">${esc(tr('최후의 밤'))}</div>`:''}<div class="xb-nm">${esc(tr(fx.cls))}</div><div class="xb-tn">${esc(tr(fx.name||'정체 불명'))}</div>${fx.line?`<div class="xb-q">“${esc(tr(fx.line))}”</div>`:''}${rep?`<div class="xb-r"><small>${esc(tr(fx.replyName||''))}</small>“${esc(tr(fx.reply))}”</div>`:''}
     <div class="xb-cp"><small>${comp.length?esc(tr('함께 싸우는 조')):''}</small>${comp.length?comp.map(n=>`<span>${esc(tr(n))}</span>`).join(''):`<span>${esc(tr('홀로'))}</span>`}</div></div>`;
@@ -181,11 +181,11 @@ function bxBossShow(fx){
     if(full) card(t,1.3,2.05+(rep?.6:0),4.6+X,5.05+X); else card(t,.12,.45+(rep?.9:fx.line?.5:0),1.45+X,1.7+X); }
 }
 
-/* 단독현현: 분홍으로 번쩍이고 몸이 녹아내렸다 다시 빚어진다. 체력 막대 위로 꽃잎이 차오른다 (2.6초) */
+/* 단독현현: 분홍으로 번쩍이고 몸이 녹아내렸다 다시 빚어진다. 체력 막대 위로 꽃잎이 차오른다 (4.0초) */
 function bxP2Show(fx){
   const {seg,io,oc}=XF, rnd=XF.rng(41);
   const head=tr('단독현현'), html=`<div class="xb-card b2 bx"><div class="xb-again">${esc(head)}</div>${fx.line?`<div class="xb-q2">“${esc(tr(fx.line))}”</div>`:''}</div>`;
-  const V=xfxOpen('b2fx bxb',[head,fx.line?tr(fx.line):''].filter(Boolean).join(' · '),html,2.6,frame); fxSnd(V.o,'j_bx_p2');
+  const V=xfxOpen('b2fx bxb',[head,fx.line?tr(fx.line):''].filter(Boolean).join(' · '),html,4.0,frame); fxSnd(V.o,'j_bx_p2');
   const ag=V.o.querySelector('.xb-again'), q2=V.o.querySelector('.xb-q2'), bar=$('.side.foe .hb');
   const DR=[...Array(28)].map(()=>({x:rnd(),l:.3+rnd()*.7,w:2+rnd()*5,d:rnd()*.3}));
   function frame(t){ const {c,W,H,D,G}=V; c.clearRect(0,0,W,H);
@@ -194,13 +194,13 @@ function bxP2Show(fx){
     // 녹아내림(0.3~1.0) → 거꾸로 다시 차오름(1.0~1.7)
     const melt=seg(t,.3,1.0), back=seg(t,1.0,1.7), k=melt*(1-back);
     if(k>0) for(const d of DR){ const L=d.l*H*.45*io(Math.max(0,(k-d.d)/(1-d.d))); if(L<=0) continue; const x=d.x*W; const g=c.createLinearGradient(0,0,0,L); g.addColorStop(0,`rgba(${BXF.pk2},.7)`); g.addColorStop(1,`rgba(${BXF.pink},0)`); c.fillStyle=g; c.fillRect(x-d.w*D/2,0,d.w*D,L); c.beginPath(); c.arc(x,L,d.w*D*.8,0,Math.PI*2); c.fillStyle=`rgba(${BXF.pink},.6)`; c.fill(); }
-    const a=oc(seg(t,.35,.6))*(1-io(seg(t,2.2,2.6))); ag.style.opacity=a; ag.style.filter=`blur(${((1-a)*4).toFixed(1)}px)`; if(q2) q2.style.opacity=oc(seg(t,.75,1.1))*(1-io(seg(t,2.2,2.6)));
+    const a=oc(seg(t,.35,.6))*(1-io(seg(t,3.6,4.0))); ag.style.opacity=a; ag.style.filter=`blur(${((1-a)*4).toFixed(1)}px)`; if(q2) q2.style.opacity=oc(seg(t,.75,1.1))*(1-io(seg(t,3.6,4.0)));
     c.fillStyle=`rgba(14,4,12,${.45*a})`; c.fillRect(0,0,W,H);
     const ra=ag.getBoundingClientRect(), rq=(q2||ag).getBoundingClientRect(), y0=(ra.top+rq.bottom)/2*D, bh=((rq.bottom-ra.top)/2+28)*D;
     const g=c.createLinearGradient(0,y0-bh,0,y0+bh); g.addColorStop(0,'rgba(12,3,10,0)'); g.addColorStop(.3,`rgba(12,3,10,${.85*a})`); g.addColorStop(.7,`rgba(12,3,10,${.85*a})`); g.addColorStop(1,'rgba(12,3,10,0)'); c.fillStyle=g; c.fillRect(0,y0-bh,W,bh*2);
     bxLotus(c,W/2,y0,bh*1.3,oc(seg(t,1.0,1.7)),t*.1,.35*a,D,false);
     c.fillStyle=`rgba(${BXF.pink},${.5*a})`; c.fillRect(W*.2,y0-bh+12*D,W*.6,1*D); c.fillRect(W*.2,y0+bh-12*D,W*.6,1*D);
-    if(bar&&t>.4){ const r=bar.getBoundingClientRect(); if(r.width>0&&r.bottom>0&&r.top<innerHeight){ const fill=io(seg(t,1.0,1.7)), gl2=1-io(seg(t,2.2,2.6)), bx=r.left*D, by=r.top*D, bw=r.width*D*.3*fill, bhh=Math.max(4,r.height)*D;
+    if(bar&&t>.4){ const r=bar.getBoundingClientRect(); if(r.width>0&&r.bottom>0&&r.top<innerHeight){ const fill=io(seg(t,1.0,1.7)), gl2=1-io(seg(t,3.6,4.0)), bx=r.left*D, by=r.top*D, bw=r.width*D*.3*fill, bhh=Math.max(4,r.height)*D;
       if(bw>0){ c.save(); c.shadowColor=`rgba(${BXF.pk2},${.9*gl2})`; c.shadowBlur=16*D; const lg=c.createLinearGradient(bx,0,bx+bw,0); lg.addColorStop(0,`rgba(120,40,90,${gl2})`); lg.addColorStop(1,`rgba(255,170,215,${gl2})`); c.fillStyle=lg; c.fillRect(bx,by,bw,bhh); c.restore(); } } } }
 }
 // BB 그림자(가로채는 소환과 같은 모양): 단위 좌표(키 1, 위 가운데가 0,0)
