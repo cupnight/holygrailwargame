@@ -81,6 +81,9 @@
     // C: 예전 방식 그대로, 한 해씩만 흐른다 (passYears가 1로 줄인다). 넷에 한 번은 사건 없는 해
     if(E.cy>=EP2_N.C){ E.ph='D'; return false; }
     E.cy++; E.k++;
+    // 결혼한 뒤의 아이: 1~4년 사이에 먼저 온다 (해마다 절반, 4년째에는 반드시)
+    { const r=relOf(), x=EP_REL.find(x=>x.id==='lv_child'), since=S.flags.relWed?S.year+1-S.flags.relWed:0;
+      if(r&&x&&since>=1&&!E.arc&&!E.relNext&&!(E.relUsed||[]).includes('lv_child')&&x.c(r)&&(since>=4||ch(.5))){ passYears(1); if(S.dead) return true; if(x.c(relOf())){ ep2YrLine(); x.f(); return true; } return true; } }
     const big=EP_REL.some(x=>['lv_child','lv_wed','lv_night'].includes(x.id)&&!(E.relUsed||[]).includes(x.id)&&relOf()&&x.c(relOf()));   // 결혼 · 아이 같은 고비가 열려 있으면 그쪽이 먼저
     if(!big&&!E.arc&&!E.relNext&&!relDue()&&relOf()&&ch(.5)){ const c=EP2_EV.filter(e=>ep2EvOk(e,relOf())); if(c.length){ passYears(1); if(S.dead) return true; ep2YrLine(); ep2EvGo(pick(c)); return true; } }
     if(ch(1-EP2_RATE.C)&&!E.arc&&!E.relNext&&!relDue()){ passYears(1); if(!S.dead) ep2YrLine(); return true; }
