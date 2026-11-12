@@ -4,7 +4,7 @@ import sys, os, re
 from PIL import Image
 from collections import Counter
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
-CROPS = {'bb': (655, 475, 290), 'kiara': (660, 445, 290), 'meltryllis': (655, 395, 290), 'passionlip': (655, 480, 290), 'suzuka': (670, 470, 290), 'tamamocat': (685, 455, 290)}
+CROPS = {'bb': (655, 475, 290), 'kiara': (660, 445, 290), 'meltryllis': (655, 395, 290), 'passionlip': (655, 480, 290), 'suzuka': (670, 470, 290), 'tamamocat': (685, 455, 290), 'emiya_alter': (598, 350, 310)}
 P = lambda *a: os.path.join(ROOT, *a)
 
 def dot72(src):
@@ -36,7 +36,7 @@ def dot72(src):
 
 if __name__ == '__main__':
     src = open(P('dev/build/game.html'), encoding='utf-8').read() if os.path.exists(P('dev/build/game.html')) else open(P('public/index.html'), encoding='utf-8').read()
-    old = re.search(r"const FACE_IDS='([^']*)'", open(P('dev/base.html'), encoding='utf-8').read()).group(1).split(',')
+    old = open(P('dev/face_ids.txt')).read().strip().split(',') if os.path.exists(P('dev/face_ids.txt')) else re.search(r"const FACE_IDS='([^']*)'", open(P('dev/base.html'), encoding='utf-8').read()).group(1).split(',')   # 지금 아틀라스의 칸 차례
     atlas = Image.open(P('public/assets/portraits/faces72.webp')).convert('RGBA')
     cell = lambda k: atlas.crop(((k % 12) * 72, (k // 12) * 72, (k % 12) * 72 + 72, (k // 12) * 72 + 72))
     cells = {i: cell(k) for k, i in enumerate(old)}
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     for k, i in enumerate(ids): out.paste(cells[i], ((k % 12) * 72, (k // 12) * 72))
     out.save(P('public/assets/portraits/faces72.webp'), 'WEBP', lossless=True, method=6, quality=100)
     if '--preview' in sys.argv:
-        pv = Image.new('RGBA', (6 * 220, 220), (40, 37, 52, 255))
+        pv = Image.new('RGBA', (len(CROPS) * 220, 220), (40, 37, 52, 255))
         for k, i in enumerate(CROPS): pv.paste(cells[i].resize((216, 216), Image.NEAREST), (k * 220, 2), cells[i].resize((216, 216), Image.NEAREST))
         pv.save('/tmp/claude-0/-home-claude/3b7fc538-eed0-54bc-a02e-74418e7d1e17/scratchpad/faces_preview.png')
     open(P('dev/face_ids.txt'), 'w').write(','.join(ids))
