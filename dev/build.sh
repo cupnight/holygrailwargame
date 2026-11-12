@@ -17,4 +17,4 @@ python3 sw_apply.py build/game.html            # ⑤ 에필로그 애정 전환
 python3 moon_apply.py build/game.html          # BB · 멜트 · 립 전용 소환 길
 python3 sfx_apply.py build/game.html           # 소환 연출: 문 캔서 · 얼터 에고
 python3 sfx_bb.py build/game.html              # 소환 연출: BB 전용(가로채는 소환)
-python3 kiara_bgm_apply.py build/game.html       # 키아라 전투 배경음악
+python3 kiara_bgm_apply.py build/game.html       # 키아라 · BB 전투 배경음악
