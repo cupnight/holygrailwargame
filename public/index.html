@@ -4509,7 +4509,7 @@ const Sim = (() => {
     else if(S.phase==='epi'){ epiTick(sp); }
     achCheck();
   }
-  function yearProgress(){ if(S.phase==='life') return S.clock/LEN[S.len].spy; if(S.phase==='war'&&S.war) return Math.min(1,S.war.prog||0); if(S.phase==='epi') return Math.min(1,S.clock/(LEN[S.len].spy*1.3)); return 0; }
+  function yearProgress(){ if(S.phase==='life') return S.clock/LEN[S.len].spy; if(S.phase==='war'&&S.war) return Math.min(1,S.war.prog||0); if(S.phase==='epi') return Math.min(1,S.clock/(LEN[S.len].spy*1.3*ep2Gap())); return 0; }
 
   const FOCUS = {
     train:{n:'수련',d:'마력이 오릅니다. 몸과 사람에게는 소홀해집니다.'},
@@ -6878,6 +6878,7 @@ const Sim = (() => {
   function relGain(n){ const r=relOf(); if(!r||!relLive()||S.war.trust<REL_BOND()) return; r.open=1; r.pt=clamp(r.pt+n*REL_MUL()*(1+Math.max(0,S.war.trust-REL_BOND())*REL_TSLOPE())); }
   function relDue(){ const r=relOf(); if(!r||!r.open||!relLive()||r.stage>=3||S.pending) return false;
     if(r.wait&&(S.phase==='war'?S.war.day:S.year)<r.wait) return false;
+    if(S.phase==='epi'&&S.epi&&S.epi.ph&&S.epi.ph!=='D'&&(S.epi.k||0)<(S.epi.relK||0)) return false;
     return r.pt>=REL_PT[r.stage+1]&&S.war.trust>=REL_REQ[r.stage+1]; }
   function relTick(){ const r=relOf(); if(!r||!relLive()) return; const w=S.war, h=H_BY[S.hero], t=trustTier(w.trust);
     if(w.trust>=REL_BOND()) r.open=1;
@@ -6914,7 +6915,7 @@ const Sim = (() => {
       const line=rlp(h,c.r);
       if(c.pt) r.pt=clamp(r.pt+c.pt);
       if(c.up) relStageUp(r,st,h);
-      else if(c.wait){ r.wait=war?S.war.day+3:S.year+2; if(st>=3) r.waited=1; }
+      else if(c.wait){ if(ep2Tight()){ r.wait=0; S.epi.relK=S.epi.k+3; } else r.wait=war?S.war.day+3:S.year+2; if(st>=3) r.waited=1; }
       else if(c.friend){ r.mx=r.mx||{}; r.mx.love=Math.max(r.mx.love||0,r.stage); r.track='friend'; r.swapped=1; r.mx.friend=Math.max(r.mx.friend||0,r.stage); r.pt=Math.min(r.pt,75); log(nf(REL_UP.friend[2],h),'joy'); }
       return line; }}))});
     H.change(); }
@@ -6973,7 +6974,7 @@ const Sim = (() => {
   function relView(){ const w=S.war; if(!w||!S.hero) return null; const r=relOf(), h=H_BY[S.hero];
     const done=S.warState==='done'||S.phase==='epi'||S.phase==='after';
     return {id:h.id,name:h.name,cls:cn(h),trust:Math.round(w.trust),tier:trustTier(w.trust),track:r.track,why:r.track==='friend'?r.why||null:null,stage:r.stage,rel:relName(r),open:!!r.open,max:r.stage>=3,
-      stay:stayHome(),away:!!S.flags.stayAway&&!S.flags.stayDied,died:!!S.flags.stayDied,wed:!!S.flags.relWed,gone:done&&!stayHome(),alive:!!w.heroAlive,yrs:Math.max(0,S.year-S.warYear),swapped:!!r.swapped,
+      when:ep2When(),stay:stayHome(),away:!!S.flags.stayAway&&!S.flags.stayDied,died:!!S.flags.stayDied,wed:!!S.flags.relWed,gone:done&&!stayHome(),alive:!!w.heroAlive,yrs:Math.max(0,S.year-S.warYear),swapped:!!r.swapped,
       next:r.stage<3?{n:REL_ST[r.track][r.stage+1],req:REL_REQ[r.stage+1],ok:w.trust>=REL_REQ[r.stage+1]}:null}; }
   const crossFoe=()=>pick(contracted().filter(p=>!p.ally&&!p.truce));
   const CROSS=[
@@ -10965,8 +10966,9 @@ const Sim = (() => {
   }
   function epiGap(){ return LEN[S.len].spy*1.3; }
   function epiTick(sp){
-    S.clock+=sp; if(S.clock<epiGap()) return; S.clock=0;
+    S.clock+=sp; if(S.clock<epiGap()*ep2Gap()) return; S.clock=0;
     const E=S.epi; E.used=E.used||[]; E.n=E.n||ri(8,10);
+    if(ep2Step()) return; if(S.dead||S.pending) return;
     let sc=null;
     // 진행 중인 연작의 다음 단계 (일반 이벤트 0~1개를 사이에 두고, 에필로그가 끝나기 전에는 반드시 마무리한다)
     if(E.arc&&E.i>=EPI_START.length){ if(E.arc.wait<=0||E.i>=EPI_START.length+E.n){ passYears(ri(1,4)); if(S.dead) return; const a=E.arc; ARC[a.id][a.st](); return; } E.arc.wait--; }
@@ -10985,6 +10987,7 @@ const Sim = (() => {
   }
   function flushBuf(head){ const b=S._buf||[]; S._buf=null; if(head) log(head,'night'); for(const e of b){ S.log.push(e); H.log(e); } }
   function passYears(n){
+    if(n>1&&S.epi&&S.epi.ph==='C') n=1;   // 열 해 구간: 한 해씩
     if(n<=0) return;
     const head={y:S.year+1,a:S.age+1,t:'',k:'night',n:0}; S._buf=[head]; let k=0, dead=false;
     for(let i=0;i<n;i++){
@@ -12489,7 +12492,7 @@ const Sim = (() => {
     // 애정 (함께 산다)
     {id:'lv_morning',w:3,c:(r)=>stayHome()&&r.track==='love'&&r.stage>=1&&relYrs()<=4,f:()=>epRel('lv_morning',{fx:{cook:()=>{add({bond:2});relGain(4);},together:()=>{add({will:1});relGain(4);}}})},
     {id:'lv_anniv',w:2,c:(r)=>stayHome()&&r.track==='love'&&r.stage>=2,f:()=>epRel('lv_anniv',{fx:{quiet:()=>{add({will:2});relGain(6);},place:()=>{add({bond:1});relGain(8);}}})},
-    {id:'lv_night',w:4,c:(r)=>stayHome()&&r.track==='love'&&r.stage>=3&&!S.flags.relNight&&S.year>=(S.flags.relNightWait||0),once:0,f:()=>epRel('lv_night',{fx:{stay:()=>{S.flags.relNight=S.year;relGain(10);},later:()=>{S.flags.relNightWait=S.year+2;}}})},
+    {id:'lv_night',w:4,c:(r)=>stayHome()&&r.track==='love'&&r.stage>=3&&!S.flags.relNight&&S.year>=(S.flags.relNightWait||0)&&!(S.epi&&(S.epi.k||0)<(S.epi.nightK||0)),once:0,f:()=>epRel('lv_night',{fx:{stay:()=>{S.flags.relNight=S.year;relGain(10);},later:()=>{ if(ep2Tight()) S.epi.nightK=S.epi.k+3; else S.flags.relNightWait=S.year+2; }}})},
     {id:'lv_wed',w:4,c:(r)=>stayHome()&&r.track==='love'&&r.stage>=3&&!!S.flags.relNight&&!!S.flags.stayPapers&&!S.flags.relWed,f:()=>{ const wed=()=>{ S.flags.relWed=S.year; mark('joy'); add({bond:6}); };
       epRel('lv_wed',{hide:k=>k==='ally'&&!ally(),fx:{family:()=>{wed();add({bond:3});},ally:()=>{wed();add({bond:2,will:1});},two:()=>{wed();add({will:2});}}}); }},
     {id:'lv_child',w:4,c:(r)=>stayHome()&&!!S.flags.relWed&&S.flags.relKid==null&&!S.flags.relKidNo&&S.age<60,f:()=>{ let nm=null; const late=femAge()>45;   // 여성 쪽이 45세를 넘으면 낳는 선택지는 빠지고 입양만 남는다
@@ -12564,6 +12567,71 @@ const Sim = (() => {
         보통:svl(h,'{N은} 창가에 선 채로 말했다. “편히 가라, 마스터.”','{N은} 창가에 선 채로 말했다. “편히 가십시오, 마스터.”'),
         불신:nf('{N은} 문 앞에 오래 서 있다가 들어왔다. 아무 말 없이, 당신 손등의 자국만 한 번 내려다보았다.',h)});
     log(l,'voice'); }
+  /* ---------- 에필로그 시간 흐름 (11-12): 수육한 서번트와 함께 사는 생 ----------
+     A 봄의 열나흘(하루씩) → B 첫 해(한 달씩, 2~12달째) → C 열 해(한 해씩, 2~10년째) → D 그 뒤(예전 방식)
+     S.epi.ph='A'|'B'|'C'|'D' · d=날 · m=달 · cy=C에서 지난 해 · k=걸음(일 · 달 · 해 모두 1) */
+  const EP2_N={A:14,B:12,C:9};
+  // 사건이 나오는 구간 (예전 사건을 옮긴 것). 적히지 않은 사건은 C부터 예전 방식으로 나온다
+  const EP2_PH={lv_morning:'A',fr_drink:'A',st_ask:'AB',stay_morning:'A',stay_watch:'AB',stay_ask:'AB',stay_family:'B',
+    lv_anniv:'B',lv_night:'B',lv_wed:'B',fr_job:'B',fr_family:'B',stay_name:'B',stay_quarrel:'B',st_quarrel:'B',sw_grow:'B',sw_spring:'B'};
+  const EP2_RATE={A:.7,B:.75,C:.75};
+  const ep2Tight=()=>!!(S&&S.phase==='epi'&&S.epi&&(S.epi.ph==='A'||S.epi.ph==='B'));
+  const ep2Gap=()=>{ const p=S.epi&&S.epi.ph; return p==='A'?.5:p==='B'?.7:1; };
+  const EP2_DAY=[
+    '도시는 아무 일도 없었다는 듯 아침을 맞았다. 무너진 담장 앞에 공사 안내판이 섰다.',
+    '{N은} 신호등 앞에서 한참을 서 있었다. 초록불이 두 번 지나간 뒤에야 건넜다.',
+    '손등의 자국이 어제보다 옅어졌다. {N이} 그것을 오래 들여다보았다.',
+    '뉴스는 그 겨울의 일을 가스 사고라고 불렀다. {N은} 채널을 돌리지 않고 끝까지 보았다.',
+    '빨래를 널었다. {N이} 옷걸이를 무기 쥐듯 쥐고 있어서 한 번 웃었다.',
+    '비가 왔다. {N은} 창가에 앉아 빗소리를 들었다. 싸울 일이 없는 비는 처음이라고 했다.',
+    '{N이} 편의점에서 돌아왔다. 봉지 안에는 같은 삼각김밥이 일곱 개 들어 있었다.',
+    '밤이 조용했다. 조용한 밤에 익숙해지는 데에도 시간이 걸린다는 걸 알았다.',
+    '{N이} 현관에 신발을 가지런히 놓았다. 당신 것 옆에, 반 뼘쯤 떨어뜨려서.',
+    '전쟁이 있던 골목에 다시 가게들이 문을 열었다. {N은} 간판을 하나하나 소리 내어 읽었다.',
+    '{N이} 낮잠을 잤다. 서번트일 때는 잠들 필요가 없었다고, 깨어나서 멋쩍게 말했다.',
+    '저녁을 먹고 둘이서 설거지를 했다. 그릇 하나가 깨졌고, 아무도 죽지 않았다.',
+    '아침에 {N의} 기척에 먼저 눈이 떠졌다. 경계가 아니라 그냥 사람의 기척이었다.',
+    '열나흘째 밤이었다. 그 겨울과 꼭 같은 길이를, 이번에는 아무도 잃지 않고 보냈다.'];
+  const EP2_MON={2:'벚꽃이 피었다 졌다. {N은} 꽃잎이 떨어지는 속도를 한참 지켜보았다.',3:'낮이 길어졌다. {N의} 옷장에 반소매가 생겼다.',4:'장마가 시작되었다. 현관에 우산이 두 개 나란히 걸렸다.',
+    5:'매미가 울었다. {N은} 선풍기 앞을 좀처럼 떠나지 않았다.',6:'여름의 끝, 불꽃놀이 소리가 멀리서 들렸다. {N은} 한 번 움찔했다가 웃었다.',7:'바람이 선선해졌다. 장 보는 길에 {N이} 먼저 장바구니를 들었다.',
+    8:'은행잎이 떨어졌다. {N이} 이 동네 길을 당신보다 잘 알게 되었다.',9:'첫서리가 내렸다. 둘이서 겨울 이불을 꺼냈다.',10:'다시 겨울이 왔다. 손등이 조금 시렸지만, 그뿐이었다.',
+    11:'그 겨울로부터 한 해가 가까워졌다. 달력의 그 날짜에 {N이} 작은 동그라미를 쳐 두었다.',12:'한 해가 지났다. 눈이 녹고, 손등의 자국은 이제 햇빛 아래서만 보였다.'};
+  const EP2_YR=['{N과} 맞는 봄이 하나 더 지났다.','집 안의 물건들이 조금씩 둘의 것이 되어 갔다.','{N은} 이제 전철 노선도를 보지 않고 갈아탔다.','동네 사람들은 {N을} 이름으로 불렀다. 이 세계에서 쓰는 이름으로.',
+    '그 겨울 이야기를 꺼내는 날이 한 해에 한두 번으로 줄었다.','현관의 신발이 몇 번 바뀌었다. 놓이는 자리는 그대로였다.','{N이} 생전의 일을 농담처럼 말하게 되었다.','사진첩이 한 권 찼다.','평범한 해였다. 그게 얼마나 드문 일인지 둘 다 알고 있었다.'];
+  const ep2N=(s)=>{ const h=H_BY[S.hero]; return nf(s.replace(/\{N의\}/g,h.name+'의'),h); };
+  function ep2Start(){ const E=S.epi; E.ph='A'; E.d=0; E.m=1; E.cy=0; E.k=0; E.n=ri(9,11); E.dayU=[]; }
+  // A · B 구간의 사건 하나: 인연 장면 → 이어지는 장면 → 그 구간의 사건
+  function ep2Pick(){ const E=S.epi, r=relOf(), ph=E.ph; if(S.pending) return true;
+    if(r&&relDue()){ E.relK=E.k+(ph==='A'?2:1); relScene(); return true; }
+    if(!r||!ch(EP2_RATE[ph])) return false;
+    const used=E.relUsed||[]; E.used=E.used||[];
+    const c=EP_REL.filter(x=>(EP2_PH[x.id]||'').includes(ph)&&x.w>0&&!used.includes(x.id)&&x.c(r)).map(x=>({x,w:x.w,rel:1}))
+      .concat(EPI_POOL.filter(x=>(EP2_PH[x.id]||'').includes(ph)&&!E.used.includes(x.id)&&x.c()).map(x=>({x,w:x.w||1,rel:0})));
+    if(!c.length) return false;
+    const p=wpick(c,o=>o.w); if(!p.rel) E.used.push(p.x.id); p.x.f(); return true; }
+  // 한 걸음. true면 이 걸음을 여기서 처리했다
+  function ep2Step(){ const E=S.epi; if(!E) return false;
+    if(!E.ph){ if(E.i===1&&stayHome()&&relOf()) ep2Start(); else return false; }
+    if(E.ph==='D') return false;
+    if(!stayHome()){ E.ph='D'; return false; }   // 곁을 떠났거나 먼저 보냈다: 예전 방식으로
+    const tick=()=>{ E.k++; relGain(STAY_YG); stayTrust(); relTick(); };
+    if(E.ph==='A'){
+      if(E.d>=EP2_N.A){ E.ph='B'; log('열나흘이 지났다. 이제 달이 지나간다.','sys'); return ep2Step(); }
+      E.d++; tick(); log(`봄 · ${E.d}일째`,'night');
+      const pool=EP2_DAY.map((_,i)=>i).filter(i=>i<EP2_DAY.length-1&&!E.dayU.includes(i)); const i=E.d>=EP2_N.A?EP2_DAY.length-1:pick(pool); E.dayU.push(i); log(ep2N(EP2_DAY[i]),'n');
+      ep2Pick(); H.change(); return true; }
+    if(E.ph==='B'){
+      if(E.m>=EP2_N.B){ E.ph='C'; log('한 해가 지났다. 이제 해가 지나간다.','sys'); return ep2Step(); }
+      E.m++; tick(); log(`첫 해 · ${E.m}달째`,'night'); log(ep2N(EP2_MON[E.m]),'n');
+      if(E.m===EP2_N.B){ S.age++; S.year++; mark('calm'); if(S.age>=40) add({health:-ageWear()}); famYear(); if(S.pending) S.pending=null; }   // 첫 해의 끝: 한 살을 먹는다 (이 구간에는 사망 판정이 없다)
+      ep2Pick(); H.change(); return true; }
+    // C: 예전 방식 그대로, 한 해씩만 흐른다 (passYears가 1로 줄인다). 넷에 한 번은 사건 없는 해
+    if(E.cy>=EP2_N.C){ E.ph='D'; return false; }
+    E.cy++; E.k++;
+    if(ch(1-EP2_RATE.C)&&!E.arc&&!E.relNext&&!relDue()){ passYears(1); if(!S.dead) log(ep2N(pick(EP2_YR)),'n'); return true; }
+    return false; }
+  // 화면에 보일 때: A · B 구간의 날짜
+  function ep2When(){ const E=S&&S.epi; if(!E||!E.ph||S.phase!=='epi') return null; return E.ph==='A'?{u:'d',n:Math.max(1,E.d)}:E.ph==='B'?{u:'m',n:E.m}:null; }
   function finalYears(){
     // 남은 생을 빠르게 흘려보낸다
     let guard=0;
@@ -12631,7 +12699,7 @@ const Sim = (() => {
         w.pairs.push(q); log("감독관의 통지: 성배가 부르지 않은 조가 하나 끼어들었다. {0} 조.".replace('{0}',cn(q)),'notice'); log("마스터는 이 도시를 지나던 마술사라고 한다. 서번트 쪽이 먼저 그 사람을 골랐다는 소문이다.",'war'); wrec('hint',`${cn(q)} 조가 전쟁에 끼어들었다`,{p:q.i}); return; }
       if(!w.egoDone&&S.hero==='bb'&&w.heroAlive&&w.day>=2&&w.day<=8&&!(w.crisis&&w.crisis.type==='beast3R')&&!w.pairs.some(p=>MOON_EGO.includes(p.hero))&&ch(.04)){
         w.egoDone=1; w.egoPend={day:w.day+1,h:pick(MOON_EGO)}; log("도시 어딘가에 서번트가 하나 더 떠돌고 있다는 소문이 돌았다. 마스터도 없이 누군가를 찾아다닌다고 한다.",'war'); const h=H_BY.bb; const l=svl(h,"“…그 아이, 내가 떼어 낸 조각이야. 결국 여기까지 왔네. 마주쳐도 너무 놀라지 마.”","“…그 아이, 제가 떼어 낸 조각이에요. 결국 여기까지 왔네요. 선배, 마주쳐도 너무 놀라지 마세요.”","{N이} 창밖을 보며 작게 한숨을 쉬었다."); if(l) log(l,'voice'); } }; }
-  return {cn,ACH:ACH.map(({t,...a})=>a),newLife,start,tick,setHold,battleMods,resolve,autoChoice,setFocus,setHooks,snapshot,load,record,yearProgress,
+  return {cn,ACH:ACH.map(({t,...a})=>a),newLife,start,tick,ep2When,setHold,battleMods,resolve,autoChoice,setFocus,setHooks,snapshot,load,record,yearProgress,
     get S(){return S}, relLoveOk:id=>!REL_CHILD.includes(id)&&!REL_NOLOVE.includes(id)&&!!H_BY[id]&&H_BY[id].sex!=='x', STYLE:()=>STYLE, seal:()=>S&&S.sealId!=null?SEALS[S.sealId]:SEALS[0], skillsOf, CLS,GR,HEROES,H_BY,ORIGINS,FOCUS,LEN,pName,artOf,ARCHE,myParams,npcParams,TIER_TXT,npInfo,npCompare,hpWord,hero:()=>S&&S.hero?H_BY[S.hero]:null,
     alName:id=>alName(id), pickup:()=>({live:pickupLive(),end:PICKUP.end,ids:PICKUP.ids.slice()}), artsView:()=>S?artsView():null, relView:()=>S?relView():null, artInfo:id=>S?artInfo(id):null, artActs:id=>(ART_ACT[id]||[]).map(k=>MACT[k].n), famState:()=>{ const w=S&&W(); if(!w||!famName()) return null; return {n:famName(),back:w.famBack>w.day?w.famBack-w.day:0,used:w.famUsed===w.day,tail:!!w.famTail}; }, giftView:()=>S?giftView():null, setGhost, randName:sx=>genName(sx==='f'?'f':'m'), mInfo, NAMES, fullName, setName, oDesc, canTrain:()=>!!S&&!!(O().mage||S.flags.awakened),
     _: {advanceYear, die} };
@@ -14249,7 +14317,7 @@ const REL_WHY={spouse:'우정 · 배우자가 있어 우정으로 발전',minor:
 function servCardHtml(v){ const love=v.track==='love', kind=love?'애정':'우정';
   const head=v.gone?'그 겨울의 서번트':v.away?'멀리 떠난 서번트':'함께 사는 서번트';
   const when=v.yrs<=1?'지난겨울':`${v.yrs}년 전 겨울`;
-  const sub=v.died?`${when} · 노환으로 먼저 떠남`:v.gone?`${when} · ${v.alive?'떠남':'잃음'}`:v.away?'수육 · 지금은 곁에 없음':v.yrs>=1?`수육 · 함께 산 지 ${v.yrs}년`:'수육 · 함께 살기 시작함';
+  const sub=v.died?`${when} · 노환으로 먼저 떠남`:v.gone?`${when} · ${v.alive?'떠남':'잃음'}`:v.away?'수육 · 지금은 곁에 없음':v.when?(v.when.u==='d'?`수육 · 함께 산 지 ${v.when.n}일`:`수육 · 함께 산 지 ${v.when.n}달`):v.yrs>=1?`수육 · 함께 산 지 ${v.yrs}년`:'수육 · 함께 살기 시작함';
   const hint=v.gone?(v.stage?'떠난 뒤로 인연은 더 깊어지지 않습니다':''):v.away?'곁에 없는 동안 인연은 더 깊어지지 않습니다':!v.open?'신뢰가 60에 닿으면 인연이 깊어지기 시작합니다':v.max?`${kind} · 가장 깊은 단계`:v.trust<60?'신뢰가 60 아래라 마음이 쌓이지 않습니다':'';
   // 「그 겨울」 카드와 합친 한 장: 머리 오른쪽은 그해, 이름 아래 클래스 · 칭호 → 언제 · 어떻게 → 소원 → 신뢰 · 인연
   const h=Sim.H_BY[v.id], yr=Sim.S&&Sim.S.warYear;
@@ -14262,7 +14330,7 @@ function render(){
   $('#game').classList.toggle('war',!!war); { const c=war&&S.war.crisis, st=c&&!c.done?c.stage:0; for(const k of [1,2,3]) $('#game').classList.toggle('cx'+k,st===k); }
   $('#gName').textContent=S.name; $('#gSex').textContent=S.sex==='f'?'여성':'남성'; $('#gAge').textContent=`${S.age}세`;
   { const o=Sim.ORIGINS.find(x=>x.id===S.origin); $('#prof').innerHTML=`<span>${S.sex==='f'?'여성':'남성'}</span><i>·</i><span>${S.age}세</span>${o?`<i>·</i><span>${esc(o.label)}</span>`:''}`; }   // 상태 카드 첫 줄: 성별 · 나이 · 출신 $('#gYear').textContent=`${S.city?S.city.n+' · ':''}${S.year}년`;
-  const ph=$('#gPhase'); ph.textContent=war?`제${S.war.day||0}일 · ${S.war.tod||'낮'}`:S.dead?'끝':S.phase==='epi'?'에필로그':'삶'; ph.classList.toggle('war',!!war);
+  const ph=$('#gPhase'); ph.textContent=war?`제${S.war.day||0}일 · ${S.war.tod||'낮'}`:S.dead?'끝':S.phase==='epi'?((w2=>w2?(w2.u==='d'?`봄 · ${w2.n}일째`:`첫 해 · ${w2.n}달째`):'에필로그')(Sim.ep2When())):'삶'; ph.classList.toggle('war',!!war);
   $('#circ').innerHTML=`마술 회로 <b>${S.circuit?letter(S.circuit):'없음'}</b>`;
   $('#stats').innerHTML=Object.entries(ST_LABEL).map(([k,l])=>bar(l,S.st[k],k)).join('')+bar('재산',S.wealth||0,'wealth');
   // 올해의 목표
