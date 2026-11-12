@@ -1,6 +1,7 @@
 """에필로그 시간 흐름 개편 1 · 2단계 (11-12): 구간 틀 · 걸음 · 날짜 표시 · 예전 사건 옮기기. 화면 코드는 epi2.js.
 새 사건(A · B 구간)과 영어 · 일본어는 검수 뒤에 넣는다. 사용: python3 epi2_apply.py <game.html>"""
 import sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 HERE = os.path.dirname(os.path.abspath(__file__))
 for P in sys.argv[1:]:
     s = open(P, encoding='utf-8').read(); miss = []
@@ -10,6 +11,22 @@ for P in sys.argv[1:]:
         if k != c: miss.append((o[:70], k)); return
         s = s.replace(o, n)
     js = open(os.path.join(HERE, 'epi2.js'), encoding='utf-8').read()
+    # 새 사건 데이터 (epi2_ev.py): 본문 · 결과는 RLEP에, 조건 · 효과는 EP2_EV에
+    import json, importlib, epi2_ev; importlib.reload(epi2_ev)
+    fixN = lambda t: t.replace('{N의}', '{N}의').replace('{N에게}', '{N}에게').replace('{N도}', '{N}도')
+    def fx(x): return {k: [fixN(t) for t in v] for k, v in x.items()} if isinstance(x, dict) else [fixN(t) for t in x]
+    RL, EVD = {}, []
+    for e in epi2_ev.EV:
+        RL[e['id']] = {'t': e['t'], 'b': [fx(b) for b in e['b']], 'c': [{'key': c['key'], 't': c['t'], 'r': [fx(r) for r in c['r']]} for c in e['c']]}
+        d = {'id': e['id'], 'ph': e['ph'], 'fx': {c['key']: c['fx'] for c in e['c']}, 'love': [c['key'] for c in e['c'] if c.get('love')]}
+        for k in ('not', 'only', 'wish', 'day', 'mon'):
+            if e.get(k): d[k] = e[k]
+        EVD.append(d)
+    ALT = {k: {'tag': v['tag'], 'b': [fx(b) for b in v['b']], 'r': {ck: [fx(r) for r in rr] for ck, rr in v['r'].items()}} for k, v in epi2_ev.ALT.items()}
+    J = lambda o: json.dumps(o, ensure_ascii=False)
+    js = ("  Object.assign(RLEP," + J(RL) + ");\n  const EP2_EV=" + J(EVD) + ";\n  const EP2_TAGS=" + J(epi2_ev.TAGS) + ";\n  const EP2_ALT=" + J(ALT)
+          + ";\n  const EP2_DAYV=" + J({str(k): v for k, v in epi2_ev.DAYV.items()}) + ", EP2_YRV=" + J({str(k): v for k, v in epi2_ev.YRV.items()}) + ";\n") + js
+    rp("f:()=>epRel('lv_morning',{fx:{", "f:()=>epRel('lv_morning',{b:ep2Alt('lv_morning','b'),r:ep2Alt('lv_morning','r'),fx:{")
     rp("  function finalYears(){\n", js + "  function finalYears(){\n")
     # 걸음: 구간마다 기다리는 시간이 다르고, A · B · C는 ep2Step이 먼저 본다
     rp("    S.clock+=sp; if(S.clock<epiGap()) return; S.clock=0;\n    const E=S.epi; E.used=E.used||[]; E.n=E.n||ri(8,10);\n",

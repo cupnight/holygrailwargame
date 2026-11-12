@@ -249,7 +249,7 @@ EV = [
 # 서번트 갈래 (문장 변형에 쓴다). bold는 성향에 '야망'이 있는 서번트
 TAGS = {
  'sage': ['asclepius','paracelsus','davinci','tesla','holmes','solomon','sheba','andersen','shakespeare','merlin','chiron','avicebron','circe','medea','ptolemaios','qinshihuang','sanzang','nitocris','semiramis','bb'],
- 'now': ['emiya','emiya_alter','bb','meltryllis','passionlip','kiara','suzuka'],
+ 'now': ['emiya','emiya_alter','kiara'],   # 검수: BB · 멜트릴리스 · 패션립 · 스즈카 고젠 제외
  'modern': ['tesla','holmes','hijikata','okita','andersen','dantes','lishuwen','jack'],
  'civil': ['andersen','shakespeare','mozart','salieri','davinci','tesla','holmes','paracelsus','asclepius','avicebron','sheba','circe','habetrot','sanson','sanzang','bb','passionlip'],
 }
@@ -260,3 +260,17 @@ DAYV = {1:{'now':'{N은} 신호등 앞에서 습관처럼 옥상들을 살폈다
         7:{'civil':'밤이 조용했다. {N은} 불을 끄지 않고 늦게까지 무언가를 적고 있었다.'}}
 # 해마다 묘사의 변형
 YRV = {2:{'now':'{N은} 이제 동네 지름길을 당신보다 잘 알았다.','modern':'{N은} 이제 동네 지름길을 당신보다 잘 알았다.'}}
+
+# 이미 있는 사건의 변형 (현대 · 근미래 서번트). 선택지와 효과는 원래 사건 그대로
+ALT = {'lv_morning': {'tag':'now','b':[
+   ['전쟁이 끝나고 며칠 뒤의 아침이었다. 부엌에서 도마 소리가 났다. {N이} 냉장고에 남은 것만으로 아침을 차리고 있었다.'],
+   ['눈을 뜨니 커피 냄새가 났다. {N이} 이 집 부엌을 원래 쓰던 사람처럼 쓰고 있었다.'],
+   ['{N이} 아침 일찍 장을 보고 돌아왔다. 영수증까지 챙겨 와서 식탁에 올려놓았다.']],
+  'r':{'cook':[
+     ['{N은} 당신이 달걀을 깨는 손을 지켜보았다. “……누가 차려 주는 아침은 오랜만이군.”','{N은} 당신이 달걀을 깨는 손을 지켜보았다. “……누가 차려 주는 아침은 오랜만이에요.”','{N은} 당신이 달걀을 깨는 손을 가만히 지켜보았다. 오랜만에 보는 풍경인 듯했다.'],
+     ['{N은} 식탁에 앉아 기다렸다. 손을 내밀어 돕고 싶은 것을 참는 얼굴이었다.'],
+     ['{N은} 한 입 먹고 고개를 끄덕였다. “간이 조금 세다. 내일은 내가 하지.”','{N은} 한 입 먹고 고개를 끄덕였다. “간이 조금 세네요. 내일은 제가 할게요.”','{N은} 한 입 먹고는, 소금 통을 당신 손이 닿지 않는 곳으로 옮겨 놓았다.']],
+   'together':[
+     ['둘이 서기에 부엌은 좁았다. 팔꿈치가 몇 번이나 부딪혔고, 그때마다 웃음이 났다.'],
+     ['{N이} 칼을 쥐자 채소가 눈 깜짝할 새에 고르게 썰렸다. “이건 자신 있다.”','{N이} 칼을 쥐자 채소가 눈 깜짝할 새에 고르게 썰렸다. “이건 자신 있습니다.”','{N이} 칼을 쥐자 채소가 눈 깜짝할 새에 고르게 썰렸다. 조금 으쓱한 얼굴이었다.'],
+     ['{N이} 냄비를 맡고 당신이 불을 맡았다. 다 차리고 보니 둘이 먹기에는 많았다. 남기지 않았다.']]}}}

@@ -6,6 +6,7 @@
   const EP2_PH={lv_morning:'A',fr_drink:'A',st_ask:'AB',stay_morning:'A',stay_watch:'AB',stay_ask:'AB',stay_family:'B',
     lv_anniv:'B',lv_night:'B',lv_wed:'B',fr_job:'B',fr_family:'B',stay_name:'B',stay_quarrel:'B',st_quarrel:'B',sw_grow:'B',sw_spring:'B'};
   const EP2_RATE={A:.7,B:.75,C:.75};
+  const EP2_MS=['stay_name','lv_night','lv_wed','lv_anniv','sw_grow','sw_spring'];
   const ep2Tight=()=>!!(S&&S.phase==='epi'&&S.epi&&(S.epi.ph==='A'||S.epi.ph==='B'));
   const ep2Gap=()=>{ const p=S.epi&&S.epi.ph; return p==='A'?.5:p==='B'?.7:1; };
   const EP2_DAY=[
@@ -30,16 +31,35 @@
   const EP2_YR=['{N과} 맞는 봄이 하나 더 지났다.','집 안의 물건들이 조금씩 둘의 것이 되어 갔다.','{N은} 이제 전철 노선도를 보지 않고 갈아탔다.','동네 사람들은 {N을} 이름으로 불렀다. 이 세계에서 쓰는 이름으로.',
     '그 겨울 이야기를 꺼내는 날이 한 해에 한두 번으로 줄었다.','현관의 신발이 몇 번 바뀌었다. 놓이는 자리는 그대로였다.','{N이} 생전의 일을 농담처럼 말하게 되었다.','사진첩이 한 권 찼다.','평범한 해였다. 그게 얼마나 드문 일인지 둘 다 알고 있었다.'];
   const ep2N=(s)=>{ const h=H_BY[S.hero]; return nf(s.replace(/\{N의\}/g,h.name+'의'),h); };
-  function ep2Start(){ const E=S.epi; E.ph='A'; E.d=0; E.m=1; E.cy=0; E.k=0; E.n=ri(9,11); E.dayU=[]; }
+  // 서번트 갈래: 현대 > 근대 > 박식 > 비전투 > 야망 순으로 먼저 맞는 변형을 쓴다
+  const ep2Tags=h=>['now','modern','sage','civil'].filter(k=>EP2_TAGS[k].includes(h.id)).concat((h.traits||[]).includes('야망')?['bold']:[]);
+  const ep2V=(x,h)=>{ if(Array.isArray(x)) return x; const k=ep2Tags(h).find(k=>x[k]); return k?x[k]:x.d; };
+  const ep2Alt=(id,part)=>{ const a=EP2_ALT[id], h=H_BY[S.hero]; return a&&ep2Tags(h).includes(a.tag)?a[part]:undefined; };
+  const EP2_FX={bond1:()=>add({bond:1}),bond2:()=>add({bond:2}),will1:()=>add({will:1}),will2:()=>add({will:2}),none:()=>{},rel4:()=>relGain(4),rel5:()=>relGain(5),rel6:()=>relGain(6),rel8:()=>relGain(8),
+    trust2:()=>add({trust:2}),trust3:()=>add({trust:3}),trust4:()=>add({trust:4}),health1:()=>add({health:1}),health2:()=>add({health:2}),wealth1:()=>add({wealth:1}),wealth3:()=>add({wealth:3}),'wealth-5':()=>{add({wealth:-5});relGain(4);},lore2:()=>add({lore:2})};
+  const ep2Wish=()=>!/^(없|딱히 없|아무것도)/.test(H_BY[S.hero].wish||'없');
+  function ep2EvOk(e,r){ const E=S.epi, h=H_BY[S.hero], T=ep2Tags(h);
+    if(e.ph!==E.ph||(E.relUsed||[]).includes(e.id)) return false;
+    if(e.not&&[].concat(e.not).some(k=>T.includes(k))) return false; if(e.only&&!T.includes(e.only)) return false;
+    if(e.wish&&!ep2Wish()) return false; if(e.day&&E.d!==e.day) return false; if(e.mon&&(E.m<e.mon[0]||E.m>e.mon[1])) return false; return true; }
+  function ep2EvGo(e){ const h=H_BY[S.hero], D=RLEP[e.id], r=relOf(), fx={}, R={};
+    for(const c of D.c){ fx[c.key]=EP2_FX[e.fx[c.key]]; R[c.key]=c.r.map(x=>ep2V(x,h)); }
+    epRel(e.id,{b:D.b.map(x=>ep2V(x,h)),r:R,fx,hide:k=>(e.love||[]).includes(k)&&!(r&&r.track==='love')}); }
+
+  const ep2NV=(v,d)=>{ if(!v) return d; const k=ep2Tags(H_BY[S.hero]).find(k=>v[k]); return k?v[k]:d; };
+  function ep2Start(){ const E=S.epi; E.ph='A'; E.d=0; E.m=1; E.cy=0; E.k=0; E.n=ri(7,9); E.dayU=[]; }
   // A · B 구간의 사건 하나: 인연 장면 → 이어지는 장면 → 그 구간의 사건
   function ep2Pick(){ const E=S.epi, r=relOf(), ph=E.ph; if(S.pending) return true;
     if(r&&relDue()){ E.relK=E.k+(ph==='A'?2:1); relScene(); return true; }
+    const fixed=EP2_EV.find(e=>(e.day||0)===E.d&&ph==='A'&&e.day&&ep2EvOk(e,r)); if(r&&fixed){ ep2EvGo(fixed); return true; }   // 날짜가 정해진 사건
     if(!r||!ch(EP2_RATE[ph])) return false;
     const used=E.relUsed||[]; E.used=E.used||[];
     const c=EP_REL.filter(x=>(EP2_PH[x.id]||'').includes(ph)&&x.w>0&&!used.includes(x.id)&&x.c(r)).map(x=>({x,w:x.w,rel:1}))
-      .concat(EPI_POOL.filter(x=>(EP2_PH[x.id]||'').includes(ph)&&!E.used.includes(x.id)&&x.c()).map(x=>({x,w:x.w||1,rel:0})));
+      .concat(EPI_POOL.filter(x=>(EP2_PH[x.id]||'').includes(ph)&&!E.used.includes(x.id)&&x.c()).map(x=>({x,w:x.w||1,rel:0})))
+      .concat(EP2_EV.filter(e=>!e.day&&ep2EvOk(e,r)).map(e=>({x:{id:e.id,f:()=>ep2EvGo(e)},w:3,rel:1})));
     if(!c.length) return false;
-    const p=wpick(c,o=>o.w); if(!p.rel) E.used.push(p.x.id); p.x.f(); return true; }
+    const ms=c.filter(o=>EP2_MS.includes(o.x.id));   // 서류 · 그날 밤 · 결혼 같은 고비는 먼저 챙긴다
+    const p=ms.length&&ch(.6)?wpick(ms,o=>o.w):wpick(c,o=>o.w); if(!p.rel) E.used.push(p.x.id); p.x.f(); return true; }
   // 한 걸음. true면 이 걸음을 여기서 처리했다
   function ep2Step(){ const E=S.epi; if(!E) return false;
     if(!E.ph){ if(E.i===1&&stayHome()&&relOf()) ep2Start(); else return false; }
@@ -49,7 +69,7 @@
     if(E.ph==='A'){
       if(E.d>=EP2_N.A){ E.ph='B'; log('열나흘이 지났다. 이제 달이 지나간다.','sys'); return ep2Step(); }
       E.d++; tick(); log(`봄 · ${E.d}일째`,'night');
-      const pool=EP2_DAY.map((_,i)=>i).filter(i=>i<EP2_DAY.length-1&&!E.dayU.includes(i)); const i=E.d>=EP2_N.A?EP2_DAY.length-1:pick(pool); E.dayU.push(i); log(ep2N(EP2_DAY[i]),'n');
+      const pool=EP2_DAY.map((_,i)=>i).filter(i=>i<EP2_DAY.length-1&&!E.dayU.includes(i)); const i=E.d>=EP2_N.A?EP2_DAY.length-1:pick(pool); E.dayU.push(i); log(ep2N(ep2NV(EP2_DAYV[i],EP2_DAY[i])),'n');
       ep2Pick(); H.change(); return true; }
     if(E.ph==='B'){
       if(E.m>=EP2_N.B){ E.ph='C'; log('한 해가 지났다. 이제 해가 지나간다.','sys'); return ep2Step(); }
@@ -59,7 +79,7 @@
     // C: 예전 방식 그대로, 한 해씩만 흐른다 (passYears가 1로 줄인다). 넷에 한 번은 사건 없는 해
     if(E.cy>=EP2_N.C){ E.ph='D'; return false; }
     E.cy++; E.k++;
-    if(ch(1-EP2_RATE.C)&&!E.arc&&!E.relNext&&!relDue()){ passYears(1); if(!S.dead) log(ep2N(pick(EP2_YR)),'n'); return true; }
+    if(ch(1-EP2_RATE.C)&&!E.arc&&!E.relNext&&!relDue()){ passYears(1); if(!S.dead){ const i=ri(0,EP2_YR.length-1); log(ep2N(ep2NV(EP2_YRV[i],EP2_YR[i])),'n'); } return true; }
     return false; }
   // 화면에 보일 때: A · B 구간의 날짜
   function ep2When(){ const E=S&&S.epi; if(!E||!E.ph||S.phase!=='epi') return null; return E.ph==='A'?{u:'d',n:Math.max(1,E.d)}:E.ph==='B'?{u:'m',n:E.m}:null; }
