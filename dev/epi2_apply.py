@@ -30,6 +30,7 @@ for P in sys.argv[1:]:
           + ";\n  const EP2_DAY2=" + J([fixN(x) for x in epi2_ev4.DAY2]) + ", EP2_MON2=" + J({str(k): [fixN(x) for x in v] for k, v in epi2_ev4.MON2.items()}) + ", EP2_YR2=" + J([fixN(x) for x in epi2_ev4.YR2])
           + ", EP2_DAY2V=" + J({str(k): {t: fixN(x) for t, x in v.items()} for k, v in epi2_ev4.DAY2V.items()})
           + ";\n  const EP2_DAYV=" + J({str(k): v for k, v in epi2_ev.DAYV.items()}) + ", EP2_YRV=" + J({str(k): v for k, v in epi2_ev.YRV.items()}) + ";\n") + js
+    rp("f:()=>epRel('lv_night',{fx:{", "f:()=>epRel('lv_night',{b:ep2NightB(),fx:{")
     rp("f:()=>epRel('lv_morning',{fx:{", "f:()=>epRel('lv_morning',{b:ep2Alt('lv_morning','b'),r:ep2Alt('lv_morning','r'),fx:{")
     rp("  function finalYears(){\n", js + "  function finalYears(){\n")
     # 걸음: 구간마다 기다리는 시간이 다르고, A · B · C는 ep2Step이 먼저 본다

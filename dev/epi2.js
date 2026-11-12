@@ -4,7 +4,7 @@
   const EP2_N={A:14,B:12,C:9};
   // 사건이 나오는 구간 (예전 사건을 옮긴 것). 적히지 않은 사건은 C부터 예전 방식으로 나온다
   const EP2_PH={lv_morning:'A',fr_drink:'A',st_ask:'AB',stay_morning:'A',stay_watch:'AB',stay_ask:'AB',stay_family:'B',
-    lv_anniv:'B',lv_night:'B',lv_wed:'B',fr_job:'B',fr_family:'B',stay_name:'B',stay_quarrel:'B',st_quarrel:'B',sw_grow:'B',sw_spring:'B'};
+    lv_anniv:'B',lv_night:'AB',lv_wed:'B',fr_job:'B',fr_family:'B',stay_name:'B',stay_quarrel:'B',st_quarrel:'B',sw_grow:'B',sw_spring:'B'};
   const EP2_RATE={A:.7,B:.75,C:.75};
   const EP2_MS=['stay_name','lv_night','lv_wed','lv_anniv','sw_grow','sw_spring'];
   const ep2Tight=()=>!!(S&&S.phase==='epi'&&S.epi&&(S.epi.ph==='A'||S.epi.ph==='B'));
@@ -38,9 +38,12 @@
   const EP2_FX={bond1:()=>add({bond:1}),bond2:()=>add({bond:2}),will1:()=>add({will:1}),will2:()=>add({will:2}),none:()=>{},rel4:()=>relGain(4),rel5:()=>relGain(5),rel6:()=>relGain(6),rel8:()=>relGain(8),
     trust2:()=>add({trust:2}),trust3:()=>add({trust:3}),trust4:()=>add({trust:4}),health1:()=>add({health:1}),health2:()=>add({health:2}),wealth1:()=>add({wealth:1}),wealth3:()=>add({wealth:3}),'wealth-5':()=>{add({wealth:-5});relGain(4);},lore2:()=>add({lore:2}),far:()=>{add({wealth:-8});relGain(8);}};
   const ep2Wish=()=>!/^(없|딱히 없|아무것도)/.test(H_BY[S.hero].wish||'없');
+  // 열나흘 구간의 「그날 밤」: 아직 방이 없으니 '자기 방으로 돌아가지 않았다' 본문은 뺀다
+  const ep2NightB=()=>S.epi&&S.epi.ph==='A'?RLEP.lv_night.b.slice(1):undefined;
   function ep2EvOk(e,r){ const E=S.epi, h=H_BY[S.hero], T=ep2Tags(h);
     if(e.ph!==E.ph||(E.relUsed||[]).includes(e.id)) return false;
     if(e.not&&[].concat(e.not).some(k=>T.includes(k))) return false; if(e.only&&!T.includes(e.only)) return false;
+    if(e.id==='b_room'&&S.flags.relNight) return false;   // 그날 밤 뒤에 방을 처음 나누는 이야기는 순서가 뒤집힌다
     if(e.wed&&!S.flags.relWed) return false; if(e.kid&&!relKid()) return false; if(e.track&&(!r||r.track!==e.track)) return false;
     if(e.wish&&!ep2Wish()) return false; if(e.day&&E.d!==e.day) return false; if(e.mon&&(E.m<e.mon[0]||E.m>e.mon[1])) return false; return true; }
   function ep2EvGo(e){ const h=H_BY[S.hero], D=RLEP[e.id], r=relOf(), fx={}, R={};
@@ -56,7 +59,7 @@
     const fixed=EP2_EV.find(e=>(e.day||0)===E.d&&ph==='A'&&e.day&&ep2EvOk(e,r)); if(r&&fixed){ ep2EvGo(fixed); return true; }   // 날짜가 정해진 사건
     if(!r||!ch(EP2_RATE[ph])) return false;
     const used=E.relUsed||[]; E.used=E.used||[];
-    const c=EP_REL.filter(x=>(EP2_PH[x.id]||'').includes(ph)&&x.w>0&&!used.includes(x.id)&&x.c(r)).map(x=>({x,w:x.w,rel:1}))
+    const c=EP_REL.filter(x=>(EP2_PH[x.id]||'').includes(ph)&&x.w>0&&!used.includes(x.id)&&x.c(r)&&!(x.id==='lv_night'&&ph==='A'&&!(E.lvK!=null&&E.k-E.lvK>=3))).map(x=>({x,w:x.w,rel:1}))
       .concat(EPI_POOL.filter(x=>(EP2_PH[x.id]||'').includes(ph)&&!E.used.includes(x.id)&&x.c()).map(x=>({x,w:x.w||1,rel:0})))
       .concat(EP2_EV.filter(e=>!e.day&&ep2EvOk(e,r)).map(e=>({x:{id:e.id,f:()=>ep2EvGo(e)},w:3,rel:1})));
     if(!c.length) return false;
@@ -67,7 +70,7 @@
     if(!E.ph){ if(E.i===1&&stayHome()&&relOf()) ep2Start(); else return false; }
     if(E.ph==='D') return false;
     if(!stayHome()){ E.ph='D'; return false; }   // 곁을 떠났거나 먼저 보냈다: 예전 방식으로
-    const tick=()=>{ E.k++; relGain(STAY_YG); stayTrust(); relTick(); };
+    const tick=()=>{ E.k++; relGain(STAY_YG); stayTrust(); relTick(); const r=relOf(); if(r&&r.stage>=3&&E.lvK==null) E.lvK=E.k; };   // 연인이 된 걸음 (전쟁을 연인으로 끝냈으면 첫날로 친다)
     if(E.ph==='A'){
       if(E.d>=EP2_N.A){ E.ph='B'; log('열나흘이 지났다. 이제 달이 지나간다.','sys'); return ep2Step(); }
       E.d++; tick(); log(`봄 · ${E.d}일째`,'night');
