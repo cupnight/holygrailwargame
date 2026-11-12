@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import epi2_ev as m1, epi2_ev2 as m2, epi2_ev3 as m3, epi2_ev4 as m4
 VN = {'mage': '캐스터(마술사형) 서번트', 'cook': '요리를 하는 서번트', 'sage': '박식한 서번트', 'civil': '싸움이 본업이 아닌 서번트', 'bold': '성향에 야망이 있는 서번트', 'd': '그 밖', 'now': '현대 · 근미래 서번트', 'modern': '근대(19~20세기) 서번트'}
 FX = {'bond1': '관계 +1', 'bond2': '관계 +2', 'will1': '정신 +1', 'will2': '정신 +2', 'none': '변화 없음', 'rel4': '인연 +4', 'rel5': '인연 +5', 'rel6': '인연 +6', 'rel8': '인연 +8', 'trust2': '신뢰 +2', 'trust3': '신뢰 +3', 'trust4': '신뢰 +4',
-      'health1': '건강 +1', 'health2': '건강 +2', 'wealth1': '재산 +1', 'wealth3': '재산 +3', 'wealth-5': '재산 −5 · 인연 +4', 'lore2': '지식 +2'}
+      'health1': '건강 +1', 'health2': '건강 +2', 'wealth1': '재산 +1', 'wealth3': '재산 +3', 'wealth-5': '재산 −5 · 인연 +4', 'lore2': '지식 +2', 'far': '재산 −8 · 인연 +8'}
 js = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'epi2.js'), encoding='utf8').read()
 def arr(name): a = js.index('const ' + name + '='); return js[a:js.index(';\n', a)]
 day = re.findall(r"'((?:[^'\\]|\\.)*)'", arr('EP2_DAY')); mon = re.findall(r"(\d+):'((?:[^'\\]|\\.)*)'", arr('EP2_MON')); yr = re.findall(r"'((?:[^'\\]|\\.)*)'", arr('EP2_YR'))

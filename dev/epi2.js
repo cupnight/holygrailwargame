@@ -36,7 +36,7 @@
   const ep2V=(x,h)=>{ if(Array.isArray(x)) return x; const k=ep2Tags(h).find(k=>x[k]); return k?x[k]:x.d; };
   const ep2Alt=(id,part)=>{ const T=ep2Tags(H_BY[S.hero]), a=(EP2_ALT[id]||[]).find(a=>T.includes(a.tag)); return a?a[part]:undefined; };
   const EP2_FX={bond1:()=>add({bond:1}),bond2:()=>add({bond:2}),will1:()=>add({will:1}),will2:()=>add({will:2}),none:()=>{},rel4:()=>relGain(4),rel5:()=>relGain(5),rel6:()=>relGain(6),rel8:()=>relGain(8),
-    trust2:()=>add({trust:2}),trust3:()=>add({trust:3}),trust4:()=>add({trust:4}),health1:()=>add({health:1}),health2:()=>add({health:2}),wealth1:()=>add({wealth:1}),wealth3:()=>add({wealth:3}),'wealth-5':()=>{add({wealth:-5});relGain(4);},lore2:()=>add({lore:2})};
+    trust2:()=>add({trust:2}),trust3:()=>add({trust:3}),trust4:()=>add({trust:4}),health1:()=>add({health:1}),health2:()=>add({health:2}),wealth1:()=>add({wealth:1}),wealth3:()=>add({wealth:3}),'wealth-5':()=>{add({wealth:-5});relGain(4);},lore2:()=>add({lore:2}),far:()=>{add({wealth:-8});relGain(8);}};
   const ep2Wish=()=>!/^(없|딱히 없|아무것도)/.test(H_BY[S.hero].wish||'없');
   function ep2EvOk(e,r){ const E=S.epi, h=H_BY[S.hero], T=ep2Tags(h);
     if(e.ph!==E.ph||(E.relUsed||[]).includes(e.id)) return false;
