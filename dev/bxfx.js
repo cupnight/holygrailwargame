@@ -99,6 +99,7 @@ function bxSealShow(fx){
 
 /* 강림: 수녀가 성배를 마시고, 연꽃이 피며 이름이 「킷쇼인 → 셋쇼인」으로 고쳐 쓰인다. 호위가 될 센티넬이 빨려 든다. 고쳐쓴 카르마면 마지막에 화면이 치직이며 덮어쓰인다 */
 function bxDescShow(fx){
+  const pre=typeof bxDarkAt!=='undefined'&&performance.now()-bxDarkAt<1500; if(pre) bxDarkAt=0;
   const {seg,io,oc}=XF, K=!!fx.karma, T=K?9.6:7.8, KA=6.7, rnd=XF.rng(23), NG=Math.max(0,Math.min(5,fx.g|0));
   const n0=tr('킷쇼인 키아라'), n1=tr('셋쇼인 키아라'), day=tr(`제${fx.d}일 · 강림`), cls=tr('비스트 Ⅲ/R'), km=tr('고쳐쓴 카르마');
   const html=`<div class="bxd"><div class="bxd-day">${esc(day)}</div><div class="bxd-nm"><span class="a">${esc(n0)}</span><span class="b">${esc(n1)}</span></div><div class="bxd-cls">${esc(cls)}</div>${K?`<div class="bxd-km">${esc(km)}</div>`:''}</div>`;
@@ -108,7 +109,7 @@ function bxDescShow(fx){
   const PET=[...Array(40)].map(()=>({x:rnd(),y:rnd(),v:.04+rnd()*.08,r:rnd()*6,s:3+rnd()*5,w:rnd()*6}));
   const ORB=[...Array(NG)].map((_,i)=>({a0:rnd()*6.28,d:i*.18}));
   function frame(t,dt){ const {c,W,H,D,G}=V; c.clearRect(0,0,W,H); const s=Math.min(W,H,640*D)/520, cx=W/2, out=io(seg(t,T-.8,T));
-    const dark=io(seg(t,0,.4))*(1-out); c.fillStyle=`rgba(10,3,10,${.9*dark})`; c.fillRect(0,0,W,H);
+    const dark=(pre?1:io(seg(t,0,.4)))*(1-out); c.fillStyle=`rgba(10,3,10,${.9*dark})`; c.fillRect(0,0,W,H);
     const nh=Math.min(290*s,H*.5), ntop=H*.12, cyc=ntop+nh*.45;
     // 연꽃 · 만다라 (2.6초부터 핀다)
     const bl=oc(seg(t,2.55,3.6)), la=bl*(1-out), sc=seg(t,K?KA+.3:99,K?KA+1.3:99);

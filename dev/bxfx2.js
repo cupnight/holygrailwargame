@@ -11,6 +11,7 @@ function bxTxtF(V,TA,TO){ const {seg,oc}=XF, chars=[...V.o.querySelectorAll('.xd
     const r=oc(seg(t,TA+.4,TA+1))*(1-out); rule.style.width=(r*Math.min(260,innerWidth*.6))+'px'; rule.style.opacity=r;
     const s=oc(seg(t,TA+.55,TA+1.1))*(1-out); subEl.style.opacity=s; return s; }; }
 // 봉인 상자(7일차 봉인과 같은 모양)
+let bxDarkAt=0;
 const BXC_E=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]], BXC_F=[[0,1,2,3],[4,5,6,7],[0,1,5,4],[2,3,7,6],[1,2,6,5],[0,3,7,4]];
 function bxCubeP(cx,cy,R,rot){ const P=[]; for(const [a,b,cc] of [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]]){ const x=a*Math.cos(rot)-cc*Math.sin(rot), z=a*Math.sin(rot)+cc*Math.cos(rot), y=b*Math.cos(.35)-z*Math.sin(.35), zz=b*Math.sin(.35)+z*Math.cos(.35), k=1+zz*.12; P.push([cx+x*R*.75*k,cy+y*R*.75*k]); } return P; }
 function bxFacePt(P,f,u,v){ const [a,b,c,d]=BXC_F[f].map(i=>P[i]); return [(1-u)*(1-v)*a[0]+u*(1-v)*b[0]+u*v*c[0]+(1-u)*v*d[0],(1-u)*(1-v)*a[1]+u*(1-v)*b[1]+u*v*c[1]+(1-u)*v*d[1]]; }
@@ -101,13 +102,14 @@ function bxConfShow(fx){
   const {seg,io,oc}=XF, v=fx.v||'conf', T=5.0, rnd=XF.rng(31), BRK=v==='force'?2.3:2.8;
   const title=tr(v==='force'?`제${fx.d}일 · 봉인이 찢어지다`:v==='unseal'?`제${fx.d}일 · 봉인을 풀다`:`제${fx.d}일 · 고백`);
   const sub=tr(v==='force'?'“…미안해요. 끝까지는 못 버텼어요.”':v==='unseal'?'상자가 소리 없이 열렸다':'“그 수녀가 키아라예요. 성배를 삼키려고 해요.”');
-  const V=xfxOpen('dsc bxs',`${title} · ${sub}`,bxTxtH(title,sub),T,frame); fxSnd(V.o,v==='force'?'j_bx_tear':v==='unseal'?'j_bx_open':'j_bx_conf');
+  // 뒤이어 강림이 나오므로 어둠은 걷지 않고 그대로 넘긴다(강림이 어두운 채로 시작한다)
+  const V=xfxOpen('dsc bxs',`${title} · ${sub}`,bxTxtH(title,sub),T,frame,()=>{ bxDarkAt=performance.now(); }); fxSnd(V.o,v==='force'?'j_bx_tear':v==='unseal'?'j_bx_open':'j_bx_conf');
   const text=bxTxtF(V,v==='unseal'?2.4:BRK+.2,T-.8);
   const CR=[...Array(16)].map(()=>({f:Math.floor(rnd()*6),u0:.25+rnd()*.5,v0:.25+rnd()*.5,st:[...Array(6)].map(()=>[(rnd()-.5)*.36,(rnd()-.5)*.36]),d:rnd()}));
   const WS=[...Array(7)].map(()=>({a:-Math.PI/2+(rnd()-.5)*2.6,w:rnd()*6,l:.6+rnd()*.5}));
   let SH=null;
   function frame(t,dt){ const {c,W,H,D,G}=V; c.clearRect(0,0,W,H); const s=Math.min(W,H,640*D)/520, cx=W/2, cy=H*.4, out=io(seg(t,T-.7,T));
-    const dark=io(seg(t,0,.4))*(1-out); c.fillStyle=`rgba(7,3,12,${.88*dark})`; c.fillRect(0,0,W,H);
+    const dark=io(seg(t,0,.4)); c.fillStyle=`rgba(10,3,10,${.9*dark})`; c.fillRect(0,0,W,H);
     const ca=oc(seg(t,.1,.6))*(1-out), br=t>=BRK;
     const shk=v==='unseal'||br?0:seg(t,v==='force'?.5:1.3,BRK), jx=(Math.random()-.5)*10*D*shk, jy=(Math.random()-.5)*6*D*shk;
     const bulge=v==='force'?1+.14*io(seg(t,.5,BRK))+.03*Math.sin(t*18)*seg(t,1.2,BRK):1;
