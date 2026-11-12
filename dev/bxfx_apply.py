@@ -19,6 +19,12 @@ k('BB가 성배를 품에 안고 달로 돌아갔다.', 'BB took the Grail in he
 k('BB가 남은 성배를 품에 안고 달로 데려갔다.', 'BB took the remaining Grail in her arms and carried it to the moon.', 'BBは残された聖杯を胸に抱き、月へ連れていった。')
 k('성배는 달빛 속으로 가라앉듯 사라졌다.', 'The Grail vanished as if sinking into the moonlight.', '聖杯は月光の中へ沈むように消えた。')
 k('흩어졌던 목소리가 성배를 달로 데려갔다.', 'A scattered voice carried the Grail away to the moon.', '散り散りになった声が、聖杯を月へ連れていった。')
+k('성배는 빛 조각으로 풀려 달로 올라갔다.', 'The Grail came apart into shards of light and rose to the Moon.', '聖杯は光の欠片にほどけ、月へと昇っていった。')
+k('달의 뒷면에서 · 긴급 방송', 'From the far side of the Moon · Emergency Broadcast', '月の裏側より · 緊急放送')
+k('선배, 그럼 이만! 이건 제가 달에 잘 넣어 둘게요.', "Well then, Senpai, I'm off! I'll tuck this away safely on the Moon.", '先輩、それじゃあこれで！これは私が月にしっかりしまっておきますね。')
+k('…고마웠어요. 이번엔 진심이에요.', '…Thank you. This time I mean it.', '…ありがとうございました。今度は本気ですよ。')
+k('…배, 들려요…? 이건 제가…', "…pai, can you hear…? I'll take th…", '…輩、聞こえ…？ これは私が…')
+k('{0} 전역에서 깊은 잠에 빠졌던 시민들 일제히 깨어나 · 밤사이 일을 기억하는 사람은 없어', 'Citizens across {0} who had fallen into deep sleep awaken all at once · no one remembers what happened overnight', '{0}全域で深い眠りに落ちていた市民が一斉に目覚める · 夜の間の出来事を覚えている者はいない')
 k('아무도 소원을 빌지 않았다.', 'No one made a wish.', '誰も願いを口にしなかった。')
 k('단꿈', 'Sweet Dream', '甘い夢')
 k('그 겨울, 도시는 한 사람의 쾌락이 되었다.', 'That winter, the city became one person\'s pleasure.', 'その冬、街はひとりの快楽になった。')
@@ -40,8 +46,14 @@ CSS = """
 .xb-card.bx .xb-again{text-shadow:0 0 3px #000,0 0 10px #000,0 0 26px rgba(255,120,190,.75)}
 .xb-card.bx .xb-cp span{border-color:rgba(255,150,200,.75)}
 .xb-card.bx .xb-night{color:#ffb6d9}
+.bxm-tv{position:absolute;left:50%;top:26%;transform:translate(-50%,0);display:flex;align-items:center;gap:10px;padding:7px 14px;border:1px solid rgba(190,140,255,.7);background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px),rgba(18,6,28,.82);font-family:var(--f-mono);font-size:clamp(11px,2.6vw,14px);letter-spacing:.12em;color:#efe2ff;opacity:0;pointer-events:none;white-space:nowrap;box-shadow:0 0 18px rgba(170,110,255,.45);max-width:calc(100vw - 32px);overflow:hidden}
+.bxm-tv i{font-style:normal;color:#ff5a7a;letter-spacing:.08em}
+.bxm-msg{position:absolute;left:0;right:0;top:calc(15% + 9vmin);text-align:center;pointer-events:none;padding:0 18px}
+.bxm-msg p{margin:0;opacity:0;font-family:var(--f-story);color:#f3e6ff;text-shadow:0 0 3px #000,0 0 14px rgba(190,140,255,.75)}
+.bxm-msg .a{font-size:clamp(14px,3.4vw,18px);min-height:1.4em}
+.bxm-msg .b{margin-top:8px;font-size:clamp(12px,2.8vw,14px);color:#d9c6ef}
 """
-SNDS = ['j_bx_seal', 'j_bx_empty', 'j_bx_desc', 'j_bx_karma', 'j_bx_in', 'j_bx_in_s', 'j_bx_brk', 'j_bx_brk_s', 'j_bx_p2', 'j_end_bxmoon', 'j_end_bxdream']
+SNDS = ['j_bx_seal', 'j_bx_empty', 'j_bx_desc', 'j_bx_karma', 'j_bx_in', 'j_bx_in_s', 'j_bx_brk', 'j_bx_brk_s', 'j_bx_p2', 'j_end_bxm_me', 'j_end_bxm_live', 'j_end_bxm_nobb', 'j_end_bxm_voice', 'j_end_bxdream']
 def dur(n):
     p = os.path.join(SND, n + '.mp3')
     try: return round(float(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', p], capture_output=True, text=True).stdout.strip()), 2)
@@ -62,7 +74,7 @@ for P in sys.argv[1:]:
     rp("function bossFx(fx){ xfxGo(", "function bossFx(fx){ if(fx.kiara) return xfxGo(fx.full?['j_bx_in','j_bx_brk']:['j_bx_in_s','j_bx_brk_s'],()=>bxBossShow(fx)); xfxGo(")
     rp("function bossP2Fx(fx){ xfxGo(", "function bossP2Fx(fx){ if(fx.kiara) return xfxGo('j_bx_p2',()=>bxP2Show(fx)); xfxGo(")
     rp("const END_X={seal:'seal',", "const END_X={bxm_me:'bxmoon',bxm_live:'bxmoon',bxm_nobb:'bxmoon',bxm_voice:'bxmoon',bxdream:'bxdream',seal:'seal',")
-    rp("const END_SK={dead:'j_end_dead',flood:'j_end_flood'};", "const END_SK={dead:'j_end_dead',flood:'j_end_flood',bxm_me:'j_end_bxmoon',bxm_live:'j_end_bxmoon',bxm_nobb:'j_end_bxmoon',bxm_voice:'j_end_bxmoon',bxdream:'j_end_bxdream'};")
+    rp("const END_SK={dead:'j_end_dead',flood:'j_end_flood'};", "const END_SK={dead:'j_end_dead',flood:'j_end_flood',bxm_me:'j_end_bxm_me',bxm_live:'j_end_bxm_live',bxm_nobb:'j_end_bxm_nobb',bxm_voice:'j_end_bxm_voice',bxdream:'j_end_bxdream'};")
     rp(".xb-q2{margin-top:12px}", ".xb-q2{margin-top:12px}" + CSS.replace('\n', ''))
     # 소리 목록
     rp('"j_boss2":{"d":2.7}', '"j_boss2":{"d":2.7},' + ','.join(f'"{n}":{{"d":{dur(n)}}}' for n in SNDS))

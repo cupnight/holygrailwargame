@@ -146,13 +146,40 @@ def p2():
     put(B, choir(SWEET, 2.3, .05, 1.3), 1.7, 0, .6); put(B, drone(2.3, .05, 1.3), 1.7, 0, .35); put(B, bell(G4 * 2, 1.6), 1.72, 0, .12)
     return reverb(B, 2.0, .3)
 
-def end_moon():
-    music = rd(os.path.join(SRC, 'j_end_d.mp3')); d = 4.6 + music.shape[1] / SR; B = buf(d); x = T(4.8)
-    for k in range(40): put(B, soft(rng.choice(SWEET) * 2, .25), .3 + rng.random() ** 1.4 * 1.3, rng.uniform(-.8, .8), .06)
-    put(B, soft(1174.66, 1.4), 1.2, 0, .12); put(B, pad(MOON, 3.6, .8, 1.2, bright=2000), 1.4, 0, .35)
-    sh = sum(np.sin(2 * np.pi * f * T(2.4) * (1 + .5 * T(2.4) / 2.4)) for f in (1760, 2217, 2637)) * np.sin(np.pi * T(2.4) / 2.4) ** 2 / 3; put(B, sh, 3.0, 0, .12)
-    put(B, bell(1864.66, 1.0), 5.3, 0, .1)
-    B = reverb(B, 2.4, .3); put(B, music[0], 4.6, -1, 1.414); put(B, music[1], 4.6, 1, 1.414); return B
+def end_moon(v):  # ⑤ 달로 간 잔 (2판, 갈래별): 효과 뒤 결말 음악. 음악은 도시 불빛이 다시 켜질 때(TK) 들어온다
+    music = rd(os.path.join(SRC, 'j_end_d.mp3')); TK = {'me': 7.9, 'live': 6.6, 'nobb': 5.8, 'voice': 6.2}[v]; d = TK + .2 + music.shape[1] / SR; B = buf(d)
+    for k in range(40): put(B, soft(rng.choice(SWEET) * 4, .25), .3 + rng.random() ** 1.4 * 1.3, rng.uniform(-.8, .8), .05)   # 꽃잎으로 흩어짐
+    def blip(f, dd=.07): x = T(dd); return np.sign(np.sin(2 * np.pi * f * x)) * .5 * np.exp(-x / (dd * .35))
+    def ticks(a, b_, g=.05):
+        t0 = a
+        while t0 < b_: put(B, bp(noise(.012), 2500, 7000) * env(.012, .001, .004), t0, rng.uniform(-.3, .3), g); t0 += rng.uniform(.05, .09)
+    if v in ('me', 'voice'):   # ① 끼어드는 방송: 지직 → 장난스러운 세 음 → 자막이 찍힘
+        put(B, crackle(.35, .9), .1, 0); put(B, np.sign(np.sin(2 * np.pi * 60 * T(.3))) * .1 * env(.3, .01, .1), .1)
+        for i, f in enumerate([932.33, 1396.91, 1864.66]): put(B, blip(f, .12), .5 + i * .11, (i - 1) * .4, .2)
+        ticks(.55, 1.15 if v == 'me' else 1.05)
+        if v == 'me': put(B, crush(bp(noise(.1), 1500, 9000) * env(.1, .001, .03), 3, 10), 1.75, 0, .4)
+        else: put(B, crackle(.3, 1.2), 1.2, 0); put(B, crush(bp(noise(.18), 800, 9000) * env(.18, .001, .05), 2, 14), 1.33, 0, .7)
+    if v == 'me':
+        put(B, pad(MOON, 4.0, .8, 1.2, bright=2000), 1.6, 0, .3)
+        sh = sum(np.sin(2 * np.pi * np.cumsum(f * (1 + .6 * T(2.2) / 2.2)) / SR) for f in (880, 1108.73, 1396.91)) * np.sin(np.pi * T(2.2) / 2.2) ** 2 / 3; put(B, sh, 3.2, 0, .1)
+        put(B, bell(1864.66, 1.2), 5.45, 0, .12); ticks(5.7, 6.6, .035)
+        put(B, soft(466.16, 2.0), 7.2, 0, .14); put(B, soft(698.46, 1.6), 7.25, 0, .07)                   # 한 박자 뒤 진심 한 줄
+    elif v == 'live':
+        put(B, pad(MOON, 2.5, .8, .6, bright=1800), 1.6, 0, .25)
+        put(B, lp(noise(1.2), 160) * np.sin(np.pi * T(1.2) / 1.2) * 3, 2.3, 0, .35); put(B, thump(46, .8), 2.4, 0, .4)   # 그림자가 번진다
+        for i in range(6): put(B, whoosh(.5, 120, 700, .5), 2.9 + i * .1, (i - 2.5) / 3)                       # 감싸 오른다
+        for k in range(70): at = 3.6 + rng.random() * 1.9; put(B, blip(587.33 * 2 ** ((at - 3.6) / 1.9 * 1.5 + rng.choice([0, .25, .58])), .05), at, rng.uniform(-.6, .6), .07)   # 빛 조각이 줄지어 올라감
+        put(B, bell(1864.66, 1.2), 5.6, 0, .12)
+    elif v == 'nobb':
+        put(B, pad(GOLD[:3], 3.0, .8, 1.0, bright=2000), 1.6, 0, .25)
+        for k in range(55): at = 2.4 + rng.random() * 2.0; put(B, soft(587.33 * 2 ** ((at - 2.4) / 2.0 * 1.5 + rng.choice([0, .58, 1])), .15), at, rng.uniform(-.6, .6), .06)
+        put(B, bell(1864.66, 1.2), 4.7, 0, .12)
+    else:
+        for i, f in enumerate([466.16, 554.37]): put(B, crush(soft(f, .5), 4, 6), 1.9 + i * .35, 0, .12)        # 끊긴 목소리 자리
+        ticks(1.9, 2.6, .04); put(B, crackle(.25, .5), 2.3, 0)
+        rv = hp(noise(.4), 2000) * (T(.4) / .4) ** 2; put(B, rv, 2.6, 0, .25); put(B, bell(1864.66, 1.2), 3.05, 0, .12)
+    for i, f in enumerate([587.33, 783.99, 880, 1174.66, 1567.98]): put(B, soft(f, 1.0), TK - .5 + i * .18, (i - 2) / 3, .07)   # ④ 불빛이 다시 켜짐
+    B = reverb(B, 2.4, .3); put(B, music[0], TK + .2, -1, 1.414); put(B, music[1], TK + .2, 1, 1.414); return B
 
 def end_dream():
     music = rd(os.path.join(SRC, 'j_end_d.mp3')); d = 4.2 + music.shape[1] / SR; B = buf(d)
@@ -236,9 +263,9 @@ def np_():  # ⑪ 키아라와의 격돌에 겹치는 단맛 (격돌 소리 위�
 os.makedirs(OUT, exist_ok=True)
 ONLY = sys.argv[3].split(',') if len(sys.argv) > 3 else None
 if ONLY:
-    F = {'j_bx_karma': karma, 'j_bx_brk': lambda: brk(True), 'j_bx_brk_s': lambda: brk(False), 'j_end_bxmoon': end_moon, 'j_end_bxdream': end_dream, 'j_bx_seal': lambda: seal(False), 'j_bx_empty': lambda: seal(True), 'j_bx_in': lambda: bin_(True), 'j_bx_in_s': lambda: bin_(False), 'j_bx_p2': p2, 'j_bx_kp': kp, 'j_bx_free': free, 'j_bx_conf': lambda: conf('conf'), 'j_bx_tear': lambda: conf('force'), 'j_bx_open': lambda: conf('unseal'), 'j_bx_order': order, 'j_bx_np': np_, 'j_bx_desc': desc}
+    F = {'j_bx_karma': karma, 'j_bx_brk': lambda: brk(True), 'j_bx_brk_s': lambda: brk(False), 'j_end_bxm_me': lambda: end_moon('me'), 'j_end_bxm_live': lambda: end_moon('live'), 'j_end_bxm_nobb': lambda: end_moon('nobb'), 'j_end_bxm_voice': lambda: end_moon('voice'), 'j_end_bxdream': end_dream, 'j_bx_seal': lambda: seal(False), 'j_bx_empty': lambda: seal(True), 'j_bx_in': lambda: bin_(True), 'j_bx_in_s': lambda: bin_(False), 'j_bx_p2': p2, 'j_bx_kp': kp, 'j_bx_free': free, 'j_bx_conf': lambda: conf('conf'), 'j_bx_tear': lambda: conf('force'), 'j_bx_open': lambda: conf('unseal'), 'j_bx_order': order, 'j_bx_np': np_, 'j_bx_desc': desc}
     for n in ONLY: save(n, F[n](), -21.0 if n == 'j_bx_np' else -16.0 if n.startswith('j_end') else -16.5)   # 격돌 소리 위에 얹는 단맛은 작게
     raise SystemExit
 save('j_bx_seal', seal(False)); save('j_bx_empty', seal(True)); save('j_bx_desc', desc()); save('j_bx_karma', karma())
 save('j_bx_in', bin_(True)); save('j_bx_in_s', bin_(False)); save('j_bx_brk', brk(True)); save('j_bx_brk_s', brk(False)); save('j_bx_p2', p2())
-save('j_end_bxmoon', end_moon(), -16.0); save('j_end_bxdream', end_dream(), -16.0)
+[save(f'j_end_bxm_{v}', end_moon(v), -16.0) for v in ('me', 'live', 'nobb', 'voice')]; save('j_end_bxdream', end_dream(), -16.0)
