@@ -1,7 +1,7 @@
 # 에필로그 새 사건 2차 (11-12 · 한국어 초안): 봄의 열나흘 22개. 꼴은 epi2_ev.py와 같다.
 # 문장: 문자열 = 말투 무관 · (반말, 존댓말, 말 없음) · {'d':…, '갈래':…} = 서번트 갈래별 변형
 def E(id, ph, t, b, *c, **o):
-    L = lambda x: {k: L(v) for k, v in x.items()} if isinstance(x, dict) else list(x) if isinstance(x, tuple) else [x]
+    L = lambda x: {k: L(v) for k, v in x.items()} if isinstance(x, dict) else list(x) if isinstance(x, (tuple, list)) else [x]
     d = {'id': id, 'ph': ph, 't': t, 'b': [L(x) for x in b], 'c': []}
     for key, label, fx, r in c:
         cc = {'key': key, 't': label, 'fx': fx, 'r': [L(x) for x in r]}
