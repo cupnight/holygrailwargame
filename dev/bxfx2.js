@@ -11,7 +11,7 @@ function bxTxtF(V,TA,TO){ const {seg,oc}=XF, chars=[...V.o.querySelectorAll('.xd
     const r=oc(seg(t,TA+.4,TA+1))*(1-out); rule.style.width=(r*Math.min(260,innerWidth*.6))+'px'; rule.style.opacity=r;
     const s=oc(seg(t,TA+.55,TA+1.1))*(1-out); subEl.style.opacity=s; return s; }; }
 // 봉인 상자(7일차 봉인과 같은 모양)
-let bxDarkAt=0;
+let bxDarkAt=0, bxDarkV='';
 const BXC_E=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]], BXC_F=[[0,1,2,3],[4,5,6,7],[0,1,5,4],[2,3,7,6],[1,2,6,5],[0,3,7,4]];
 function bxCubeP(cx,cy,R,rot){ const P=[]; for(const [a,b,cc] of [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]]){ const x=a*Math.cos(rot)-cc*Math.sin(rot), z=a*Math.sin(rot)+cc*Math.cos(rot), y=b*Math.cos(.35)-z*Math.sin(.35), zz=b*Math.sin(.35)+z*Math.cos(.35), k=1+zz*.12; P.push([cx+x*R*.75*k,cy+y*R*.75*k]); } return P; }
 function bxFacePt(P,f,u,v){ const [a,b,c,d]=BXC_F[f].map(i=>P[i]); return [(1-u)*(1-v)*a[0]+u*(1-v)*b[0]+u*v*c[0]+(1-u)*v*d[0],(1-u)*(1-v)*a[1]+u*(1-v)*b[1]+u*v*c[1]+(1-u)*v*d[1]]; }
@@ -103,7 +103,7 @@ function bxConfShow(fx){
   const title=tr(v==='force'?`제${fx.d}일 · 봉인이 찢어지다`:v==='unseal'?`제${fx.d}일 · 봉인을 풀다`:`제${fx.d}일 · 고백`);
   const sub=tr(v==='force'?'“…미안해요. 끝까지는 못 버텼어요.”':v==='unseal'?'상자가 소리 없이 열렸다':'“그 수녀가 키아라예요. 성배를 삼키려고 해요.”');
   // 뒤이어 강림이 나오므로 어둠은 걷지 않고 그대로 넘긴다(강림이 어두운 채로 시작한다)
-  const V=xfxOpen('dsc bxs',`${title} · ${sub}`,bxTxtH(title,sub),T,frame,()=>{ bxDarkAt=performance.now(); }); fxSnd(V.o,v==='force'?'j_bx_tear':v==='unseal'?'j_bx_open':'j_bx_conf');
+  const V=xfxOpen('dsc bxs',`${title} · ${sub}`,bxTxtH(title,sub),T,frame,()=>{ bxDarkAt=performance.now(); bxDarkV=v; }); fxSnd(V.o,v==='force'?'j_bx_tear':v==='unseal'?'j_bx_open':'j_bx_conf');
   const text=bxTxtF(V,v==='unseal'?2.4:BRK+.2,T-.8);
   const CR=[...Array(16)].map(()=>({f:Math.floor(rnd()*6),u0:.25+rnd()*.5,v0:.25+rnd()*.5,st:[...Array(6)].map(()=>[(rnd()-.5)*.36,(rnd()-.5)*.36]),d:rnd()}));
   const WS=[...Array(7)].map(()=>({a:-Math.PI/2+(rnd()-.5)*2.6,w:rnd()*6,l:.6+rnd()*.5}));
@@ -116,7 +116,8 @@ function bxConfShow(fx){
     const R=150*s*bulge, rot=.6+t*(v==='unseal'?.12:.25), P=bxCubeP(cx+jx,cy+jy,R,rot);
     const glow=v==='unseal'?0:seg(t,v==='force'?.5:1.1,BRK);
     if(v==='unseal'){ const r=io(seg(t,1.6,3.0)); bxGlow(c,cx,cy+30*s,170*s,BXF.gold,.45*r*(1-out)); bxCupDraw(c,cx,cy+80*s,s*.62,r*(1-out),D,null); }
-    bxGlow(c,cx,cy,R*(1+glow),BXF.pk2,(.12+.6*glow)*ca*(br?1-seg(t,BRK,BRK+1.4):1));
+    const resid=v==='unseal'?0:.16*seg(t,BRK,BRK+.6); // 깨진 뒤 남는 분홍 빛: 끝까지 걷지 않고 강림이 이어받는다
+    bxGlow(c,cx,cy,R*(1+glow),BXF.pk2,Math.max(resid*oc(seg(t,.1,.6)),(.12+.6*glow)*ca*(br?1-seg(t,BRK,BRK+1.4):1)));
     if(!br||v==='unseal'){ const op=v==='unseal'?1-io(seg(t,1.3,3.0)):1; c.save(); c.lineCap='round';
       for(const f of BXC_F){ c.beginPath(); f.forEach((i,j)=>j?c.lineTo(P[i][0],P[i][1]):c.moveTo(P[i][0],P[i][1])); c.closePath(); c.fillStyle=`rgba(150,100,230,${(.09+.08*glow)*ca*op})`; c.fill();
         c.strokeStyle=`rgba(${BXF.vio},${.25*ca*op})`; c.lineWidth=.8*D; const A=P[f[0]],B=P[f[1]],C=P[f[2]],E=P[f[3]]; for(let g=1;g<3;g++){ const u=g/3; c.beginPath(); c.moveTo(A[0]+(B[0]-A[0])*u,A[1]+(B[1]-A[1])*u); c.lineTo(E[0]+(C[0]-E[0])*u,E[1]+(C[1]-E[1])*u); c.moveTo(A[0]+(E[0]-A[0])*u,A[1]+(E[1]-A[1])*u); c.lineTo(B[0]+(C[0]-B[0])*u,B[1]+(C[1]-B[1])*u); c.stroke(); } }

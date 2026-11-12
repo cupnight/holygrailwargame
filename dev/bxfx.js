@@ -99,7 +99,7 @@ function bxSealShow(fx){
 
 /* 강림: 수녀가 성배를 마시고, 연꽃이 피며 이름이 「킷쇼인 → 셋쇼인」으로 고쳐 쓰인다. 호위가 될 센티넬이 빨려 든다. 고쳐쓴 카르마면 마지막에 화면이 치직이며 덮어쓰인다 */
 function bxDescShow(fx){
-  const pre=typeof bxDarkAt!=='undefined'&&performance.now()-bxDarkAt<1500; if(pre) bxDarkAt=0;
+  const pre=typeof bxDarkAt!=='undefined'&&performance.now()-bxDarkAt<1500?(bxDarkV==='unseal'?'u':'p'):''; if(pre) bxDarkAt=0;
   const {seg,io,oc}=XF, K=!!fx.karma, T=K?9.6:7.8, KA=6.7, rnd=XF.rng(23), NG=Math.max(0,Math.min(5,fx.g|0));
   const n0=tr('킷쇼인 키아라'), n1=tr('셋쇼인 키아라'), day=tr(`제${fx.d}일 · 강림`), cls=tr('비스트 Ⅲ/R'), km=tr('고쳐쓴 카르마');
   const html=`<div class="bxd"><div class="bxd-day">${esc(day)}</div><div class="bxd-nm"><span class="a">${esc(n0)}</span><span class="b">${esc(n1)}</span></div><div class="bxd-cls">${esc(cls)}</div>${K?`<div class="bxd-km">${esc(km)}</div>`:''}</div>`;
@@ -108,9 +108,11 @@ function bxDescShow(fx){
   const q=k=>V.o.querySelector(k), E={day:q('.bxd-day'),a:q('.bxd-nm .a'),b:q('.bxd-nm .b'),cls:q('.bxd-cls'),km:q('.bxd-km')};
   const PET=[...Array(40)].map(()=>({x:rnd(),y:rnd(),v:.04+rnd()*.08,r:rnd()*6,s:3+rnd()*5,w:rnd()*6}));
   const ORB=[...Array(NG)].map((_,i)=>({a0:rnd()*6.28,d:i*.18}));
+  if(pre) frame(0,0); // 앞 연출에서 넘어올 때: 첫 화면을 바로 그려 한 프레임 비는 틈을 없앤다
   function frame(t,dt){ const {c,W,H,D,G}=V; c.clearRect(0,0,W,H); const s=Math.min(W,H,640*D)/520, cx=W/2, out=io(seg(t,T-.8,T));
     const dark=(pre?1:io(seg(t,0,.4)))*(1-out); c.fillStyle=`rgba(10,3,10,${.9*dark})`; c.fillRect(0,0,W,H);
     const nh=Math.min(290*s,H*.5), ntop=H*.12, cyc=ntop+nh*.45;
+    if(pre&&pre!=='u'){ const k=1-io(seg(t,0,1.4)); if(k>0) bxGlow(c,cx,H*.4,300*s,BXF.pk2,.16*k); } // 앞 연출에서 남은 분홍 빛을 이어받아 잦아들게 한다
     // 연꽃 · 만다라 (2.6초부터 핀다)
     const bl=oc(seg(t,2.55,3.6)), la=bl*(1-out), sc=seg(t,K?KA+.3:99,K?KA+1.3:99);
     bxGlow(c,cx,cyc,nh*1.2,BXF.pk2,.35*la); bxMandala(c,cx,cyc,nh*.62,t,la,D); bxLotus(c,cx,cyc,nh*.6,bl,t*.05,la,D,false);
@@ -152,9 +154,9 @@ function bxDescShow(fx){
 function bxBossShow(fx){
   const {seg,io,oc}=XF, rnd=XF.rng(29), full=!!fx.full, rep=!!fx.reply, X=(full?(rep?1.0:0):(rep||fx.line?1.4:0))+(full?1.4:.7), T=(full?5.2:1.8)+X;
   const comp=fx.comp||[];
-  const html=`<div class="xb-card bx">${fx.final?`<div class="xb-night">${esc(tr('최후의 밤'))}</div>`:''}<div class="xb-nm">${esc(tr(fx.cls))}</div><div class="xb-tn">${esc(tr(fx.name||'정체 불명'))}</div>${fx.line?`<div class="xb-q">“${esc(tr(fx.line))}”</div>`:''}${rep?`<div class="xb-r"><small>${esc(tr(fx.replyName||''))}</small>“${esc(tr(fx.reply))}”</div>`:''}
+  const html=`<div class="xb-card bx">${fx.final?`<div class="xb-night">${esc(tr('최후의 밤'))}</div>`:''}<div class="xb-nm">${esc(tr('비스트 Ⅲ/R'))}</div><div class="xb-tn">${esc(tr(fx.name||'정체 불명'))}</div>${fx.line?`<div class="xb-q">“${esc(tr(fx.line))}”</div>`:''}${rep?`<div class="xb-r"><small>${esc(tr(fx.replyName||''))}</small>“${esc(tr(fx.reply))}”</div>`:''}
     <div class="xb-cp"><small>${comp.length?esc(tr('함께 싸우는 조')):''}</small>${comp.length?comp.map(n=>`<span>${esc(tr(n))}</span>`).join(''):`<span>${esc(tr('홀로'))}</span>`}</div></div>`;
-  const V=xfxOpen('bfx bxb',[fx.final?tr('최후의 밤'):'',tr(fx.cls),tr(fx.name||'정체 불명'),fx.line?tr(fx.line):'',rep?`${tr(fx.replyName||'')}: ${tr(fx.reply)}`:''].filter(Boolean).join(' · '),html,T,frame);
+  const V=xfxOpen('bfx bxb',[fx.final?tr('최후의 밤'):'',tr('비스트 Ⅲ/R'),tr(fx.name||'정체 불명'),fx.line?tr(fx.line):'',rep?`${tr(fx.replyName||'')}: ${tr(fx.reply)}`:''].filter(Boolean).join(' · '),html,T,frame);
   const brk=(full?4.55:1.4)+X; fxSnd(V.o,full?'j_bx_in':'j_bx_in_s'); fxSnd(V.o,full?'j_bx_brk':'j_bx_brk_s',{at:brk});
   const q=k=>V.o.querySelector(k), E={night:q('.xb-night'),nm:q('.xb-nm'),tn:q('.xb-tn'),q:q('.xb-q'),r:q('.xb-r'),cp:q('.xb-cp'),card:q('.xb-card')};
   const cpItems=[...E.cp.querySelectorAll('span')], cpLab=E.cp.querySelector('small');
