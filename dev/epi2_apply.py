@@ -66,6 +66,20 @@ for P in sys.argv[1:]:
             k = kt(ko)
             if '{0' in k: TP.append((k, en.replace('{N}', '{0}'), ja.replace('{N}', '{0}')))
             else: DI.append((ko, en, ja))
+    # 해체(반말) 판: CAS_V 서번트가 쓰는 줄. 따옴표 안만 바꾸고, 영어는 같은 문장, 일본어는 따옴표 안만 바꾼다
+    import epi2_cas; importlib.reload(epi2_cas); CS, cbad = {}, []
+    for i, qs in epi2_cas.CAS.items():
+        L, v = ROW.get(i), TRS.get(i)
+        if not L or not isinstance(v, list) or len(re.findall(r'“[^”]*”', L[0])) != len(qs) or len(re.findall(r'「[^」]*」', v[0][1])) != len(qs): cbad.append(i); continue
+        it = iter(qs); ko = re.sub(r'“[^”]*”', lambda m: '“' + next(it)[0] + '”', L[0])
+        it = iter(qs); ja = re.sub(r'「[^」]*」', lambda m: '「' + next(it)[1] + '」', v[0][1])
+        CS[L[0]] = ko; k = kt(ko)
+        if '{0' in k: TP.append((k, v[0][0].replace('{N}', '{0}'), ja.replace('{N}', '{0}')))
+        else: DI.append((ko, v[0][0], ja))
+    m2 = re.search(r'const CASL=\{', s)
+    if m2 and CS: s = s[:m2.end()] + json.dumps(CS, ensure_ascii=False)[1:-1] + ', ' + s[m2.end():]
+    else: miss.append('CASL')
+    if cbad: print('해체 판 안 맞는 줄', cbad)
     s, nd, _ = i18n.add(s, DI + UID, [])
     m_, T = i18n._blk(s, 'I18N_TPL'); nt = 0
     for ko, en, ja in TP:
