@@ -43,6 +43,9 @@ for P in sys.argv[1:]:
     rp("    return r.pt>=REL_PT[r.stage+1]&&S.war.trust>=REL_REQ[r.stage+1]; }", "    if(S.phase==='epi'&&S.epi&&S.epi.ph&&S.epi.ph!=='D'&&(S.epi.k||0)<(S.epi.relK||0)) return false;\n    return r.pt>=REL_PT[r.stage+1]&&S.war.trust>=REL_REQ[r.stage+1]; }")
     rp("later:()=>{S.flags.relNightWait=S.year+2;}", "later:()=>{ if(ep2Tight()) S.epi.nightK=S.epi.k+3; else S.flags.relNightWait=S.year+2; }")
     rp("&&!S.flags.relNight&&S.year>=(S.flags.relNightWait||0),once:0,", "&&!S.flags.relNight&&S.year>=(S.flags.relNightWait||0)&&!(S.epi&&(S.epi.k||0)<(S.epi.nightK||0)),once:0,")
+    # 저장 → 불러오기: 떠 있던 사건을 다시 띄우고, 같은 나이 안에서도 걸음마다 난수 줄기가 달라지게 한다
+    rp("    if(r==='ev'&&S.resumeEv&&S.resumeEv.src==='ART') return showArt(S.resumeEv.id);", "    if(r==='ev'&&S.resumeEv&&S.resumeEv.src==='EP2') return ep2Resume();\n    if(r==='ev'&&S.resumeEv&&S.resumeEv.src==='ART') return showArt(S.resumeEv.id);")
+    rp("R=mulberry((data.seed+data.age*7919)|0); S.pending=null;", "R=mulberry((data.seed+data.age*7919+((data.epi&&data.epi.ph&&data.epi.ph!=='D'&&data.epi.k)||0)*31337)|0); S.pending=null;")
     # 화면: 날짜
     rp("stay:stayHome(),away:!!S.flags.stayAway&&!S.flags.stayDied,", "when:ep2When(),stay:stayHome(),away:!!S.flags.stayAway&&!S.flags.stayDied,")
     rp("newLife,start,tick,", "newLife,start,tick,ep2When,")
