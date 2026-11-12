@@ -1,0 +1,113 @@
+# 에필로그 새 문장 번역 2: 첫 번째 아침 변형 · 열나흘 사건(1차분 앞쪽)
+def T(en, en_m, ja1, ja2, ja3): return [(en, ja1), (en, ja2), (en_m, ja3)]
+A = 'alt.lv_morning.'
+TR = {
+A+'b0': ("It was a morning a few days after the war. The sound of a cutting board came from the kitchen. {N} was making breakfast from nothing but what was left in the fridge.", "戦争が終わって数日後の朝だった。台所からまな板の音がした。{N}が冷蔵庫の残り物だけで朝食を作っていた。"),
+A+'b1': ("You woke to the smell of coffee. {N} was using this kitchen like someone who had always used it.", "目を覚ますとコーヒーの匂いがした。{N}はこの家の台所を、元から使っていた人のように使っていた。"),
+A+'b2': ("{N} came back from shopping early in the morning. They had even kept the receipt and laid it on the table.", "{N}が朝早く買い物をして戻ってきた。レシートまで持ち帰って、食卓に置いた。"),
+A+'cook.t': ("Make them breakfast", "朝食を作ってあげる"),
+A+'cook.r0': T("{N} watched your hands crack the egg. “…It's been a long time since someone made me breakfast.”", "{N} quietly watched your hands crack the egg. It seemed a sight they had not seen in a long time.", "{N}はあなたが卵を割る手を見ていた。「……誰かが作ってくれる朝食は久しぶりだな」", "{N}はあなたが卵を割る手を見ていた。「……誰かが作ってくれる朝食は久しぶりです」", "{N}はあなたが卵を割る手をじっと見ていた。久しぶりに見る光景のようだった。"),
+A+'cook.r1': ("{N} sat at the table and waited. Their face said they were holding back the urge to reach out and help.", "{N}は食卓に座って待った。手を出して手伝いたいのを堪えている顔だった。"),
+A+'cook.r2': T("{N} took a bite and nodded. “A little heavy on the salt. I'll do it tomorrow.”", "{N} took a bite, then moved the salt out of your reach.", "{N}は一口食べて頷いた。「少し味が濃い。明日は私がやろう」", "{N}は一口食べて頷いた。「少し味が濃いですね。明日は私がやります」", "{N}は一口食べると、塩の容器をあなたの手の届かないところへ移した。"),
+A+'together.t': ("Make it together", "一緒に作る"),
+A+'together.r0': ("The kitchen was too small for two. Your elbows bumped again and again, and each time you laughed.", "二人で立つには台所は狭かった。肘が何度もぶつかり、そのたびに笑いが出た。"),
+A+'together.r1': T("When {N} took the knife, the vegetables were sliced evenly in the blink of an eye. “This I'm confident in.”", "When {N} took the knife, the vegetables were sliced evenly in the blink of an eye. They looked a little proud.", "{N}が包丁を握ると、野菜は瞬く間に均等に切れた。「これは自信がある」", "{N}が包丁を握ると、野菜は瞬く間に均等に切れた。「これは自信があります」", "{N}が包丁を握ると、野菜は瞬く間に均等に切れた。少し得意げな顔だった。"),
+A+'together.r2': ("{N} took the pot and you took the stove. Once it was all laid out, it was too much for two. You left nothing.", "{N}が鍋を、あなたが火を受け持った。並べてみると二人には多すぎた。残さなかった。"),
+A+'now.b0': ("It was a morning a few days after the war. A convenience-store bag sat on the table. {N} said they had bought breakfast.", "戦争が終わって数日後の朝だった。食卓にコンビニの袋が置かれていた。{N}が朝食を買ってきたと言った。"),
+A+'now.b1': ("You woke to find {N} standing in the kitchen, looking down at an empty pot. They knew how to use it, their face said, but not what to make.", "目を覚ますと、{N}が台所に立って空の鍋を見下ろしていた。使い方は分かるが何を作ればいいか分からない、という顔だった。"),
+A+'now.b2': ("{N} had set a bag of bread and a jar of jam side by side on the table. This was the only breakfast they knew how to make, they said.", "{N}が食パンの袋とジャムの瓶を食卓に並べて置いていた。作れる朝食はこれだけだと言った。"),
+A+'now.cook.t': ("Make them breakfast", "朝食を作ってあげる"),
+A+'now.cook.r0': ("{N} quietly watched your hands crack the egg. It seemed a long time since anyone had made them breakfast.", "{N}はあなたが卵を割る手をじっと見ていた。誰かが作ってくれる朝食は久しぶりのようだった。"),
+A+'now.cook.r1': ("{N} sat at the table and waited. When the plate was set down, they said a small thanks for the meal.", "{N}は食卓に座って待った。皿が置かれると、小さく、いただきますと言った。"),
+A+'now.cook.r2': ("{N} ate every bite. They said they would do the dishes, and that they did well.", "{N}は残さず食べた。皿洗いは自分がやると言い、それは上手だった。"),
+A+'now.together.t': ("Make it together", "一緒に作る"),
+A+'now.together.r0': ("The kitchen was too small for two. Your elbows bumped again and again, and each time you laughed.", "二人で立つには台所は狭かった。肘が何度もぶつかり、そのたびに笑いが出た。"),
+A+'now.together.r1': ("{N} was in charge of the eggs. They burned a little. {N} put the burnt side on their own plate.", "{N}が受け持ったのは卵だった。少し焦げた。{N}は焦げた方を自分の皿に載せた。"),
+A+'now.together.r2': ("You took the stove and {N} set the plates. By the time it was ready, it was lunchtime. You ate the late breakfast slowly.", "あなたが火を受け持ち、{N}が皿を並べた。出来上がってみると昼時だった。遅い朝食をゆっくり食べた。"),
+}
+def ev(p, **k): TR.update({p + '.' + i: v for i, v in k.items()})
+def E_(p, d): TR.update({p + '.' + i: v for i, v in d.items()})
+E_('a_clothes', {
+'b0': ("{N} had nothing to wear. Dressed as they were in spirit form, they couldn't even go to the convenience store. The two of you went to the clothing shop by the station.", "{N}には着る服がなかった。霊体の頃の格好ではコンビニにも行けない。二人で駅前の服屋へ行った。"),
+'b1': ("{N} stood before the shop mirror for a long time. The sight of themselves in clothes that were neither armor nor ceremonial dress seemed strange to them.", "服屋の鏡の前で、{N}はしばらく立っていた。鎧でも礼服でもない服を着た自分の姿が、見慣れないらしかった。"),
+'b2': ("The sleeves of your clothes didn't fit {N}. You decided that today, clothes came first.", "あなたの服を借りた{N}の袖が合っていなかった。今日はまず服を買わなければと思った。"),
+'pick.t': ("Choose for them", "選んであげる"),
+'pick.r0': T("{N} came out in what you had chosen and rolled a shoulder. “Light. It won't stop a blade, though.”", "{N} came out in what you had chosen, rolled a shoulder, and nodded.", "あなたの選んだ服を着て出てきた{N}が、肩を一度回した。「軽いな。これでは刃を防げないが」", "あなたの選んだ服を着て出てきた{N}が、肩を一度回した。「軽いですね。これでは刃を防げませんけれど」", "あなたの選んだ服を着て出てきた{N}は、肩を一度回して、頷いた。"),
+'pick.r0@mage': T("{N} came out in what you had chosen and rolled up a sleeve. “Light. I like that the sleeves don't get in the way.”", "{N} came out in what you had chosen, rolled up a sleeve, and nodded.", "あなたの選んだ服を着て出てきた{N}が、袖をまくってみた。「軽いな。袖が邪魔にならなくていい」", "あなたの選んだ服を着て出てきた{N}が、袖をまくってみた。「軽いですね。袖が邪魔にならなくていいです」", "あなたの選んだ服を着て出てきた{N}は、袖をまくってみて、頷いた。"),
+'pick.r1': ("At the register, {N} didn't want the price tag removed. It was the first thing that was ever theirs.", "レジで、{N}は値札を外したがらなかった。初めて持った自分の物だったからだ。"),
+'pick.r2': ("On the way home, {N} stole glance after glance at their reflection in the shop windows.", "帰り道、{N}はショーウィンドウに映る自分の姿を何度も横目で見た。"),
+'self.t': ("Let them choose", "自分で選ばせる"),
+'self.r0': T("What {N} chose was a surprisingly plain color. “Better not to stand out. Now, at least.”", "What {N} chose was a surprisingly plain color. They seemed to have picked what would not stand out.", "{N}が選んだのは意外にも地味な色だった。「目立たない方がいい。今は」", "{N}が選んだのは意外にも地味な色だった。「目立たない方がいいです。今は」", "{N}が選んだのは意外にも地味な色だった。目立たない方を選んだようだった。"),
+'self.r0@bold': T("What {N} chose was the most eye-catching outfit in the shop. “If I'm to wear something, I'll wear it properly. No reason to hide.”", "What {N} chose was the most eye-catching outfit in the shop. They did a turn in front of the mirror.", "{N}が選んだのは店でいちばん目立つ服だった。「着るならきちんと着なければな。隠れる理由がない」", "{N}が選んだのは店でいちばん目立つ服だった。「着るならきちんと着ないと。隠れる理由がないでしょう」", "{N}が選んだのは店でいちばん目立つ服だった。鏡の前で一回りしてみせた。"),
+'self.r1': ("It took an hour. Only after touching every garment in the shop did {N} choose one.", "一時間かかった。{N}は店の服をすべて一度ずつ触ってから、ようやく一着を選んだ。"),
+'self.r2': ("What {N} chose didn't suit the season. Still, you said nothing. It was the first thing they had ever picked for themselves.", "{N}の選んだ服は季節に合っていなかった。それでもあなたは何も言わなかった。本人が選んだ最初の服だった。"),
+})
+E_('a_name', {
+'b0': ("The neighbor saw {N} at the front door and asked who they were. {N} looked back at you.", "隣の人が玄関先で{N}を見て尋ねた。どなたですかと。{N}があなたを振り返った。"),
+'b1': ("The landlord called, asking who has been living with you lately. Beyond the receiver, {N} held their breath.", "大家から電話があった。最近誰か一緒に住んでいるのかと訊く。受話器の向こうで{N}が息を殺した。"),
+'b2': ("The owner of your usual shop pointed at {N} and smiled. A new face — who might this be?", "行きつけの店の主人が{N}を指して笑った。初めて見る顔だが、どなたかと。"),
+'kin.t': ("Say they're a distant relative", "遠い親戚だと言う"),
+'kin.r0': T("“A distant relative.” On the way back, {N} turned the words over. “Not a bad lie.”", "On the way back, {N} mouthed the words “distant relative” a few times.", "「遠い親戚、か」帰り道、{N}がその言葉を繰り返した。「悪くない嘘だな」", "「遠い親戚、ですか」帰り道、{N}がその言葉を繰り返した。「悪くない嘘ですね」", "帰り道、{N}は遠い親戚という言葉を、口の形だけで何度かなぞった。"),
+'kin.r1': ("Nobody believed it, and nobody asked further. It was that kind of neighborhood.", "誰も信じなかったが、誰もそれ以上訊かなかった。この町はそういう所だった。"),
+'kin.r2': ("That night {N} asked about your family tree. Even a lie needs preparation, they said.", "その夜、{N}があなたの家系図を尋ねた。嘘にも準備が要ると言った。"),
+'mine.t': ("Say “the person I live with”", "「一緒に暮らしている人」だと言う"),
+'mine.r0': T("{N} said nothing then and there. Only at home did they ask. “What you said earlier — say it once more.”", "{N} stayed still then and there. At home, they caught your sleeve once and let go.", "{N}はその場では何も言わなかった。家に帰ってから尋ねた。「さっきの言葉、もう一度言ってみろ」", "{N}はその場では何も言わなかった。家に帰ってから尋ねた。「さっきの言葉、もう一度だけ言ってください」", "{N}はその場ではじっとしていた。家に帰って、あなたの袖を一度つかんで離した。"),
+'mine.r1': ("The other person's eyes widened for a moment, then they smiled. {N}'s ears went a little red.", "相手は一瞬目を見開いて、笑った。{N}の耳が少し赤くなった。"),
+'mine.r2': ("The person I live with. Not a word of it was wrong. {N} seemed to like the phrase.", "一緒に暮らしている人。間違いはひとつもなかった。{N}はその言葉が気に入った様子だった。"),
+})
+E_('a_train', {
+'b0': ("{N} stopped at the ticket gate. They watched the doors open and close on their own three times.", "改札の前で{N}が立ち止まった。扉がひとりでに開いて閉じるのを三度見ていた。"),
+'b1': ("The knowledge the Grail had given included how to ride a train. It did not include that there would be this many people.", "聖杯が与えた知識に、電車の乗り方はあった。人がこんなに多いということはなかった。"),
+'b2': ("{N} stood before the route map. Eyes that read a battlefield map at a glance wandered among the colored lines.", "{N}が路線図の前に立っていた。戦場の地図を一目で読んだ目が、色とりどりの線の前で迷っていた。"),
+'guide.t': ("Ride a full loop together", "一緒に乗って一周する"),
+'guide.r0': T("You rode the loop line once around. {N} never took their eyes off the window. “A city without walls. It would be worth defending.”", "You rode the loop line once around. {N} never took their eyes off the window to the end.", "環状線を一周した。{N}は窓の外から目を離さなかった。「城壁のない街か。守り甲斐がありそうだ」", "環状線を一周した。{N}は窓の外から目を離さなかった。「城壁のない街ですね。守り甲斐がありそうです」", "環状線を一周した。{N}は最後まで窓の外から目を離さなかった。"),
+'guide.r1': ("How to hold the strap, how to count the stations. There was much to teach, and {N} memorized it all at once.", "吊り革の持ち方、降りる駅の数え方。教えることは多く、{N}は一度で覚えた。"),
+'guide.r2': ("When a seat opened, {N} sat you down first. That habit will probably never be cured.", "席が空くと、{N}はあなたを先に座らせた。その癖はたぶん一生直らない。"),
+'alone.t': ("Send them off alone", "一人で行かせる"),
+'alone.r0': ("{N} came back two hours later, holding a slip of paper stamped with the commemorative seal of the terminal station.", "{N}は二時間後に戻ってきた。手には終点の駅の記念スタンプが押された紙があった。"),
+'alone.r1': T("“I got off at the wrong stop three times. The fourth was right.”", "{N} held up three fingers, folded them, then held up a fourth and smiled.", "「三度降り間違えた。四度目は合っていた」", "「三度降り間違えました。四度目は合っていました」", "{N}が指を三本立てて折り、四本目を立ててみせて笑った。"),
+'alone.r2': ("There was a transit card in {N}'s pocket when they returned. A station attendant had made it for them, they said.", "戻ってきた{N}のポケットに交通カードが入っていた。駅員が作ってくれたと言った。"),
+})
+E_('a_field', {
+'b0': ("You happened to pass, in daylight, a place where that winter's fighting had been. The broken railing had already been replaced.", "あの冬、戦いのあった場所を昼間に通ることになった。壊れた手すりはもう新しいものに替わっていた。"),
+'b1': ("{N} slowed. It was here. Ten nights ago, the two of you had stood back to back.", "{N}が歩みを緩めた。ここだった。十日前の夜、二人で背中を合わせて立った場所。"),
+'b2': ("Beyond the construction screen, traces of that winter showed. None of the passersby looked that way.", "工事の囲いの向こうに、あの冬の跡が見えた。通り過ぎる人は誰もそちらを見なかった。"),
+'stop.t': ("Stand there a while", "しばらく立ち止まる"),
+'stop.r0': T("You stood a long while. {N} spoke first. “I thought I would die here.” And laughed.", "You stood a long while. {N} pressed a foot once against the ground there, looked at you, and smiled.", "しばらく立っていた。{N}が先に口を開いた。「ここで死ぬと思った」そして笑った。", "しばらく立っていた。{N}が先に口を開いた。「ここで終わると思いました」そして笑った。", "しばらく立っていた。{N}がその場の地面を一度足で踏んでみて、あなたを見て笑った。"),
+'stop.r1': ("A child was kicking a ball on that very spot. When it rolled over, the two of you kicked it back.", "子どもが一人、その場所でボールを蹴っていた。転がってくると、二人で蹴り返した。"),
+'stop.r2': ("The wind blew. The same direction as that night, but the smell was different. It smelled of baking bread.", "風が吹いた。あの夜と同じ向きなのに、匂いが違った。パンを焼く匂いがした。"),
+'pass.t': ("Just walk on", "そのまま通り過ぎる"),
+'pass.r0': ("You both passed by without a word. At the next alley, {N} pointed at a fish-shaped pastry stall. That was enough.", "二人とも黙って通り過ぎた。次の路地で、{N}がたい焼きの店を指した。それで十分だった。"),
+'pass.r1': ("Only after passing did you breathe. {N} matched their steps to yours.", "通り過ぎてから、やっと息をした。{N}があなたの歩みに合わせて歩いた。"),
+'pass.r2': T("“No need to look back. It was a battle we won.”", "{N} gave your back a light push. It meant: go on ahead.", "「振り返る必要はない。勝った戦いだ」", "「振り返る必要はありません。勝った戦いですから」", "{N}があなたの背中を軽く押した。前へ行こうという意味だった。"),
+})
+E_('a_church', {
+'b0': ("The doorbell rang. An overseer in a cassock stood there with a briefcase. Tidying up after the war, he said.", "呼び鈴が鳴った。神父服の監督役が書類鞄を提げて立っていた。戦争の後始末だと言った。"),
+'b1': ("Someone came from the Holy Church. An incarnated Servant has few precedents, they said, and they would confirm just a few things.", "聖堂教会から人が来た。受肉したサーヴァントは前例が少ないので、いくつかだけ確認すると言った。"),
+'b2': ("With a teacup before him, the overseer looked at {N} for a long time. The eyes of one weighing whether to put it on record.", "監督役は茶碗を前に、{N}を長く見つめていた。記録に残すかどうかを量る目だった。"),
+'talk.t': ("Tell it as it is", "ありのままを話す"),
+'talk.r0': ("The overseer wrote for a while, then put down his pen. “I will enter it in the record as ‘vanished.’ That will be quieter for us both.”", "監督役は書き留めていたが、ペンを置いた。「記録には『消滅』と上げておきます。その方がお互い静かでしょう」"),
+'talk.r1': ("“So long as you cause no trouble here, the Church knows nothing.” The overseer finished his tea and rose.", "「こちらで問題を起こさない限り、教会は知らぬことです」監督役は茶を飲み干して立ち上がった。"),
+'talk.r2': ("After the overseer left, {N} locked the door. It was the first time they had locked this house's door themselves.", "監督役が去ったあと、{N}が扉に鍵をかけた。この家の扉を自分でかけたのは初めてだった。"),
+'hide.t': ("Say little", "言葉を控える"),
+'hide.r0': ("The overseer asked nothing more. At the door he left only one remark. “Live long. Both of you.”", "監督役はそれ以上訊かなかった。玄関先で一言だけ残した。「長生きなさい。お二人とも」"),
+'hide.r1': ("{N} did not say a single word to the end. Only after the overseer had gone did their shoulders ease.", "{N}は最後まで一言も話さなかった。監督役が去ってから、ようやく肩の力を抜いた。"),
+'hide.r2': ("There was no knowing what went into the papers. After that, no word ever came from the Church.", "書類に何が書かれたのかは分からなかった。それきり教会からは何の連絡もなかった。"),
+})
+E_('a_sleep', {
+'b0': ("You woke before dawn. The living room light was on. {N} sat by the window, keeping watch on the outside.", "夜明け前に目が覚めた。居間の灯りがついていた。{N}が窓辺に座って外を見張っていた。"),
+'b1': ("{N} had not yet shaken the habit of guarding the night. The body wants sleep, they said, but the eyes won't close.", "{N}はまだ夜を見張る癖を捨てられなかった。体は眠りたがるのに目が閉じないのだと言った。"),
+'b2': ("In the dead of night you heard {N} check the front door handle and come back. The third time tonight alone.", "真夜中、{N}が玄関の取っ手を確かめて戻ってくる音がした。今夜だけで三度目だった。"),
+'sit.t': ("Sit beside them", "隣に座る"),
+'sit.r0': T("The two of you sat until the sun rose. “…Is a night without enemies always this long?”", "The two of you sat until the sun rose. {N} draped half the blanket over your shoulders.", "二人で日が昇るまで座っていた。「……敵のいない夜は、こんなに長いのか」", "二人で日が昇るまで座っていた。「……敵のいない夜は、こんなに長いのですか」", "二人で日が昇るまで座っていた。{N}があなたの肩に毛布を半分かけた。"),
+'sit.r1': ("You dozed off first. When you opened your eyes, {N} was asleep too. A face you had never seen before.", "あなたが先にうとうとした。目を開けると、{N}も眠っていた。初めて見る顔だった。"),
+'sit.r2': ("You said nothing. That was what {N} needed most that night.", "何も言わなかった。それがその夜、{N}にいちばん必要なものだった。"),
+'tea.t': ("Make something warm", "温かいものを淹れてあげる"),
+'tea.r0': ("{N} wrapped both hands around the cup. Before it was finished, their head dropped.", "{N}はカップを両手で包んだ。飲み終える前に、頭が落ちた。"),
+'tea.r1': T("“You're the first master to bring tea to a sentry.”", "{N} raised the cup and bowed their head. It meant thank you.", "「見張りに茶を出す主は初めてだ」", "「見張りにお茶を出してくださる主は初めてです」", "{N}がカップを掲げて頭を下げた。ありがとうという意味だった。"),
+'tea.r2': ("You warmed some milk. {N} took one sip, grimaced, and drank it to the end.", "牛乳を温めた。{N}は一口飲んで顔をしかめ、最後まで飲み干した。"),
+})
+UID = [(k, e, j) for k, e, j in [
+ ('입을 옷','Something to Wear','着る服'),('누구냐고 물으면','When They Ask Who','誰かと訊かれたら'),('처음 타는 전철','First Train Ride','初めての電車'),('낮에 다시 걷는 길','The Same Road by Day','昼にもう一度歩く道'),
+ ('감독관의 방문','The Overseer Calls','監督役の訪問'),('잠들지 못하는 밤','A Sleepless Night','眠れない夜'),
+ ('아침을 차려 준다','Make them breakfast','朝食を作ってあげる'),('같이 차린다','Make it together','一緒に作る')]]
