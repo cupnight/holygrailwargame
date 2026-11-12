@@ -47,7 +47,12 @@
     if(e.wed&&!S.flags.relWed) return false; if(e.kid&&!relKid()) return false; if(e.track&&(!r||r.track!==e.track)) return false;
     if(e.wish&&!ep2Wish()) return false; if(e.day&&E.d!==e.day) return false; if(e.mon&&(E.m<e.mon[0]||E.m>e.mon[1])) return false; return true; }
   // 사건이 떠 있을 때 저장했다가 불러오면 같은 사건을 다시 띄운다
-  function ep2Resume(){ const id=S.resumeEv&&S.resumeEv.id, e=EP2_EV.find(e=>e.id===id); if(e) return ep2EvGo(e); const x=EP_REL.find(x=>x.id===id)||EPI_POOL.find(x=>x.id===id); if(x){ S.resumeEv={src:'EP2',id}; x.f(); } }
+  function ep2Resume(){ const id=S.resumeEv&&S.resumeEv.id||''; S.resumeEv=null;
+    if(id==='@scene'){ if(relOf()) relScene(); return; }
+    if(id.startsWith('@start')){ const x=EPI_START[+id.slice(6)]; if(x){ S.resumeEv={src:'EP2',id}; x.f(); } return; }
+    if(id.startsWith('@pool')){ const x=EPI_POOL.find(x=>x.id===id.slice(5)); if(x){ S.resumeEv={src:'EP2',id}; x.f(); } return; }
+    const e=EP2_EV.find(e=>e.id===id); if(e) return ep2EvGo(e);
+    const x=EP_REL.find(x=>x.id===id)||EPI_POOL.find(x=>x.id===id); if(x){ S.resumeEv={src:'EP2',id}; x.f(); } if(!S.pending) S.resumeEv=null; }
   function ep2EvGo(e){ const h=H_BY[S.hero], D=RLEP[e.id], r=relOf(), fx={}, R={}; S.resumeEv={src:'EP2',id:e.id};
     for(const c of D.c){ fx[c.key]=EP2_FX[e.fx[c.key]]; R[c.key]=c.r.map(x=>ep2V(x,h)); }
     epRel(e.id,{b:D.b.map(x=>ep2V(x,h)),r:R,fx,hide:k=>(e.love||[]).includes(k)&&!(r&&r.track==='love')}); }
@@ -66,7 +71,7 @@
       .concat(EP2_EV.filter(e=>!e.day&&ep2EvOk(e,r)).map(e=>({x:{id:e.id,f:()=>ep2EvGo(e)},w:3,rel:1})));
     if(!c.length) return false;
     const ms=c.filter(o=>EP2_MS.includes(o.x.id));   // 서류 · 그날 밤 · 결혼 같은 고비는 먼저 챙긴다
-    const p=ms.length&&ch(.6)?wpick(ms,o=>o.w):wpick(c,o=>o.w); if(!p.rel) E.used.push(p.x.id); S.resumeEv={src:'EP2',id:p.x.id}; p.x.f(); return true; }
+    const p=ms.length&&ch(.6)?wpick(ms,o=>o.w):wpick(c,o=>o.w); if(!p.rel) E.used.push(p.x.id); S.resumeEv={src:'EP2',id:p.x.id}; p.x.f(); if(!S.pending) S.resumeEv=null; return true; }
   // 한 걸음. true면 이 걸음을 여기서 처리했다
   function ep2Step(){ const E=S.epi; if(!E) return false;
     if(!E.ph){ if(E.i===1&&stayHome()&&relOf()) ep2Start(); else return false; }

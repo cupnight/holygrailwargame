@@ -46,6 +46,12 @@ for P in sys.argv[1:]:
     # 저장 → 불러오기: 떠 있던 사건을 다시 띄우고, 같은 나이 안에서도 걸음마다 난수 줄기가 달라지게 한다
     rp("    if(r==='ev'&&S.resumeEv&&S.resumeEv.src==='ART') return showArt(S.resumeEv.id);", "    if(r==='ev'&&S.resumeEv&&S.resumeEv.src==='EP2') return ep2Resume();\n    if(r==='ev'&&S.resumeEv&&S.resumeEv.src==='ART') return showArt(S.resumeEv.id);")
     rp("R=mulberry((data.seed+data.age*7919)|0); S.pending=null;", "R=mulberry((data.seed+data.age*7919+((data.epi&&data.epi.ph&&data.epi.ph!=='D'&&data.epi.k)||0)*31337)|0); S.pending=null;")
+    # 예전 방식 사건 · 인연 사건 · 인연 단계 장면도 불러오면 다시 뜨게 표시해 둔다
+    rp("  function epRel(id,o={}){ const E=RLEP[id], h=H_BY[S.hero],", "  function epRel(id,o={}){ if(S.phase==='epi') S.resumeEv={src:'EP2',id}; const E=RLEP[id], h=H_BY[S.hero],")
+    rp("  function relScene(){ const r=relOf(); if(!r) return; ", "  function relScene(){ const r=relOf(); if(!r) return; if(S.phase==='epi') S.resumeEv={src:'EP2',id:'@scene'}; ")
+    rp("    if(E.i<EPI_START.length) sc=EPI_START[E.i];", "    if(E.i<EPI_START.length) sc={...EPI_START[E.i],rid:'@start'+E.i};")
+    rp("sc={yrs:()=>ri(1,4),f:sc.f}; } else E.i=EPI_START.length+E.n; }", "sc={yrs:()=>ri(1,4),f:sc.f,rid:'@pool'+sc.id}; } else E.i=EPI_START.length+E.n; }")
+    rp("    sc.f();\n  }\n  function flushBuf", "    if(sc.rid) S.resumeEv={src:'EP2',id:sc.rid};\n    sc.f(); if(!S.pending&&S.resumeEv&&S.resumeEv.src==='EP2') S.resumeEv=null;\n  }\n  function flushBuf")
     # 화면: 날짜
     rp("stay:stayHome(),away:!!S.flags.stayAway&&!S.flags.stayDied,", "when:ep2When(),stay:stayHome(),away:!!S.flags.stayAway&&!S.flags.stayDied,")
     rp("newLife,start,tick,", "newLife,start,tick,ep2When,")

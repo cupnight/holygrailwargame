@@ -6908,7 +6908,7 @@ const Sim = (() => {
   // 기록 한 줄로 쓸 때(이름: “말”)
   const rluL=(h,l,kid)=>l?voiceLine(h,rluF(l,kid)):'';
   // 단계 오름 장면 (공통 지문 + 서번트별 고유 대사가 있으면 그 대사)
-  function relScene(){ const r=relOf(); if(!r) return; const h=H_BY[S.hero], st=r.stage+1, sc=RLX.sc[r.track][st], m=VREG(h)==='mute', war=S.phase==='war';
+  function relScene(){ const r=relOf(); if(!r) return; if(S.phase==='epi') S.resumeEv={src:'EP2',id:'@scene'}; const h=H_BY[S.hero], st=r.stage+1, sc=RLX.sc[r.track][st], m=VREG(h)==='mute', war=S.phase==='war';
     const u=rluQ(h,rlu(h,'s'+st));
     const body=m?[rlp(h,sc.bm),u].filter(Boolean).join(' '):[rlp(h,sc.b[war?0:1]),u||(sc.say?rlp(h,sc.say):'')].filter(Boolean).join(' ');
     decide({title:sc.t,body,war,choices:sc.c.map(c=>({t:c.t,auto:!!c.auto||sc.c.length===1,f:()=>{
@@ -10976,14 +10976,15 @@ const Sim = (() => {
     if(E.i>=EPI_START.length&&E.i<=EPI_START.length+E.n&&!E.arc&&relDue()){ passYears(ri(1,2)); if(S.dead) return; relScene(); return; }
     if(E.i>=EPI_START.length&&E.i<=EPI_START.length+E.n&&!E.arc&&relEpiTry()) return;   // 에필로그 인연 사건
     if(E.i===EPI_START.length+E.n&&!E.arc&&relLate()) return;   // 사건이 다 지난 뒤에도 함께 사는 생이면: 남은 인연 단계 · 노환 연작
-    if(E.i<EPI_START.length) sc=EPI_START[E.i];
-    else if(E.i<EPI_START.length+E.n){ const c=EPI_POOL.filter(x=>!E.used.includes(x.id)&&(!x.arc||(!E.arc&&(E.arcN||0)<2))&&x.c()); if(c.length){ sc=wpick(c,x=>x.w||1); E.used.push(sc.id); if(sc.arc) E.arcN=(E.arcN||0)+1; sc={yrs:()=>ri(1,4),f:sc.f}; } else E.i=EPI_START.length+E.n; }
+    if(E.i<EPI_START.length) sc={...EPI_START[E.i],rid:'@start'+E.i};
+    else if(E.i<EPI_START.length+E.n){ const c=EPI_POOL.filter(x=>!E.used.includes(x.id)&&(!x.arc||(!E.arc&&(E.arcN||0)<2))&&x.c()); if(c.length){ sc=wpick(c,x=>x.w||1); E.used.push(sc.id); if(sc.arc) E.arcN=(E.arcN||0)+1; sc={yrs:()=>ri(1,4),f:sc.f,rid:'@pool'+sc.id}; } else E.i=EPI_START.length+E.n; }
     else if(E.i===EPI_START.length+E.n){ sc=EPI_END; if(sc.c&&!sc.c()) sc=null; }
     else { finalYears(); return; }
     E.i++;
     if(!sc) return;
     if(sc.yrs){ const n=typeof sc.yrs==='function'?sc.yrs():sc.yrs; passYears(n); if(S.dead) return; }
-    sc.f();
+    if(sc.rid) S.resumeEv={src:'EP2',id:sc.rid};
+    sc.f(); if(!S.pending&&S.resumeEv&&S.resumeEv.src==='EP2') S.resumeEv=null;
   }
   function flushBuf(head){ const b=S._buf||[]; S._buf=null; if(head) log(head,'night'); for(const e of b){ S.log.push(e); H.log(e); } }
   function passYears(n){
@@ -12455,7 +12456,7 @@ const Sim = (() => {
   // 사건 하나를 띄운다. o.b: 본문 배열 바꾸기 · o.say: 덧붙일 말 · o.k: {K} 이름 · o.off(key): 고를 수 없는 선택지 · o.fx[key]: 효과 · o.auto: 자동 결정이 고를 선택지
   // 서번트별 고유 대사가 들어가는 에필로그 자리: say=본문 뒤 한마디, key=그 선택지 결과 뒤 한마디
   const RLU_EP={lv_cry:{say:'cry'},fr_oath:{say:'epi'},lv_night:{key:'stay',slot:'epi'}};
-  function epRel(id,o={}){ const E=RLEP[id], h=H_BY[S.hero], m=VREG(h)==='mute', ue=RLU_EP[id]||{}, us=ue.say&&rlu(h,ue.say);
+  function epRel(id,o={}){ if(S.phase==='epi') S.resumeEv={src:'EP2',id}; const E=RLEP[id], h=H_BY[S.hero], m=VREG(h)==='mute', ue=RLU_EP[id]||{}, us=ue.say&&rlu(h,ue.say);
     S.epi.relUsed=(S.epi.relUsed||[]).concat(id);
     let B=o.b||(m&&E.bm?E.bm:E.b); if(!ally()&&Array.isArray(B)){ const nb=B.filter(x=>!/동맹/.test(JSON.stringify(x))); if(nb.length) B=nb; } // 동맹이 없던 생에는 옛 동맹이 나오는 문장을 빼고 고른다
     let body=rle(h,B,o.k); const say=us?null:(o.say||(!m&&E.say));
@@ -12622,7 +12623,12 @@ const Sim = (() => {
     if(e.wed&&!S.flags.relWed) return false; if(e.kid&&!relKid()) return false; if(e.track&&(!r||r.track!==e.track)) return false;
     if(e.wish&&!ep2Wish()) return false; if(e.day&&E.d!==e.day) return false; if(e.mon&&(E.m<e.mon[0]||E.m>e.mon[1])) return false; return true; }
   // 사건이 떠 있을 때 저장했다가 불러오면 같은 사건을 다시 띄운다
-  function ep2Resume(){ const id=S.resumeEv&&S.resumeEv.id, e=EP2_EV.find(e=>e.id===id); if(e) return ep2EvGo(e); const x=EP_REL.find(x=>x.id===id)||EPI_POOL.find(x=>x.id===id); if(x){ S.resumeEv={src:'EP2',id}; x.f(); } }
+  function ep2Resume(){ const id=S.resumeEv&&S.resumeEv.id||''; S.resumeEv=null;
+    if(id==='@scene'){ if(relOf()) relScene(); return; }
+    if(id.startsWith('@start')){ const x=EPI_START[+id.slice(6)]; if(x){ S.resumeEv={src:'EP2',id}; x.f(); } return; }
+    if(id.startsWith('@pool')){ const x=EPI_POOL.find(x=>x.id===id.slice(5)); if(x){ S.resumeEv={src:'EP2',id}; x.f(); } return; }
+    const e=EP2_EV.find(e=>e.id===id); if(e) return ep2EvGo(e);
+    const x=EP_REL.find(x=>x.id===id)||EPI_POOL.find(x=>x.id===id); if(x){ S.resumeEv={src:'EP2',id}; x.f(); } if(!S.pending) S.resumeEv=null; }
   function ep2EvGo(e){ const h=H_BY[S.hero], D=RLEP[e.id], r=relOf(), fx={}, R={}; S.resumeEv={src:'EP2',id:e.id};
     for(const c of D.c){ fx[c.key]=EP2_FX[e.fx[c.key]]; R[c.key]=c.r.map(x=>ep2V(x,h)); }
     epRel(e.id,{b:D.b.map(x=>ep2V(x,h)),r:R,fx,hide:k=>(e.love||[]).includes(k)&&!(r&&r.track==='love')}); }
@@ -12641,7 +12647,7 @@ const Sim = (() => {
       .concat(EP2_EV.filter(e=>!e.day&&ep2EvOk(e,r)).map(e=>({x:{id:e.id,f:()=>ep2EvGo(e)},w:3,rel:1})));
     if(!c.length) return false;
     const ms=c.filter(o=>EP2_MS.includes(o.x.id));   // 서류 · 그날 밤 · 결혼 같은 고비는 먼저 챙긴다
-    const p=ms.length&&ch(.6)?wpick(ms,o=>o.w):wpick(c,o=>o.w); if(!p.rel) E.used.push(p.x.id); S.resumeEv={src:'EP2',id:p.x.id}; p.x.f(); return true; }
+    const p=ms.length&&ch(.6)?wpick(ms,o=>o.w):wpick(c,o=>o.w); if(!p.rel) E.used.push(p.x.id); S.resumeEv={src:'EP2',id:p.x.id}; p.x.f(); if(!S.pending) S.resumeEv=null; return true; }
   // 한 걸음. true면 이 걸음을 여기서 처리했다
   function ep2Step(){ const E=S.epi; if(!E) return false;
     if(!E.ph){ if(E.i===1&&stayHome()&&relOf()) ep2Start(); else return false; }
