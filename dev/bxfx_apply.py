@@ -91,11 +91,11 @@ for P in sys.argv[1:]:
     rp("    const k=f.cupSealed?'seal'", "    const k=f.bxEnd?'bxm_'+(f.bxEndV||'voice'):f.bxDream?'bxdream':f.cupSealed?'seal'")
     # BB가 성배를 달로 가져간 결말은 밝은 결말 곡(end_f · 사용자 제공 곡)으로. 생의 기록에 비스트 결말을 남겨 지난 생 다시 보기에도 같은 곡
     rp("wd:warDigest(), ach:(S.ach||[]).slice()};", "wd:warDigest(), bx:S.flags.bxEnd?'moon':S.flags.bxDream?'dream':'', ach:(S.ach||[]).slice()};")
-    rp("function sndEndOf(r){ if(r.wd", "function sndEndOf(r){ if(r.bx==='moon') return 'f'; if(r.wd")
-    rp('"j_boss2":{"d":2.7}', '"j_boss2":{"d":2.7},"end_f":{"d":223.5,"ls":26.3,"le":223.0},"j_end_f":{"d":12.0}')
+    rp("function sndEndOf(r){ if(r.wd", "function sndEndOf(r){ if(r.bx==='moon') return 'f'; if(r.bx==='dream') return 'g'; if(r.wd")
+    rp('"j_boss2":{"d":2.7}', '"j_boss2":{"d":2.7},"end_f":{"d":223.5,"ls":26.3,"le":223.0},"j_end_f":{"d":12.0},"end_g":{"d":208.5,"ls":0.45,"le":208.0},"j_end_g":{"d":12.0}')
     # 연출음에 반복 · 시작 위치 · 완만한 시작을 더한다(달로 간 잔의 결말 곡을 닫을 때까지 이어서 틀기 위해)
     rp("const s=c.createBufferSource(), g=c.createGain(); s.buffer=L.b; g.gain.value=o.v||1; s.connect(g); g.connect(gS); const st=Math.max(n,at);\n      s.start(st,L.off+late); track(s); duck(st,d-late);",
        "const s=c.createBufferSource(), g=c.createGain(); s.buffer=L.b; const m=SND_M[k], v0=o.v||1, st=Math.max(n,at); if(o.loop&&m.ls!=null){ s.loop=true; s.loopStart=m.ls+L.off; s.loopEnd=m.le+L.off; }\n      if(o.fin){ const N=64, cv=new Float32Array(N); for(let i=0;i<N;i++) cv[i]=v0*Math.pow(i/(N-1),2.2); g.gain.setValueAtTime(0,n); g.gain.setValueCurveAtTime(cv,st,o.fin); } else g.gain.value=v0; s.connect(g); g.connect(gS);\n      s.start(st,L.off+(o.off||0)+late); track(s); duck(st,o.loop?3600:d-late);")
-    rp("function endFx(fx){ if(!xfxOK()||!fx) return; try{ Snd.prep(endSndK(fx.k)); }catch(e){}", "function endFx(fx){ if(!xfxOK()||!fx) return; try{ Snd.prep(endSndK(fx.k)); if(/^bxm_/.test(fx.k)) Snd.prep('end_f'); }catch(e){}")
+    rp("function endFx(fx){ if(!xfxOK()||!fx) return; try{ Snd.prep(endSndK(fx.k)); }catch(e){}", "function endFx(fx){ if(!xfxOK()||!fx) return; try{ Snd.prep(endSndK(fx.k)); if(/^bxm_/.test(fx.k)) Snd.prep('end_f'); if(fx.k==='bxdream') Snd.prep('end_g'); }catch(e){}")
     s, nd, nt = i18n.add(s, TR, TT)
     open(P, 'w', encoding='utf-8').write(s); print('bxfx', 'miss', miss, 'tr', nd, nt)

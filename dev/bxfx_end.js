@@ -70,7 +70,9 @@
     TX.tick.style.opacity=seg(t,TK,TK+.3)*(1-io(seg(t,OUT,OUT+.9))); TX.tickS.style.clipPath=`inset(0 ${(100-100*seg(t,TK+.2,TK+1.3)).toFixed(1)}% 0 0)`;
     text(t,v==='me'?3.6:v==='live'?4.2:3.6,4.5); }};
   // 단꿈: 도시의 불빛이 분홍으로 물들며 가운데서부터 하나씩 꺼진다. 한 점만 남는다 → 속보
-  SCN.bxdream={HOLD:7.6,init(){ o.classList.add('flood'); setText('단꿈','그 겨울, 도시는 한 사람의 쾌락이 되었다.','당신만이 남겨졌다.','rgba(255,150,200,.95)');
+  SCN.bxdream={HOLD:7.6,init(){ o.classList.add('flood');
+     // 결말 곡(end_g): 제목 무렵부터 아주 작게 시작해 7초에 걸쳐 커지고, 닫을 때까지 반복 · 닫으면 3초 넘게 잦아든다
+     try{ const h=Snd.cue('end_g',{at:3.6,loop:true,off:.45,fin:7,sync:true}); (o._snd=o._snd||[]).push({stop:tt=>h.stop(Math.max(tt||0,3.2))}); }catch(e){} setText('단꿈','그 겨울, 도시는 한 사람의 쾌락이 되었다.','당신만이 남겨졌다.','rgba(255,150,200,.95)');
      TX.tickS.textContent=tr(`${opt.city} 전역 원인 모를 깊은 잠 확산 · 깨어나지 않는 시민 수십만 명 · 모두 웃는 얼굴로 잠들어`); OUT=99;
      const R=rng(77), g=Math.max(26,Math.min(W,H)/16); this.L=[]; for(let y=0;y<H;y+=g/2) for(let x=0;x<W;x+=g/2) if(R()<.3) this.L.push({x:x+g*.25*R(),y:y+g*.25*R(),d:Math.hypot(x/W-.5,(y/H-.5)*.8)+R()*.12});
      const far=this.L.filter(L=>L.d>.35&&L.y>H*.35); this.me=far.length?far[Math.floor(R()*far.length)]:this.L[0]; this.P=null; },

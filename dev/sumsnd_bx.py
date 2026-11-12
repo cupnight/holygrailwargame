@@ -188,16 +188,18 @@ def end_moon(v):  # ⑤ 달로 간 잔 (3판, 갈래별): 밝고 희망차게 ·
     for i, f in enumerate([523.25, 659.25, 783.99, 1046.5, 1318.51]): put(B, soft(f, 1.0), TK - .5 + i * .16, (i - 2) / 3, .07)
     return reverb(B, 2.4, .3)
 
-def end_dream():
-    music = rd(os.path.join(SRC, 'j_end_d.mp3')); d = 4.2 + music.shape[1] / SR; B = buf(d)
-    put(B, choir(SWEET[:4], 4.6, 1.6, 1.0), 0, 0, .5); put(B, drone(4.6, 1.6, 1.0), 0, 0, .3)
+DREAM = [146.83, 174.61, 220.0, 233.08, 329.63]   # 단꿈: D 단조 add9 + B♭(결말 곡 「bad end · melancholic」과 같은 조) — BB의 소리는 넣지 않는다
+def end_dream():  # ⑥ 단꿈 (2판): 효과만. 결말 곡(end_g)은 화면이 제목 무렵부터 따로 틀어 닫을 때까지 이어 간다
+    d = 8.6; B = buf(d)
+    put(B, choir(DREAM[:4], 5.0, 1.6, 1.4), 0, 0, .45); put(B, pad([73.42, 110.0], 5.0, 1.6, 1.4, bright=500), 0, 0, .25)
     for k in range(6): put(B, thump(45, .3), .6 + k * (.55 + k * .12), 0, .3 * (1 - k / 7))     # 느려지는 박동
     t0 = .9
-    while t0 < 4.0: put(B, hp(noise(.008), 2500) * env(.008, .0005, .002), t0, rng.uniform(-.9, .9), .1); t0 += .02 + .25 * abs(t0 - 2.2) / 1.8 * rng.random()
+    while t0 < 4.0: put(B, hp(noise(.008), 2500) * env(.008, .0005, .002), t0, rng.uniform(-.9, .9), .1); t0 += .02 + .25 * abs(t0 - 2.2) / 1.8 * rng.random()   # 불빛이 하나씩 꺼짐
+    put(B, soft(587.33, 2.4), 3.9, .3, .1); put(B, soft(440.0, 2.6), 4.1, -.2, .08)                  # 한 점만 남는다
     t0 = 5.0
-    while t0 < 6.1: put(B, bp(noise(.02), 1500, 5000) * env(.02, .001, .006), t0, .2, .4); t0 += rng.uniform(.05, .11)
-    put(B, bell(2093, .6), 6.15, .3, .15)
-    B = reverb(B, 2.2, .3); put(B, music[0], 4.2, -1, 1.414); put(B, music[1], 4.2, 1, 1.414); return B
+    while t0 < 6.1: put(B, bp(noise(.02), 1500, 5000) * env(.02, .001, .006), t0, .2, .4); t0 += rng.uniform(.05, .11)   # 속보 타자
+    put(B, bell(1174.66, .6), 6.15, .3, .12)
+    return reverb(B, 2.2, .3)
 
 def kp():  # ⑦ 조각이 빠져나와 손에 내려앉고, 지켜보던 시선이 끊긴다
     d = 6.7; B = buf(d); x = T(d)
