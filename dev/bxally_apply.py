@@ -104,7 +104,10 @@ for P in sys.argv[1:]:
     rp("${compHtml(w)}${MD?modsHtml(MD.me,'me'):''}</div>`;", "${compHtml(w)}${bxCardRows(w,e,'me')}${MD?modsHtml(MD.me,'me'):''}</div>`;")
     rp("<div class=\"np2\">보구 ${e.artKnown?`${esc(eArt.n)} · ${eArt.r}`:'모름'}</div>${MD?modsHtml(MD.en,'en'):''}</div>`;",
        "<div class=\"np2\">보구 ${e.artKnown?`${esc(eArt.n)} · ${eArt.r}`:'모름'}</div>${bxCardRows(w,e,'foe')}${MD?modsHtml(MD.en,'en'):''}</div>`;")
-    rp(".comp{margin-top:5px;", ".comp .cf{display:inline-flex;align-items:center;gap:4px}.comp .cf .pf{flex:none}.comp{margin-top:5px;")
+    # 11-13: 함께 싸우는 조도 같은 모양으로(얼굴 · 상태 · 보구 남음/씀)
+    rp("return `<div class=\"comp\"><small>함께 싸우는 조</small>${b.ctx.comp.map(i=>{ const p=w.pairs.find(x=>x.i===i); if(!p) return ''; const st=!p.alive?'쓰러짐':out.includes(i)?'물러남':hw(p.hp); return `<span class=\"${!p.alive||out.includes(i)?'off':''}\">${esc(Sim.pName(p))} · ${st}</span>`; }).join('')}</div>`; }",
+       "const np=b.compNP||[]; return `<div class=\"comp\"><small>함께 싸우는 조</small>${b.ctx.comp.map(i=>{ const p=w.pairs.find(x=>x.i===i); if(!p) return ''; const gone=!p.alive||out.includes(i), st=!p.alive?'쓰러짐':out.includes(i)?'물러남':hw(p.hp); return `<span class=\"cf${gone?' off':''}\">${faceHtml(p.hero,20,{unk:!p.revealed})}${esc(Sim.pName(p))} · ${st}${gone?'':` · ${np.includes(i)?'보구 씀':'보구 남음'}`}</span>`; }).join('')}</div>`; }")
+    rp(".comp{margin-top:5px;", ".comp .cf{display:inline-flex;align-items:center;gap:4px}.comp .cf .pf{flex:none}.comp .cf.off .pf{opacity:.45}.comp{margin-top:5px;")
     s, nd, nt = i18n.add(s, D, T)
     print('bxally miss', miss, 'tr', nd, nt)
     open(P, 'w', encoding='utf-8').write(s)

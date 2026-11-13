@@ -317,7 +317,7 @@ aside{display:grid;gap:18px;align-content:start}
 .vs .hb{height:5px;background:var(--panel2);border-radius:3px;overflow:hidden;margin:4px 0 2px} .vs .hb i{display:block;height:100%;background:var(--seal)} .vs .hb.sm{height:3px;margin-top:2px} .vs .hb.sm i{background:var(--dusk)}
 .vs .meta{font-size:11.5px;color:var(--dim);display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap}
 .vs .np2{font-size:11.5px;color:var(--dim);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.comp .cf{display:inline-flex;align-items:center;gap:4px}.comp .cf .pf{flex:none}.comp{margin-top:5px;display:flex;flex-wrap:wrap;gap:3px 8px;font-size:11.5px;color:var(--text)}.comp small{width:100%;color:var(--dim);font-size:10.5px}.comp span.off{color:var(--dim);text-decoration:line-through}
+.comp .cf{display:inline-flex;align-items:center;gap:4px}.comp .cf .pf{flex:none}.comp .cf.off .pf{opacity:.45}.comp{margin-top:5px;display:flex;flex-wrap:wrap;gap:3px 8px;font-size:11.5px;color:var(--text)}.comp small{width:100%;color:var(--dim);font-size:10.5px}.comp span.off{color:var(--dim);text-decoration:line-through}
 @media (max-width:480px){.vs{grid-template-columns:minmax(0,1fr)}}
 .recent{margin:10px 0 0;max-height:220px;overflow-y:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--ink);padding:8px 12px;display:grid;gap:4px;font-family:var(--f-story);font-size:14px;line-height:1.6}
 .recent .rl{color:#cfc8ba}
@@ -15398,7 +15398,7 @@ function bxCardRows(w,e,side){ const c=w&&w.crisis; if(!c||c.type!=='beast3R'||!
   return `<div class="comp"><small>키아라를 지키는 센티넬 ${gs.length}</small>${gs.map(u=>chip(u.hero,`${u.revealed?Sim.H_BY[u.hero].name:Sim.cn(u)} · KP ${u.kp} · ${hw(u.hp)}`,!u.revealed)).join('')}</div>`; }
 function compHtml(w){ const b=w.battle; if(!b||!b.ctx||!b.ctx.comp||!b.ctx.comp.length) return ''; const out=b.compOut||[];
   const hw=v=>v>70?'멀쩡함':v>40?'다침':'크게 다침';
-  return `<div class="comp"><small>함께 싸우는 조</small>${b.ctx.comp.map(i=>{ const p=w.pairs.find(x=>x.i===i); if(!p) return ''; const st=!p.alive?'쓰러짐':out.includes(i)?'물러남':hw(p.hp); return `<span class="${!p.alive||out.includes(i)?'off':''}">${esc(Sim.pName(p))} · ${st}</span>`; }).join('')}</div>`; }
+  const np=b.compNP||[]; return `<div class="comp"><small>함께 싸우는 조</small>${b.ctx.comp.map(i=>{ const p=w.pairs.find(x=>x.i===i); if(!p) return ''; const gone=!p.alive||out.includes(i), st=!p.alive?'쓰러짐':out.includes(i)?'물러남':hw(p.hp); return `<span class="cf${gone?' off':''}">${faceHtml(p.hero,20,{unk:!p.revealed})}${esc(Sim.pName(p))} · ${st}${gone?'':` · ${np.includes(i)?'보구 씀':'보구 남음'}`}</span>`; }).join('')}</div>`; }
 function vsHtml(endE){
   const S=Sim.S, w=S.war, e=w.battle?w.battle.e:endE, h=Sim.hero(), eh=Sim.H_BY[e.hero];
   const mp=Sim.myParams().p, ep=Sim.npcParams(e).p;
