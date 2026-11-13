@@ -23,7 +23,7 @@ G = [
      "인연 1~2단계에서는 '쌓인 인연 덕에 조금씩 가까워진다'는 회색 칩이 붙고, 3단계에서는 궁합 어긋남 칩이 붙지 않습니다."]),
    '서번트가 선택을 마음에 들어 했는데 궁합이 어긋난 경우, 칩 문구가 그 흐름에 맞게 이어집니다.']),
  ('에필로그', [
-   ('시간이 흐르는 방식이 바뀝니다. 처음 14일은 하루 씩, 첫 1년은 한 달씩, 그 뒤 10년은 1년씩 흐릅니다.', [
+   ('시간이 흐르는 방식이 바뀝니다. 처음 14일은 하루씩, 첫 1년은 한 달씩, 그 뒤 10년은 1년씩 흐릅니다.', [
      '구간마다 그 시기의 일상 묘사가 나옵니다.',
      '새 사건 81개가 추가됩니다.',
      '현재 에필로그 구성 상, 중년에 결혼 등의 이벤트가 진행되는 경우가 많아 개선하게 되었습니다.']),
@@ -39,10 +39,13 @@ G = [
      '지난 생, 서번트 도감, 업적이 배경 위에 펼쳐집니다.',
      "'움직임 줄이기'를 켠 기기에서도 배경이 움직이되, 1초에 30번 그립니다."]),
    '게임이 로딩 중인 경우, 로딩 화면이 추가됩니다.']),
+ ('결과 화면', [
+   '성배전쟁 기록의 조 목록에 서번트 얼굴이 표시됩니다.',
+   '결과 화면을 이미지로 저장하는 「캡처하기」가 추가됩니다.']),
  ('서번트 대사 말투', [
    '갈림길에서의 평가, 싸우지 않을 때의 재촉, 다쳐서 쉴 때의 한마디가 서번트 말투에 맞게 바뀝니다.']),
  ('업적과 패치 노트', [
-   '신규 위기 업적 17개가 추가됩니다.',
+   '신규 위기 업적 18개가 추가됩니다.',
    '업적 화면은 분류 안에서 최근에 추가된 업적 순서로 정렬됩니다.']),
  ('수정', [
    ('인질을 구하는 날에 결투장 사건이 겹치던 문제를 수정했습니다.', [
@@ -75,7 +78,7 @@ TR = {
  "인연 1~2단계에서는 '쌓인 인연 덕에 조금씩 가까워진다'는 회색 칩이 붙고, 3단계에서는 궁합 어긋남 칩이 붙지 않습니다.": ("At bond stages 1–2, a grey chip reading 'growing a little closer thanks to the bond you've built' appears, and at stage 3 no compatibility-clash chip appears.", '縁1～2段階では「積み重ねた縁のおかげで少しずつ近づく」という灰色のチップが付き、3段階では相性のずれのチップが付きません。'),
  '서번트가 선택을 마음에 들어 했는데 궁합이 어긋난 경우, 칩 문구가 그 흐름에 맞게 이어집니다.': ('When a Servant liked your choice but your compatibility clashes, the chip text now follows on naturally.', 'サーヴァントが選択を気に入ったのに相性が噛み合わない場合、チップの文言がその流れに合わせてつながります。'),
  '에필로그': ('Epilogue', 'エピローグ'),
- '시간이 흐르는 방식이 바뀝니다. 처음 14일은 하루 씩, 첫 1년은 한 달씩, 그 뒤 10년은 1년씩 흐릅니다.': ('Time now flows differently: the first 14 days pass one day at a time, the first year one month at a time, and the following 10 years one year at a time.', '時間の流れ方が変わります。最初の14日は一日ずつ、最初の1年はひと月ずつ、その後の10年は1年ずつ流れます。'),
+ '시간이 흐르는 방식이 바뀝니다. 처음 14일은 하루씩, 첫 1년은 한 달씩, 그 뒤 10년은 1년씩 흐릅니다.': ('Time now flows differently: the first 14 days pass one day at a time, the first year one month at a time, and the following 10 years one year at a time.', '時間の流れ方が変わります。最初の14日は一日ずつ、最初の1年はひと月ずつ、その後の10年は1年ずつ流れます。'),
  '구간마다 그 시기의 일상 묘사가 나옵니다.': ('Each stretch shows descriptions of everyday life for that period.', '区間ごとに、その時期の日常の描写が出ます。'),
  '새 사건 81개가 추가됩니다.': ('81 new events have been added.', '新しい出来事が81個追加されます。'),
  '현재 에필로그 구성 상, 중년에 결혼 등의 이벤트가 진행되는 경우가 많아 개선하게 되었습니다.': ('This was changed because, with the previous epilogue structure, events like marriage often happened in middle age.', 'これまでのエピローグの構成では、結婚などの出来事が中年になってから進むことが多かったため、改善しました。'),
@@ -91,10 +94,13 @@ TR = {
  '지난 생, 서번트 도감, 업적이 배경 위에 펼쳐집니다.': ('Past lives, the Servant Codex, and achievements open up over the background.', '過去の人生、サーヴァント図鑑、実績が背景の上に広がります。'),
  "'움직임 줄이기'를 켠 기기에서도 배경이 움직이되, 1초에 30번 그립니다.": ("Even on devices with 'Reduce motion' turned on, the background moves, drawn 30 times per second.", '「動きを減らす」をオンにした端末でも背景は動きますが、1秒に30回描画します。'),
  '게임이 로딩 중인 경우, 로딩 화면이 추가됩니다.': ('A loading screen has been added while the game is loading.', 'ゲームの読み込み中にロード画面が表示されるようになります。'),
+ '결과 화면': ('Result screen', '結果画面'),
+ '성배전쟁 기록의 조 목록에 서번트 얼굴이 표시됩니다.': ("Servant faces are now shown in the team list of the Holy Grail War record.", '聖杯戦争の記録の組一覧に、サーヴァントの顔が表示されます。'),
+ '결과 화면을 이미지로 저장하는 「캡처하기」가 추가됩니다.': ('A 「Capture」 button has been added to save the result screen as an image.', '結果画面を画像として保存する「キャプチャ」が追加されます。'),
  '서번트 대사 말투': ('Servant speech style', 'サーヴァントの台詞の口調'),
  '갈림길에서의 평가, 싸우지 않을 때의 재촉, 다쳐서 쉴 때의 한마디가 서번트 말투에 맞게 바뀝니다.': ("Servants' comments at crossroads, their urging when you aren't fighting, and their remarks while resting from injuries now match each Servant's speech style.", '分かれ道での評価、戦わないときの催促、負傷して休むときのひと言が、サーヴァントの口調に合わせて変わります。'),
  '업적과 패치 노트': ('Achievements and patch notes', '実績とパッチノート'),
- '신규 위기 업적 17개가 추가됩니다.': ('17 new crisis achievements have been added.', '新しい危機の実績が17個追加されます。'),
+ '신규 위기 업적 18개가 추가됩니다.': ('18 new crisis achievements have been added.', '新しい危機の実績が18個追加されます。'),
  '업적 화면은 분류 안에서 최근에 추가된 업적 순서로 정렬됩니다.': ('Within each category, the achievement screen is now sorted by when achievements were added.', '実績画面は、分類の中で追加された順に並ぶようになります。'),
  '수정': ('Fixes', '修正'),
  '인질을 구하는 날에 결투장 사건이 겹치던 문제를 수정했습니다.': ('Fixed an issue where a duel event could overlap with the day you rescue a hostage.', '人質を救う日に決闘の出来事が重なっていた問題を修正しました。'),
