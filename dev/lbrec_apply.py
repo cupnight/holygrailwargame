@@ -1,5 +1,5 @@
 """로비: 지난 생 · 서번트 도감 · 업적(· 보낸 조)을 「이 밤의 이야기와 규칙」처럼 배경 위에 펼친다 (A안 · 11-13).
-보낸 조가 있으면: 소식은 「이 밤의 이야기와 규칙」 옆 작은 알림, 버튼 줄에 「보낸 조」, 알림 켜고 끄기는 보낸 조 탭 머리글 옆.
+보낸 조가 있으면: 소식은 버튼 묶음 위 한 줄, 버튼 줄에 「보낸 조」, 알림 켜고 끄기는 보낸 조 탭 머리글 옆.
 lobby_apply.py 뒤에 쓴다. 사용: python3 lbrec_apply.py <game.html>"""
 import sys
 CSS = r'''
@@ -19,16 +19,15 @@ CSS = r'''
 #lbRec .past-item,#lbRec .dx,#lbRec .dex-item,#lbRec .ach,#lbRec .ach-item,#lbRec .sent-item{background:rgba(26,23,36,.74);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 body.lb-rec #intro.lb .lb-screen{opacity:0;transition:opacity .45s;pointer-events:none}
 
-/* 보낸 조: 소식은 「이 밤의 이야기와 규칙」 옆 작은 알림으로, 알림 켜고 끄기는 보낸 조 탭 안으로 */
+/* 보낸 조: 소식은 버튼 묶음 위 한 줄로, 알림 켜고 끄기는 보낸 조 탭 안으로 */
 #intro.lb #ghNews{display:none!important}
-#intro.lb .lb-morerow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:12px}
-#intro.lb .lb-morerow .lb-more{margin-top:0}
-#intro.lb .lb-news{display:inline-flex;align-items:center;gap:7px;padding:4px 11px 4px 9px;border-radius:999px;border:1px solid rgba(201,164,92,.5);background:rgba(30,24,20,.72);color:var(--gold2);font:inherit;font-size:12px;line-height:1.3;cursor:pointer;text-shadow:0 1px 6px #08060e}
+#intro.lb .lb-news{display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;padding:9px 14px;border-radius:10px;border:1px solid rgba(201,164,92,.45);background:linear-gradient(180deg,rgba(44,35,24,.80),rgba(22,19,30,.80));color:var(--gold2);font:inherit;font-size:13px;line-height:1.3;cursor:pointer;text-align:left}
 #intro.lb .lb-news[hidden]{display:none}
 #intro.lb .lb-news:hover{border-color:var(--gold)}
-#intro.lb .lb-news i{width:6px;height:6px;flex:none;border-radius:50%;background:var(--seal,#e58b93)}
+#intro.lb .lb-news i{width:7px;height:7px;flex:none;border-radius:50%;background:var(--seal,#e58b93)}
 #intro.lb .lb-news b{font-weight:500;color:var(--text);font-variant-numeric:tabular-nums}
-#intro.lb .lb-news .ar{color:var(--dim)}
+#intro.lb .lb-news .ar{margin-left:auto;color:var(--dim)}
+body.lb-wide #intro.lb .lb-acts .lb-news{grid-column:1/-1}
 #intro.lb .lb-row.n4 .btn{font-size:13px;padding-inline:4px}
 #paneSent .past-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
 #paneSent #ghnRow{margin:0 0 0 auto}
@@ -61,8 +60,7 @@ JS = r'''
   const acts=$q('#intro .lb-acts'), row=$q('#intro .lb-row'), gr=$q('#ghnRow');
   const pill=document.createElement('button'); pill.type='button'; pill.className='lb-news'; pill.hidden=true;
   pill.innerHTML='<i aria-hidden="true"></i><span>다른 성배전쟁에서 온 소식</span><b></b><span class="ar" aria-hidden="true">›</span>';
-  // 제목 아래 「이 밤의 이야기와 규칙」 옆에 둔다(버튼 묶음을 밀어내지 않게)
-  { const mo=$q('#intro .lb-more'); if(mo){ const r=document.createElement('div'); r.className='lb-morerow'; mo.parentNode.insertBefore(r,mo); r.append(mo,pill); } else if(acts) acts.insertBefore(pill,acts.firstChild); }
+  if(acts) acts.insertBefore(pill,acts.firstChild);
   pill.onclick=()=>{ VT='sent'; renderVT(); open(); };
   const sb=document.createElement('button'); sb.type='button'; sb.className='btn'; sb.dataset.v='sent'; sb.textContent='보낸 조'; sb.hidden=true;
   sb.onclick=()=>{ VT='sent'; renderVT(); }; if(row) row.appendChild(sb);
