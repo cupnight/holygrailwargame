@@ -4,15 +4,18 @@
 (()=>{
 const K='cupnight.test.v1', D={pow:0,dmgIn:1,dmgOut:1,hero:'',crisis:'nat'};
 let T=Object.assign({},D); try{ Object.assign(T,JSON.parse(localStorage.getItem(K)||'{}')); }catch(e){}
-const save=()=>{ try{ localStorage.setItem(K,JSON.stringify(T)); }catch(e){} apply(); };
-function apply(){ window.__TEST=T; window.__FORCE_HERO=T.hero||undefined; window.__FORCE_CRISIS=T.crisis==='nat'?undefined:T.crisis==='off'?false:T.crisis; badge(); }
+const save=()=>{ try{ const {hook:_,...o}=T; localStorage.setItem(K,JSON.stringify(o)); }catch(e){} apply(); };
+function apply(){ T.hook=hook; window.__TEST=T; window.__FORCE_HERO=T.hero||undefined; window.__FORCE_CRISIS=T.crisis==='nat'?undefined:T.crisis==='off'?false:T.crisis; badge(); }
 const on=()=>T.pow!==0||T.dmgIn!==1||T.dmgOut!==1||!!T.hero||T.crisis!=='nat';
 // 받는 피해 · 주는 피해: 전투 중 체력이 줄어드는 만큼에 배율을 곱한다
 function wrapHp(o,kind){ if(!o||o.__tw||typeof o.hp!=='number') return; let v=o.hp; Object.defineProperty(o,'__tw',{value:1,enumerable:false});
   Object.defineProperty(o,'hp',{enumerable:true,configurable:true,get(){ return v; },set(n){ const w=Sim.S&&Sim.S.war;
     if(w&&w.battle&&typeof n==='number'&&n<v){ if(kind==='me'&&T.dmgIn!==1) n=Math.max(0,v-(v-n)*T.dmgIn); else if(kind==='e'&&w.battle.e===o&&T.dmgOut!==1) n=Math.max(0,v-(v-n)*T.dmgOut); }
     v=n; }}); }
-setInterval(()=>{ if(T.dmgIn===1&&T.dmgOut===1) return; const S=Sim.S, w=S&&S.war; if(!w) return; wrapHp(w,'me'); (w.pairs||[]).forEach(p=>wrapHp(p,'e')); ((w.crisis&&w.crisis.units)||[]).forEach(u=>wrapHp(u,'e')); },250);
+const wrapAll=()=>{ if(T.dmgIn===1&&T.dmgOut===1) return; const S=Sim.S, w=S&&S.war; if(!w) return; wrapHp(w,'me'); (w.pairs||[]).forEach(p=>wrapHp(p,'e')); ((w.crisis&&w.crisis.units)||[]).forEach(u=>wrapHp(u,'e')); };
+setInterval(wrapAll,250);
+// 엔진이 합마다 부른다: 이번 합의 나와 상대에 배율을 걸어 둔다
+const hook=(w,e)=>{ if(T.dmgIn===1&&T.dmgOut===1) return; wrapHp(w,'me'); wrapHp(e,'e'); };
 // ---- 화면 ----
 const st=document.createElement('style'); st.textContent=`
 #tpBtn{position:fixed;left:max(10px,env(safe-area-inset-left,0px));bottom:max(10px,env(safe-area-inset-bottom,0px));z-index:2147482000;font:600 12px/1 system-ui,sans-serif;padding:8px 11px;border-radius:999px;border:1px solid #6b5a8a;background:#1d1828ee;color:#d8cdf0;cursor:pointer}

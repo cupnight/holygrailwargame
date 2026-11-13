@@ -24,7 +24,7 @@ pre = '<script>window.__PORT=' + json.dumps(P) + ';window.__LOBBY=' + json.dumps
 s = s.replace('<body>\n', '<body>\n' + pre, 1)
 # 테스트 조절판: 내 판정 보정 자리를 엔진에 하나 열고, 조절판 스크립트를 맨 끝에 붙인다
 o = "+npFxP(b,'me'); b.judged=false;"
-if s.count(o) == 1: s = s.replace(o, "+npFxP(b,'me')+((globalThis.__TEST&&globalThis.__TEST.pow)||0); b.judged=false;")
+if s.count(o) == 1: s = s.replace(o, "+npFxP(b,'me')+((globalThis.__TEST&&globalThis.__TEST.pow)||0); if(globalThis.__TEST&&globalThis.__TEST.hook) globalThis.__TEST.hook(w,e); b.judged=false;")
 else: miss.append('judge hook')
 TP = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_panel.js'), encoding='utf-8').read()
 # 번역기가 켜지기 전에 실행되도록 화면 스크립트 앞에 둔다(뒤에 붙이면 번역기가 스크립트 글자까지 옮기려다 멈춘다)
