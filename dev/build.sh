@@ -28,6 +28,7 @@ python3 ach_order_apply.py build/game.html       # 업적 화면: 업데이트�
 python3 reg1113_apply.py build/game.html         # 갈림길 · 재촉 · 쉼 대사를 서번트 말투에 맞게 (11-13)
 python3 bxscn_apply.py build/game.html           # 비스트 위기 화면 표시 · 시나리오 분리 (11-13)
 python3 cxui_apply.py build/game.html            # 후반 위기 현판 (11-13)
+python3 bxnun_apply.py build/game.html           # 비스트 위기: 수녀(키아라)의 소원 · 대사 · 이벤트 (11-13)
 python3 fix1113_apply.py build/game.html         # 11-13 문의: 인질 구출전 대화 · 인질 날 결투장 겹침
 python3 lobby_apply.py build/game.html            # 로비 새 배경 · 새 배치 (11-13)
 python3 lbrec_apply.py build/game.html            # 로비: 기록 화면을 배경 위에 펼침 (A안 · 11-13)
