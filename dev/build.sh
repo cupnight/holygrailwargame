@@ -47,4 +47,4 @@ python3 loading_apply.py build/game.html          # 로딩 화면: 성배에 금
 python3 bxfx_apply.py build/game.html            # 비스트 연출 ①~⑥: 봉인 · 빈 자리 · 강림 · 키아라 입장 · 단독현현 · 결말 (11-12 시안 → 11-13 연결)
 python3 bxfx2_apply.py build/game.html           # 비스트 연출 ⑦~⑪: KP · 해방 · 봉인이 갈라짐 · 토벌령 · 격돌 (11-13 연결)
 python3 pnver_apply.py build/game.html            # 패치 노트 버전 번호 v1.00~ (11-14)
-python3 pn117_apply.py build/game.html            # 패치 노트 v1.17 (11-14)
+python3 pn117_apply.py build/game.html            # 패치 노트 v2.00 (11-14)
