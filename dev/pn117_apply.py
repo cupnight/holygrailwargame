@@ -54,7 +54,8 @@ G = [
    '우정 3단계의 이름이 「죽마고우」에서 「지기」로 바뀝니다.',
    '성유물을 다시 뽑던 문제를 수정했습니다.',
    '선택 창이 뜬 직후 0.3초 동안은 터치를 받지 않아, 실수로 선택지를 누르는 일을 막습니다.',
-   '랭크가 한 단계 내려갈 때 +가 그대로 남습니다. (예: A+ → B+)']),
+   '랭크가 한 단계 내려갈 때 +가 그대로 남습니다. (예: A+ → B+)',
+   '전투 중 대화로 이미 동맹을 맺은 조가 사건으로 다시 동맹을 제안하던 문제를 수정했습니다.']),
 ]
 TR = {
  '달에서 온 이레귤러': ('The Irregular from the Moon', '月から来たイレギュラー'),
@@ -109,6 +110,7 @@ TR = {
  '우정 3단계의 이름이 「죽마고우」에서 「지기」로 바뀝니다.': ('Friendship stage 3 has been renamed to 「Sworn Friends」.', '友情3段階の名前が「無二の友」に変わります。'),
  '성유물을 다시 뽑던 문제를 수정했습니다.': ('Fixed an issue where the relic was drawn again.', '聖遺物を引き直していた問題を修正しました。'),
  '선택 창이 뜬 직후 0.3초 동안은 터치를 받지 않아, 실수로 선택지를 누르는 일을 막습니다.': ('Choice windows now ignore touches for 0.3 seconds after appearing, to prevent accidental taps.', '選択ウィンドウが出た直後の0.3秒はタッチを受け付けず、誤って選択肢を押すのを防ぎます。'),
+ '전투 중 대화로 이미 동맹을 맺은 조가 사건으로 다시 동맹을 제안하던 문제를 수정했습니다.': ('Fixed an issue where a team you had already allied with through talk in battle would propose an alliance again in an event.', '戦闘中の対話ですでに同盟を結んだ組が、出来事で再び同盟を持ちかけてきた問題を修正しました。'),
  '랭크가 한 단계 내려갈 때 +가 그대로 남습니다. (예: A+ → B+)': ('When a rank drops by one step, the + now remains. (e.g. A+ → B+)', 'ランクが一段階下がるとき、＋がそのまま残ります。（例：A+ → B+）'),
 }
 def js(x): return json.dumps(x, ensure_ascii=False)
