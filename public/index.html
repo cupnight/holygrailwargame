@@ -7610,7 +7610,7 @@ const Sim = (() => {
     if(w.passDay!==w.day){ w.passDay=w.day; const passive=(w.strikes||0)<Math.floor(w.day/3)&&w.day-(w.lastStrike||0)>=2; w.passN=passive?(w.passN||0)+1:0; }
     if(!w.passN||w.exposure<40) return false;
     if(!ch(Math.min(0.35,0.04+0.07*(w.passN-1))+(Object.keys(w.close||{}).length?.05:0))) return false;
-    const who=wpick(L,x=>(w.close||{})[x.g]?3:1), p=wpick(cap,x=>HOST_AID.includes(x.aid)?2:1), h=hero(); w.hostDone=true; w.host={id:who.id,g:who.g,n:who.n,i:p.i,d:w.day};
+    const who=wpick(L,x=>(w.close||{})[x.g]?3:1), p=wpick(cap,x=>HOST_AID.includes(x.aid)?2:1), h=hero(); w.hostDone=true; w.hostDay=w.day; w.host={id:who.id,g:who.g,n:who.n,i:p.i,d:w.day};
     decide({title:'인질',body:`${pName(p)} 조의 사자가 사진 한 장을 두고 갔다. ${who.n}${J(who.n,이)} 낯선 방 의자에 묶여 있다. 뒷면에 한 줄이 적혀 있었다. “결계 밖으로 나오지 않는 마스터에게는 이 방법밖에 없더군. 오늘 밤, 혼자 와라.”`,war:true,choices:[
       {t:'구하러 간다',d:'오늘 밤 그 조의 거처로 쳐들어간다. 상대는 판을 깔아 두고 기다린다',auto:true,f:()=>{ w.host.go=true; return `${h.name}${J(h.name,이)} 말없이 무기를 챙겼다.`; }},
       {t:'령주: 데려와라',d:'령주 1획 · 서번트가 반드시 구해 온다',seal:true,off:w.seals<1,f:()=>{ useSeal('데려와라'); addIntel(p,30); hostSaved(); return ''; }},
@@ -7790,6 +7790,7 @@ const Sim = (() => {
   MASTER_EV.avenger.push({c:p=>W().day>=5,f:p=>{log(`몰락 가문의 막내 ${p.mname}${J(p.mname,이)} 명문가 저택 하나를 습격했다는 소문이 돌았다. 저택은 반쯤 불탔다.`,'war');const t=alivePairs().find(x=>x.aid==='heir');if(t){t.hp=clamp(t.hp-20);}}});
   function masterEvent(force){
     const w=W(); if(w.ended||!w.heroAlive||S.pending||S.dead) return;
+    if(w.hostDay===w.day) return; // 인질 사건이 난 날: 그날 밤은 구출 하나로 정해져 있으니 '오늘 밤 결판' 약속이 겹치지 않게
     if(!force&&!ch(.42)) return;
     const opts=[];
     for(const p of contracted()){ const arc=MASTER_EV[p.aid]; if(!arc) continue; p.arc=p.arc||0;
@@ -9857,7 +9858,7 @@ const Sim = (() => {
       log(bd>=60?'당신의 말에 상대의 칼끝이 흔들렸다. 상대가 먼저 무기를 거두었다.':'상대가 먼저 무기를 거두었다. 오늘 밤은 여기까지다.','war');
       w.trust=clamp(w.trust+Math.round(mixR(h.traits.includes('연민')?4:0,alR({선:4,중용:2,악:0}))));
       if(bd>=70&&!allyBlock()&&e.master&&ch(.35)){ e.ally=true;e.allyDay=W().day; e.known=true; S.flags.allyName=e.mname;allyConfide(e);wrec('ally',`${cn(e)} 조 ${e.mname}${J(e.mname,과)} 동맹`,{p:e.i}); log(`${e.mname}: “…당신이라면 믿어 볼 수 있겠어요. 마지막 둘이 남을 때까지만.”`,'enemy'); log(`${pName(e)} 조와 동맹을 맺었다.`,'war'); }
-      return endBattle(); }
+      b.res='talk'; return endBattle(); }
     if(ch(.45-bd/250)){ w.hp=clamp(w.hp-ri(4,9)); log('대답 대신 칼끝이 날아왔다.','war'); if(w.hp<=0){ myHeroDown(e); return endBattle(); } }
     soon(()=>battleRound());
   }
@@ -9915,7 +9916,7 @@ const Sim = (() => {
   }
   const BRES={win:'승리',mutual:'동귀어진',lose:'패배',retreat:'퇴각',fled:'상대가 물러남',draw:'승부 없음',asn:'적 마스터 암살',fail:'암살 실패',talk:'대화로 끝남',eAsn:'적 어새신의 암습'};
   function endBattle(){ const w=W(); const b=w.battle; if(b) b.fx=[]; if(b&&w.heroAlive&&!b.relPer){ b.relPer=1; relGain(5); } if(b&&w.heroAlive&&b.res==='win'&&w.hp<20&&!b.relNear){ b.relNear=1; relGain(5); } if(b&&!b.relDone){ b.relDone=1; relAfterBattle(b); } if(b&&b.andersenUsed&&!b.andDone&&w.heroAlive){ b.andDone=1; add({will:2}); }
-    if(b&&b.ctx.hostage&&!b.hostDone){ b.hostDone=true; const ok=w.heroAlive&&(['win','fled','asn'].includes(b.res)||(b.res==='draw'&&ch(.5))); if(ok) hostSaved(); else hostLost(true); }
+    if(b&&b.ctx.hostage&&!b.hostDone){ b.hostDone=true; const ok=w.heroAlive&&(['win','fled','asn','talk'].includes(b.res)||(b.res==='draw'&&ch(.5))); if(ok) hostSaved(); else hostLost(true); }
     if(b&&b.ctx.defend&&!b.ctx.claim&&w.heroAlive&&b.e&&b.e.alive) b.e.fortRead=Math.min(3,(b.e.fortRead||0)+1);
     if(b&&w.heroAlive&&!['lose','retreat','fail'].includes(b.res)){ if(b.ctx.coal2) S.flags.coalBeat=1; if(b.ctx.siege) S.flags.siegeHeld=1; if(b.ctx.final&&b.madUsed&&b.res==='win') S.flags.madFinal=1; }
     if(b&&b.eMadUsed&&!b.eMadDone){ b.eMadDone=true; if(b.e&&b.e.alive) b.e.hp=clamp(b.e.hp-10); }

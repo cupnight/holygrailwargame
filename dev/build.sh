@@ -23,4 +23,5 @@ python3 ea_apply.py build/game.html              # 에미야[얼터]: 보구 특
 python3 fix1112_apply.py build/game.html         # 11-12 문의: 교회 의뢰 보상 · 죽마고우 → 지기
 python3 alex_apply.py build/game.html            # 이스칸다르의 소원: 수육
 python3 epi2_apply.py build/game.html            # 에필로그 시간 흐름: 일 · 달 · 해 구간
+python3 fix1113_apply.py build/game.html         # 11-13 문의: 인질 구출전 대화 · 인질 날 결투장 겹침
 python3 lobby_apply.py build/game.html            # 로비 새 배경 · 새 배치 (11-13)
