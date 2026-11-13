@@ -171,7 +171,7 @@ function build(){cancelAnimationFrame(raf);if(!active)return;const vw=innerWidth
  const boats=V===VR?Array.from({length:4},()=>({t:.25+R()*.6,o:(R()-.5)*.9,v:(R()<.5?1:-1)*(.0025+R()*.003)})):[];
  Lr={W,H,HS,SA,wide,O,V,skyg,ground,star,lights,bloom,fx,lx,cars,boats,wi:0,off:[],bloomed:false,shoot:null,nextShoot:4+R()*5,R};
  fit();T0=performance.now();requestAnimationFrame(()=>{void stage.offsetWidth;stage.classList.add('in')});
- if(RM)frame(T0+9000);else raf=requestAnimationFrame(frame)}
+ if(RM)frame(T0+9000);else raf=requestAnimationFrame(frame);rdyFire()}
 // 도시 아랫줄은 늘 버튼 묶음 바로 위에. 배경 폭의 78%는 늘 보이게
 function fit(){if(!Lr||!active)return;const vw=innerWidth,vh=innerHeight,W=Lr.W,H=Lr.H,FY=Lr.wide?H-160:620,acts=qs('#intro .lb-acts'),top=acts?Math.min(vh,acts.getBoundingClientRect().top+scrollY):vh*.7,line=top-6;
  let s=Math.max(vw/W,vh/H)*1.035,y=line-FY*s;if(y>0){s=Math.max(s,line/FY);y=line-FY*s}
@@ -203,8 +203,10 @@ function frame(now){if(!active||!Lr)return;if(document.documentElement.classList
  if(!RM&&!document.hidden&&active)raf=requestAnimationFrame(frame)}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Lr&&active&&!RM){cancelAnimationFrame(raf);raf=requestAnimationFrame(frame)}});
 let rz=0;addEventListener('resize',()=>{if(!active)return;fit();clearTimeout(rz);rz=setTimeout(()=>{const wide=innerWidth/innerHeight>1.15;if(!Lr||wide!==Lr.wide)build();else fit()},200)});
+let RDY=[];const rdyFire=()=>{const q=RDY.splice(0);q.forEach(f=>{try{f()}catch(e){}})};
+function onReady(f){if(Lr&&active)f();else RDY.push(f)} // 로딩 화면이 로비 배경이 다 그려졌는지 묻는다
 function enter(o){stage=stage||qs('#lbStage');if(!stage)return;SPR=SPR||mkSpr();lives=o.lives|0;met=o.met|0;active=true;qs('#lobbyBg').hidden=false;document.body.classList.add('lb-on');BI=pick();
- const B=BOARDS[BI],key=B.V.img[0],my=++tok;if(IMGS[key]){build();return}const im=new Image();im.onload=()=>{IMGS[key]=im;if(my===tok&&active)build()};im.onerror=()=>{};im.src='assets/lobby/'+B.f+'.webp'}
-function leave(){active=false;tok++;cancelAnimationFrame(raf);Lr=null;const bg=qs('#lobbyBg');if(bg)bg.hidden=true;document.body.classList.remove('lb-on','lb-wide');if(stage)stage.replaceChildren()}
-return {enter,leave,fit,get active(){return active}};
+ const B=BOARDS[BI],key=B.V.img[0],my=++tok;if(IMGS[key]){build();return}const im=new Image();im.onload=()=>{IMGS[key]=im;if(my===tok&&active)build()};im.onerror=()=>{rdyFire()};im.src='assets/lobby/'+B.f+'.webp'}
+function leave(){rdyFire();active=false;tok++;cancelAnimationFrame(raf);Lr=null;const bg=qs('#lobbyBg');if(bg)bg.hidden=true;document.body.classList.remove('lb-on','lb-wide');if(stage)stage.replaceChildren()}
+return {enter,leave,fit,onReady,get active(){return active}};
 })();
