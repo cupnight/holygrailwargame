@@ -14,6 +14,7 @@ D = [('키아라 처치', 'Kiara defeated', 'キアラ撃破'),
      ('키아라를 쓰러뜨렸다', 'Defeated Kiara', 'キアラを倒した'),
      ('다른 조가 키아라를 쓰러뜨렸다', 'Another team defeated Kiara', '他の陣営がキアラを倒した'),
      ('도시가 단꿈에 잠겼다', 'The city sank into a sweet dream', '街は甘い夢に沈んだ'),
+     ('성배는 달로 갔다', 'The Grail went to the moon', '聖杯は月へ行った'),
      ]
 T = [('키아라를 쓰러뜨린 것은 {0} 조 · {1}', 'Kiara was defeated by the {0} team · {1}', 'キアラを倒したのは{0}陣営 · {1}'),
      ('키아라를 쓰러뜨린 것은 {0} 조', 'Kiara was defeated by the {0} team', 'キアラを倒したのは{0}陣営'),
@@ -48,7 +49,7 @@ for P in sys.argv[1:]:
        "const pst=p=>{ if(wd.winner===p.i) return `<span class=\"st win\">${be?'키아라를 쓰러뜨렸다':'성배를 쥐었다'}</span>`;")
     rp("${my.alive&&RGRP(k)==='grail'?'<span class=\"st win\">성배를 쥐었다</span>':",
        "${my.alive&&RGRP(k)==='grail'?`<span class=\"st win\">${be==='me'?'키아라를 쓰러뜨렸다':'성배를 쥐었다'}</span>`:")
-    rp("const endTxt={victor:'성배를 손에 쥐었다',", "const endTxt={victor:warTxt(r),")
+    rp("const endTxt={victor:'성배를 손에 쥐었다',", "const endTxt=(be==='me'||be==='npc')?'성배는 달로 갔다':be==='dream'?'':{victor:warTxt(r),")
     rp("|| (win?`${pLab(win)} 조가 성배를 쥐었다`:'');", "|| (win?`${pLab(win)} 조가 ${be?'키아라를 쓰러뜨렸다':'성배를 쥐었다'}`:'');")
     rp("<div class=\"verdict\">${esc(RLAB[k]==='전사'?'전쟁 중에 숨을 거두었다':r.war)}", "<div class=\"verdict\">${esc(RLAB[k]==='전사'?'전쟁 중에 숨을 거두었다':warTxt(r))}")
     # 한 사람의 기록 · 복사 글 · 지난 생 목록 배지
