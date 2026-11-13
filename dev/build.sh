@@ -31,6 +31,7 @@ python3 cxui_apply.py build/game.html            # 후반 위기 현판 (11-13)
 python3 bxnun_apply.py build/game.html           # 비스트 위기: 수녀(키아라)의 소원 · 대사 · 이벤트 (11-13)
 python3 epi1113_apply.py build/game.html          # 에필로그: 비스트 생의 검은 성배 사건 · 단꿈 생의 일상 사건 거르기 (11-13)
 python3 bxabs_apply.py build/game.html           # 비스트: 봉인 중 흡수도 단서로 (11-13 · A안)
+python3 cxmsg_apply.py build/game.html           # 비스트 유닛: 전투 종료 메시지 · 적 카드 · 정보창 문구 (11-13)
 python3 fix1113_apply.py build/game.html         # 11-13 문의: 인질 구출전 대화 · 인질 날 결투장 겹침
 python3 lobby_apply.py build/game.html            # 로비 새 배경 · 새 배치 (11-13)
 python3 lbrec_apply.py build/game.html            # 로비: 기록 화면을 배경 위에 펼침 (A안 · 11-13)
