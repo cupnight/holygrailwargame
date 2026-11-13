@@ -4535,7 +4535,7 @@ const Sim = (() => {
   const WV=()=>S.war||{};
   const bxAC=()=>{ const c=WV().crisis; return c&&c.type==='beast3R'?c:null; }; // 비스트 위기 업적이 보는 위기 기록
   const ACH=[
-    {id:'grail',cat:'성배전쟁의 끝',n:'성배를 쥔 자',d:'성배를 손에 쥐었다',t:()=>GRAIL()},
+    {id:'grail',cat:'성배전쟁의 끝',n:'성배를 쥔 자',d:'성배를 손에 쥐었다',t:()=>GRAIL()&&!S.flags.bxEnd},
     {id:'shared',cat:'성배전쟁의 끝',n:'함께 빈 소원',d:'동맹과 함께 성배에 소원을 빌었다',t:()=>S.flags.war==='shared'&&!S.flags.brokeCup},
     {id:'yield',cat:'성배전쟁의 끝',n:'넘겨준 잔',d:'마지막에 남은 동맹에게 성배를 양보했다',t:()=>!!S.flags.yieldAlly},
     {id:'stay',cat:'성배전쟁의 끝',n:'영웅이 남은 세상',d:'서번트가 이 세계에 남았다',t:()=>!!S.flags.stay},
@@ -4570,17 +4570,17 @@ const Sim = (() => {
     {id:'cxsolo',cat:'성배전쟁의 끝',n:'홀로 선 성배 앞',d:'함께 싸우는 조 없이 검은 성배의 어벤저를 쓰러뜨렸다',t:()=>!!(WV().crisis&&WV().crisis.soloBoss&&WV().crisis.type!=='beast3R')},
     {id:'cxhunt',cat:'성배전쟁의 끝',n:'그림자 사냥꾼',d:'한 전쟁에서 검은 그림자를 둘 쓰러뜨렸다',t:()=>(WV().crisis||{}).type!=='beast3R'&&((WV().crisis||{}).shadowKills||0)>=2},
     {id:'cxguard',cat:'성배전쟁의 끝',n:'끝까지 지킨 잔',d:'성배 앞을 막아선 조와의 결전에서 이겼다',t:()=>!!(WV().crisis&&WV().crisis.guardWon)},
-    {id:'fast',cat:'성배전쟁의 끝',n:'일주일 안의 기적',d:'7일째가 되기 전에 성배를 쥐었다',t:()=>GRAIL()&&WV().day>0&&WV().day<7},
+    {id:'fast',cat:'성배전쟁의 끝',n:'일주일 안의 기적',d:'7일째가 되기 전에 성배를 쥐었다',t:()=>GRAIL()&&!S.flags.bxEnd&&WV().day>0&&WV().day<7},
     {id:'refused',cat:'성배전쟁의 끝',n:'손등을 거둔 자',d:'령주를 받고도 전쟁을 거부했다',t:()=>S.flags.war==='refused'},
     {id:'kill1',cat:'싸움',n:'첫 격파',d:'적 서번트를 처음으로 쓰러뜨렸다',t:()=>(WV().kills||0)>=1},
     {id:'kill4',cat:'싸움',n:'일곱 중 넷',d:'한 전쟁에서 네 조 이상을 직접 쓰러뜨렸다',t:()=>(WV().kills||0)>=4},
-    {id:'noseal',cat:'싸움',n:'령주 없이',d:'령주를 한 획도 쓰지 않고 성배를 쥐었다',t:()=>GRAIL()&&!(WV().sealLog||[]).length},
+    {id:'noseal',cat:'싸움',n:'령주 없이',d:'령주를 한 획도 쓰지 않고 성배를 쥐었다',t:()=>GRAIL()&&!S.flags.bxEnd&&!(WV().sealLog||[]).length},
     {id:'coal',cat:'싸움',n:'연합을 꺾다',d:'임시 연합의 두 조를 하룻밤에 막아 냈다',t:()=>!!S.flags.coalBeat},
     {id:'siege',cat:'싸움',n:'결계를 지킨 밤',d:'결계를 깨고 들어온 조를 막아 냈다',t:()=>!!S.flags.siegeHeld},
-    {id:'backstab',cat:'싸움',n:'등 뒤의 칼',d:'마지막에 배신한 동맹을 쓰러뜨리고 성배를 쥐었다',t:()=>GRAIL()&&!!S.flags.allyBetrayed},
+    {id:'backstab',cat:'싸움',n:'등 뒤의 칼',d:'마지막에 배신한 동맹을 쓰러뜨리고 성배를 쥐었다',t:()=>GRAIL()&&!S.flags.bxEnd&&!!S.flags.allyBetrayed},
     {id:'bond',cat:'서번트와 나',n:'유대',d:'신뢰 80 이상으로 전쟁을 마쳤다',t:()=>S.phase!=='war'&&!!S.war&&S.war.heroAlive&&S.war.trust>=80},
     {id:'frags',cat:'서번트와 나',n:'모든 사연',d:'한 서번트의 과거를 끝까지 들었다',t:()=>!!S.war&&!!S.hero&&(S.war.frag||0)>=H_BY[S.hero].frags.length},
-    {id:'misfit',cat:'서번트와 나',n:'어긋난 짝',d:'궁합이 어긋난 서번트와 성배를 쥐었다',t:()=>GRAIL()&&(WV().fit??60)<50},
+    {id:'misfit',cat:'서번트와 나',n:'어긋난 짝',d:'궁합이 어긋난 서번트와 성배를 쥐었다',t:()=>GRAIL()&&!S.flags.bxEnd&&(WV().fit??60)<50},
     {id:'mend',cat:'서번트와 나',n:'불신을 넘어',d:'「불신」에 빠졌던 서번트와 「유대」에 닿았다',t:()=>!!WV().wasDist&&WV().trust>=80},
     {id:'recontract',cat:'서번트와 나',n:'다시 맺은 계약',d:'주인 잃은 서번트와 다시 계약했다',t:()=>!!S.flags.recontract},
     {id:'names',cat:'서번트와 나',n:'일곱의 진명',d:'한 전쟁에서 다른 여섯 조의 진명을 모두 알아냈다',t:()=>S.phase==='war'&&!!S.war&&!S.war.ended&&S.war.pairs.every(p=>p.revealed)},
@@ -16055,7 +16055,7 @@ function warReport(r){
   let verdictSub = k==='victor'?`${be?'':'소원 · '}${esc(wd.wish||r.wish||'')}${wd.cup&&!be?` · ${wd.cup==='pure'?'성배는 맑았다':'성배는 오염되어 있었다'}`:''}`
     : k==='shared'?`동맹 ${esc(wd.ally||'')}${J2(wd.ally||'','과')} 함께 · ${esc(wd.wish||r.wish||'')}`
     : win?`${be?'키아라를 쓰러뜨린':'성배를 쥔'} 것은 ${esc(pLab(win))} 조${win.mname?` · ${esc(win.mname)}`:''}`:'';
-  if(wd.cx&&wd.cx.type==='beast3R'){ const t=be==='me'&&k==='victor'?'':({me:'키아라를 쓰러뜨렸다',npc:'다른 조가 키아라를 쓰러뜨렸다',dream:'도시가 단꿈에 잠겼다'}[be]||''); verdictSub=(verdictSub?verdictSub+' · ':'')+`후반 위기 · 비스트 Ⅲ/R${t?' · '+t:''}`; }
+  if(wd.cx&&wd.cx.type==='beast3R'){ const t=(be==='me'&&k==='victor')||(be==='npc'&&win)?'':({me:'키아라를 쓰러뜨렸다',npc:'다른 조가 키아라를 쓰러뜨렸다',dream:'도시가 단꿈에 잠겼다'}[be]||''); verdictSub=(verdictSub?verdictSub+' · ':'')+`후반 위기 · 비스트 Ⅲ/R${t?' · '+t:''}`; }
   else if(wd.cx){ const t={seal:'검은 성배를 봉인했다',key:'원한을 받아내 검은 성배를 부쉈다',break:'검은 성배를 부쉈다',claim:'검은 성배에 소원을 빌었다',flood:'검은 성배가 넘쳤다',npcBreak:'다른 조가 검은 성배를 부쉈다',npcClaim:'다른 조가 검은 성배에 소원을 빌었다'}[wd.cx.end]||'검은 성배가 차오른 겨울'; verdictSub=(verdictSub?verdictSub+' · ':'')+`후반 위기 · ${t}`; }
   const my=wd.my;
   const myState= my.out?`제${my.out.d}일 ${my.out.tod} · ${esc(my.out.why)}`:(my.alive?'끝까지 함께했다':'—');

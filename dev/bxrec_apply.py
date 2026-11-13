@@ -6,6 +6,7 @@
   · 위기 줄: 후반 위기 · 비스트 Ⅲ/R · 키아라를 쓰러뜨렸다 / 다른 조가 키아라를 쓰러뜨렸다 / 도시가 단꿈에 잠겼다
   · 다른 조가 끝낸 경우: '성배를 쥔 것은 ○ 조' → '키아라를 쓰러뜨린 것은 ○ 조'
   · 성배가 맑았는지/오염되었는지 줄은 비스트 생에서 뺀다
+- 업적 「성배를 쥔 자」 · 「일주일 안의 기적」 · 「령주 없이」 · 「등 뒤의 칼」 · 「어긋난 짝」은 키아라 결말에서 달성되지 않는다
 - 새로 남기는 기록: wd.cx.bx(me/npc/dream) · 비스트 생은 cx.end · cup을 남기지 않는다
 사용: python3 bxrec_apply.py <game.html>"""
 import sys, i18n
@@ -42,7 +43,7 @@ for P in sys.argv[1:]:
        "  const win=wd.winner?P[wd.winner]:null; " + BXE + "\n  let verdictSub = k==='victor'?`${be?'':'소원 · '}${esc(wd.wish||r.wish||'')}${wd.cup&&!be?")
     rp(": win?`성배를 쥔 것은 ${esc(pLab(win))} 조${win.mname?",
        ": win?`${be?'키아라를 쓰러뜨린':'성배를 쥔'} 것은 ${esc(pLab(win))} 조${win.mname?")
-    rp("  if(wd.cx){ const t={seal:", "  if(wd.cx&&wd.cx.type==='beast3R'){ const t=be==='me'&&k==='victor'?'':({me:'키아라를 쓰러뜨렸다',npc:'다른 조가 키아라를 쓰러뜨렸다',dream:'도시가 단꿈에 잠겼다'}[be]||''); verdictSub=(verdictSub?verdictSub+' · ':'')+`후반 위기 · 비스트 Ⅲ/R${t?' · '+t:''}`; }\n  else if(wd.cx){ const t={seal:")
+    rp("  if(wd.cx){ const t={seal:", "  if(wd.cx&&wd.cx.type==='beast3R'){ const t=(be==='me'&&k==='victor')||(be==='npc'&&win)?'':({me:'키아라를 쓰러뜨렸다',npc:'다른 조가 키아라를 쓰러뜨렸다',dream:'도시가 단꿈에 잠겼다'}[be]||''); verdictSub=(verdictSub?verdictSub+' · ':'')+`후반 위기 · 비스트 Ⅲ/R${t?' · '+t:''}`; }\n  else if(wd.cx){ const t={seal:")
     rp("const pst=p=>{ if(wd.winner===p.i) return '<span class=\"st win\">성배를 쥐었다</span>';",
        "const pst=p=>{ if(wd.winner===p.i) return `<span class=\"st win\">${be?'키아라를 쓰러뜨렸다':'성배를 쥐었다'}</span>`;")
     rp("${my.alive&&RGRP(k)==='grail'?'<span class=\"st win\">성배를 쥐었다</span>':",
@@ -54,6 +55,12 @@ for P in sys.argv[1:]:
     rp(" 함께. `:''}${r.war}${r.wish?", " 함께. `:''}${warTxt(r)}${r.wish?")
     rp("+' 함께, ':''}${r.war}${r.wish?", "+' 함께, ':''}${warTxt(r)}${r.wish?")
     rp("<span class=\"badge\">${RLAB[k]||''}</span>", "<span class=\"badge\">${rlab(r,k)}</span>")
+    # 성배를 손에 쥐어야 하는 업적은 키아라 결말에서 빼기 (성배는 BB가 달로 가져갔다)
+    for aid in ('grail','fast','noseal','backstab','misfit'):
+        import re as _re
+        m = _re.search(r"\{id:'" + aid + r"',cat:'[^']*',n:'[^']*',d:'[^']*',t:\(\)=>GRAIL\(\)", s)
+        if not m: miss.append(('ach ' + aid, 0)); continue
+        s = s[:m.end()] + "&&!S.flags.bxEnd" + s[m.end():]
     s, nd, nt = i18n.add(s, D, T)
     print('bxrec miss', miss, 'tr', nd, nt)
     open(P, 'w', encoding='utf-8').write(s)
