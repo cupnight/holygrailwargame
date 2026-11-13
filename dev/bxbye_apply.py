@@ -40,10 +40,35 @@ BN = t_('다른 조가 키아라를 쓰러뜨렸다는 통지가 돌았다. 성�
         '別の組がキアラを倒したという通知が回った。聖杯は月へ行き、私たちの冬はそうして終わった。{0}の足先から光となってほどけていく。引き留める聖杯は、もうこの世界にない。')
 ebn = [x for x in T if x[0] == BN][0]
 T.append((BN + '\n' + DEEP, ebn[1] + '\n' + ed[1], ebn[2] + '\n' + ed[2]))
+
+# 11-14: 내 서번트가 멜트릴리스 · 패션립일 때 — 키아라에게서 떨어져 나온 아이들의 작별
+EGO = {
+ 'meltryllis': {
+  'me': [('키아라가 녹아 사라진 하늘을 멜트릴리스가 한참 올려다보았다. 발끝부터 빛으로 풀려 가는데도, 멜트릴리스의 걸음은 끝까지 춤추는 사람의 것이었다.',
+          "Meltryllis gazed up for a long while at the sky where Kiara had melted away. Even as she came undone into light from the toes, Meltryllis's steps remained those of a dancer to the very end.",
+          'キアラが溶けて消えた空を、メルトリリスは長いあいだ見上げていた。足先から光になってほどけていくのに、メルトリリスの足取りは最後まで踊る者のそれだった。'),
+         ('…빚은 갚았어. 이제 남은 건 너뿐이네.', "…I've paid my debt. Now all that's left is you.", '……借りは返したわ。あとはあなただけね。')],
+  'npc': [('다른 조가 키아라를 쓰러뜨렸다는 통지가 돌았다. 멜트릴리스는 그 하늘을 한참 올려다보았다. 발끝부터 빛으로 풀려 가는데도, 멜트릴리스는 고개를 들고 있었다.',
+           'Word came that another team had brought Kiara down. Meltryllis gazed up at that sky for a long while. Even as she came undone into light from the toes, Meltryllis kept her head held high.',
+           '別の組がキアラを倒したという通知が回った。メルトリリスはその空を長いあいだ見上げていた。足先から光になってほどけていくのに、メルトリリスは顔を上げたままだった。'),
+          ('…내 손으로 갚고 싶었는데. 뭐, 됐어.', "…I wanted to pay her back with my own hands. Well, whatever.", '……この手で返したかったのに。まあ、いいわ。')]},
+ 'passionlip': {
+  'me': [('키아라가 사라진 자리를 패션립이 두 손을 꼭 모은 채 바라보았다. 그 손끝부터 빛으로 풀려 가는 것을 보며, 패션립이 작게 웃었다.',
+          'Passionlip looked at the place where Kiara had vanished, her hands clasped tight. Watching those fingertips come undone into light, Passionlip gave a small smile.',
+          'キアラが消えた場所を、パッションリップは両手をぎゅっと合わせたまま見つめていた。その指先から光になってほどけていくのを見ながら、パッションリップは小さく笑った。'),
+         ('…이제 아무도 저를 묶지 않아요. 그러니까, 마지막은 제가 고를래요.', "…No one binds me anymore. So I'll choose how this ends.", '……もう誰もわたしを縛りません。だから、最後はわたしが選びます。')],
+  'npc': [('다른 조가 키아라를 쓰러뜨렸다는 통지가 돌았다. 한참 그 하늘을 바라보던 패션립이 두 손을 꼭 모았다. 그 손끝부터 빛으로 풀려 가는 것을 보며, 패션립이 조그맣게 말했다.',
+           'Word came that another team had brought Kiara down. Passionlip, who had been gazing at that sky for a long while, clasped her hands tight. Watching those fingertips come undone into light, Passionlip spoke softly.',
+           '別の組がキアラを倒したという通知が回った。長いあいだその空を見つめていたパッションリップが、両手をぎゅっと合わせた。その指先から光になってほどけていくのを見ながら、パッションリップは小さく言った。'),
+          ('…끝났네요. 정말로.', "…It's over. Really over.", '……終わったんですね。本当に。')]}}
+for h in EGO.values():
+    for k, (nar, q) in h.items():
+        D.append(nar); D.append(q); D.append(('“' + q[0] + '”', '“' + q[1] + '”', '「' + q[2].rstrip('。') + '」'))
+EGOJS = {h: {k: v[0][0] + ' “' + v[1][0] + '”' for k, v in d.items()} for h, d in EGO.items()}
 js = lambda x: json.dumps(x, ensure_ascii=False)
 SIM = ("  // 11-14: 「새벽의 작별」 — 키아라를 쓰러뜨린 뒤, 결말 연출이 끝나고 에필로그 첫 장면 전에\n"
        "  function bxBye(){ const w=W(), h=hero(); if(!h) return; const r=relOf(), deep=!!(r&&r.stage>=3), nm=h.name;\n"
-       "    const body=S.hero==='bb'?" + js(BBB) + ":[S.flags.bxEnd==='npc'?`다른 조가 키아라를 쓰러뜨렸다는 통지가 돌았다. 성배는 달로 갔고, 우리의 겨울은 그렇게 끝났다. ${nm}의 발끝부터 빛으로 풀려 가고 있었다. 붙잡아 둘 성배는 이제 이 세계에 없다.`:`성배가 달로 올라간 뒤, 도시 위로 첫 햇살이 번졌다. ${nm}의 발끝부터 빛으로 풀려 가고 있었다. 붙잡아 둘 성배는 이제 이 세계에 없다.`,deep?" + js(DEEP) + ":''].filter(Boolean).join('\\n');\n"
+       "    const EGO=" + js(EGOJS) + ", eg=EGO[S.hero];\n    const body=S.hero==='bb'?" + js(BBB) + ":eg?[eg[S.flags.bxEnd==='npc'?'npc':'me'],deep?" + js(DEEP) + ":''].filter(Boolean).join('\\n'):[S.flags.bxEnd==='npc'?`다른 조가 키아라를 쓰러뜨렸다는 통지가 돌았다. 성배는 달로 갔고, 우리의 겨울은 그렇게 끝났다. ${nm}의 발끝부터 빛으로 풀려 가고 있었다. 붙잡아 둘 성배는 이제 이 세계에 없다.`:`성배가 달로 올라간 뒤, 도시 위로 첫 햇살이 번졌다. ${nm}의 발끝부터 빛으로 풀려 가고 있었다. 붙잡아 둘 성배는 이제 이 세계에 없다.`,deep?" + js(DEEP) + ":''].filter(Boolean).join('\\n');\n"
        "    const end=`${nm}${J(nm,은)} 새벽빛 속으로 흩어졌다.`;\n"
        "    const res=(t,txt)=>{ decide({title:" + js(TITLE) + ",body:'→ '+t+'\\n'+txt,silent:true,byeFx:1,choices:[{t:'닫기',auto:true,f:()=>null}]}); return txt; };\n"
        "    decide({title:" + js(TITLE) + ",body,choices:[\n"
