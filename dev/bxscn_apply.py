@@ -54,7 +54,7 @@ for P in sys.argv[1:]:
     if(f===undefined){ L=L.filter(x=>md(x)!=='off'); if(!L.length) return null; const al=L.filter(x=>md(x)==='always');
       if(al.length) L=al; else { const all=CRISIS.list.reduce((a,x)=>a+wt(x),0), on=L.reduce((a,x)=>a+wt(x),0); if(!ch((av?CRISIS.pAv:CRISIS.p)*on/all)) return null; } }
     const t=wpick(L,wt);""")
-    rp("function cxRep(){ const w=S.war, c=w&&w.crisis; if(!c) return null;", "function cxRep(){ const w=S.war, c=w&&w.crisis; if(!c||c.type==='beast3R') return null; // 검은 성배 통계(cx_lives)에만 보낸다")
+    rp("function cxRep(){ const w=S.war, c=w&&w.crisis; if(!c) return null;", "function cxRep(){ const w=S.war, c=w&&w.crisis; if(!c||c.type==='beast3R') return null; /* 검은 성배 통계(cx_lives)에만 보낸다 */")
     rp("cx:w.crisis?{st:w.crisis.stage,sk:w.crisis.shadowKills||0,", "cx:w.crisis?{type:w.crisis.type,st:w.crisis.stage,sk:w.crisis.shadowKills||0,")
     # ---- 화면: 시나리오 설정이 열리는 조건 · 기록 화면 안내 ----
     rp("if(r.wd&&r.wd.cx&&r.wd.cx.st>=2&&scnUnlock('black')) r.scnNew='black';",

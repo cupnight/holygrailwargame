@@ -38,6 +38,7 @@ python3 bxally_apply.py build/game.html           # 키아라전: 동행(BB·멜
 python3 bxbye_apply.py build/game.html            # 키아라 처치 뒤 「새벽의 작별」 · 닫기 연출 (11-14)
 python3 epi1114_apply.py build/game.html          # 에필로그: 키아라 결말에 안 맞는 사건 정리 (11-14)
 python3 bxrec_apply.py build/game.html            # 기록 화면: 비스트 결말 문구 (11-14)
+python3 bxui_apply.py build/game.html             # 기록 화면: 비스트 결말 카드 꾸밈 · 지난 생 분류 · 수녀 조 줄 (11-14)
 python3 fix1113_apply.py build/game.html         # 11-13 문의: 인질 구출전 대화 · 인질 날 결투장 겹침
 python3 lobby_apply.py build/game.html            # 로비 새 배경 · 새 배치 (11-13)
 python3 lbrec_apply.py build/game.html            # 로비: 기록 화면을 배경 위에 펼침 (A안 · 11-13)
