@@ -1095,7 +1095,7 @@ function drawSparks(c,st){c.save();c.globalCompositeOperation='lighter';for(cons
 function cells(x0,y0,w,h,cs,thrF){const L=[];for(let y=y0;y<y0+h;y+=cs)for(let x=x0;x<x0+w;x+=cs)L.push({x,y,t:thrF(x+cs/2,y+cs/2)});L.sort((a,b)=>a.t-b.t);return{L,i:0,cs}}
 function eraseTo(m,mc,t){const c=mc.getContext('2d');c.fillStyle='#000';const out=[];while(m.i<m.L.length&&m.L[m.i].t<=t){const q=m.L[m.i++];c.fillRect(q.x*DPR,q.y*DPR,m.cs*DPR+.5,m.cs*DPR+.5);out.push(q)}return out}
 /* --- 진행 --- */
-const ui=document.body,RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ui=document.body,RM=false; // 로딩은 '움직임 줄이기' 설정과 상관없이 연출을 다 보여 준다 (몇 초면 끝나고 남는 부담이 없다 · 11-13 결정)
 ui.classList.add('ld-on');
 let ready=false,readyAt=0;
 function finish(){if(ready)return;ready=true;readyAt=performance.now()}
