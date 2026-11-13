@@ -23,7 +23,7 @@ python3 ea_apply.py build/game.html              # 에미야[얼터]: 보구 특
 python3 fix1112_apply.py build/game.html         # 11-12 문의: 교회 의뢰 보상 · 죽마고우 → 지기
 python3 alex_apply.py build/game.html            # 이스칸다르의 소원: 수육
 python3 epi2_apply.py build/game.html            # 에필로그 시간 흐름: 일 · 달 · 해 구간
-python3 bxach_apply.py build/game.html           # 비스트 위기 업적 17개 (11-13)
+python3 bxach_apply.py build/game.html           # 비스트 위기 업적 17개 (11-13) · 선배와 후배 (11-14)
 python3 ach_order_apply.py build/game.html       # 업적 화면: 업데이트된 순서 · 분류 순서 고정 (11-13)
 python3 reg1113_apply.py build/game.html         # 갈림길 · 재촉 · 쉼 대사를 서번트 말투에 맞게 (11-13)
 python3 bxscn_apply.py build/game.html           # 비스트 위기 화면 표시 · 시나리오 분리 (11-13)
@@ -39,6 +39,7 @@ python3 bxbye_apply.py build/game.html            # 키아라 처치 뒤 「새�
 python3 epi1114_apply.py build/game.html          # 에필로그: 키아라 결말에 안 맞는 사건 정리 (11-14)
 python3 bxrec_apply.py build/game.html            # 기록 화면: 비스트 결말 문구 (11-14)
 python3 bxui_apply.py build/game.html             # 기록 화면: 비스트 결말 카드 꾸밈 · 지난 생 분류 · 수녀 조 줄 (11-14)
+python3 cap_apply.py build/game.html             # 결과 화면: 조 목록 초상화 · 캡처하기 (11-14)
 python3 fix1113_apply.py build/game.html         # 11-13 문의: 인질 구출전 대화 · 인질 날 결투장 겹침
 python3 lobby_apply.py build/game.html            # 로비 새 배경 · 새 배치 (11-13)
 python3 lbrec_apply.py build/game.html            # 로비: 기록 화면을 배경 위에 펼침 (A안 · 11-13)

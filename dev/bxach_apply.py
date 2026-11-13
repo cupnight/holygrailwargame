@@ -1,4 +1,4 @@
-"""비스트 Ⅲ/R 위기 업적 17개 (11-13). 기록이 없던 것은 새로 남긴다.
+"""비스트 Ⅲ/R 위기 업적 17개 (11-13) · BB와 함께 쓰러뜨린 「선배와 후배」(11-14). 기록이 없던 것은 새로 남긴다.
 덤: 검은 성배 업적 「홀로 선 성배 앞」 · 「그림자 사냥꾼」이 키아라 · 센티넬로도 풀리던 것을 막는다.
 사용: python3 bxach_apply.py <game.html>"""
 import sys, i18n
@@ -33,6 +33,8 @@ A = [  # id, 분류, 이름, 설명, 판정, 영어 이름, 영어 설명, 일�
   'A Beast of the Same Name','Defeated Kiara together with Kama','同じ名の獣','カーマと共にキアラを倒した'),
  ('bxego','서번트와 나','떨어져 나온 아이','멜트릴리스나 패션립을 서번트로 데리고 키아라를 쓰러뜨렸다',"S.flags.bxEnd==='me'&&['meltryllis','passionlip'].includes(S.hero)",
   'The Child Who Broke Away','Defeated Kiara with Meltryllis or Passionlip as your Servant','切り離された子','メルトリリスかパッションリップをサーヴァントとしてキアラを倒した'),
+ ('bxbb','서번트와 나','선배와 후배','BB를 서번트로 데리고 키아라를 쓰러뜨렸다',"S.flags.bxEnd==='me'&&S.hero==='bb'",
+  'Senpai and Kouhai','Defeated Kiara with BB as your Servant','センパイと後輩','BBをサーヴァントとしてキアラを倒した'),
  ('bxsweet','삶','뿌리친 단맛','그 겨울의 단꿈이 세 번 찾아왔고, 세 번 모두 뿌리쳤다',"!!S.flags.bxFree",
   'Sweetness Refused','The sweet dream of that winter came three times, and you refused it all three times','振り払った甘さ','あの冬の甘い夢が三度訪れ、三度とも振り払った'),
  ('bxmoonnews','삶','달에서 온 소식','달로 간 BB에게서 소식이 왔다',"!!S.flags.bxMoon",

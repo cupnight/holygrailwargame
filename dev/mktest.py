@@ -30,5 +30,11 @@ TP = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_panel.j
 # 번역기가 켜지기 전에 실행되도록 화면 스크립트 앞에 둔다(뒤에 붙이면 번역기가 스크립트 글자까지 옮기려다 멈춘다)
 k = s.index('(() => {\nconst $=s=>document.querySelector(s);'); a = s.rindex('<script>', 0, k)
 s = s[:a] + '<script>\n' + TP + '\n</script>\n' + s[a:]
+# 캡처하기(11-14): 파일 하나로 열 때는 assets/js를 못 읽으므로 html2canvas를 파일 안에 넣는다
+H2 = os.path.join(os.path.dirname(os.path.abspath(src)), 'assets', 'js', 'html2canvas.min.js')
+if os.path.exists(H2):
+    a = s.rindex('<script>', 0, s.index('(() => {\nconst $=s=>document.querySelector(s);'))
+    s = s[:a] + '<script>\n' + open(H2, encoding='utf-8').read() + '\n</script>\n' + s[a:]
+else: miss.append('html2canvas')
 open(out, 'w', encoding='utf-8').write(s)
 print('test miss', miss, 'portraits', len(P), 'lobby', len(L), 'MB', round(len(s.encode()) / 1e6, 1))
