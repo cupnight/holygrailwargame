@@ -52,7 +52,7 @@ for P in sys.argv[1:]:
     # 마지막 한마디: 다른 서번트(BB · 멜트 · 립 등)의 말이 내 서번트의 마지막 말로 남던 것
     rp("if(inW&&k==='voice'&&(t.includes('“')||t.startsWith('(')))S.war.lastVoice=t;",
        "if(inW&&k==='voice'&&(t.includes('“')||t.startsWith('('))&&lvMine(t))S.war.lastVoice=t;")
-    rp("  function log(t,k='n',x){", "  const lvMine=t=>{ const h=S.hero&&H_BY[S.hero], m=t.match(/^([^:“”\\n]{1,40}): [“(]/); if(m) return !!h&&m[1]===h.name; return !/— BB”$/.test(t); }; // 11-14\n  function log(t,k='n',x){")
+    rp("  function log(t,k='n',x){", "  const lvMine=t=>{ const h=S.hero&&H_BY[S.hero], m=t.match(/^([^:“”\\n]{1,40}): [“(]/); if(m) return !!h&&m[1]===h.name; if(/— BB”$/.test(t)) return false; const m2=t.match(/^(.{1,30}?)(?:이|가|은|는) /); if(m2&&h&&m2[1]!==h.name){ if(!lvMine.N) lvMine.N=new Set(Object.values(H_BY).map(x=>x.name)); if(lvMine.N.has(m2[1])) return false; } return true; }; // 11-14\n  function log(t,k='n',x){")
     s, nd, nt = i18n.add(s, D, T)
     print('bxui miss', miss, 'tr', nd, nt)
     open(P, 'w', encoding='utf-8').write(s)
