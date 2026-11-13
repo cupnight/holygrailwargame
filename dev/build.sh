@@ -1,8 +1,9 @@
 #!/bin/sh
-# main의 public/index.html에서 복구 작업을 차례로 다시 쌓는다: sh dev/build.sh
+# v1.16 main(ac19f71)의 public/index.html에서 작업을 차례로 다시 쌓는다: sh dev/build.sh
+# (11-14: main을 v2.00으로 합친 뒤로는 main이 이미 다 쌓인 파일이므로, 바탕은 v1.16 커밋으로 고정한다)
 set -e
 cd "$(dirname "$0")"
-git show main:public/index.html > base.html
+git show ac19f71:public/index.html > base.html
 mkdir -p build; cp base.html build/game.html
 python3 al_apply.py build/game.html            # ⓪ 속성·취향
 python3 inject3.py batch3 3차 build/game.html   # ① BB·멜트릴리스·패션립
@@ -42,6 +43,7 @@ python3 bxui_apply.py build/game.html             # 기록 화면: 비스트 결
 python3 cap_apply.py build/game.html             # 결과 화면: 조 목록 초상화 · 캡처하기 (11-14)
 python3 fix1113_apply.py build/game.html         # 11-13 문의: 인질 구출전 대화 · 인질 날 결투장 겹침
 python3 lobby_apply.py build/game.html            # 로비 새 배경 · 새 배치 (11-13)
+python3 lbsnd_apply.py build/game.html           # 로비 소리 아이콘: 켜지면 금색 (11-14)
 python3 lbrec_apply.py build/game.html            # 로비: 기록 화면을 배경 위에 펼침 (A안 · 11-13)
 python3 loading_apply.py build/game.html          # 로딩 화면: 성배에 금빛이 차오름 (11-13)
 python3 bxfx_apply.py build/game.html            # 비스트 연출 ①~⑥: 봉인 · 빈 자리 · 강림 · 키아라 입장 · 단독현현 · 결말 (11-12 시안 → 11-13 연결)

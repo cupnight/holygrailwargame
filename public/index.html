@@ -998,7 +998,7 @@ body.lb-wide #intro.lb .lb-screen{max-width:860px}
 #intro.lb .lb-top .lang-pick{display:inline-flex;margin:0}
 #intro.lb .lb-tools{display:flex;gap:6px;align-items:center}
 #intro.lb .lb-ico{width:34px;height:34px;display:grid;place-items:center;border-radius:999px;border:1px solid var(--line);background:rgba(18,16,25,.5);color:var(--dim);cursor:pointer;padding:0}
-#intro.lb .lb-ico svg{width:17px;height:17px}#intro.lb .lb-ico[aria-pressed=false]{opacity:.55}
+#intro.lb .lb-ico svg{width:17px;height:17px}#intro.lb .lb-ico[aria-pressed=false]{opacity:.55}#intro.lb .lb-ico[aria-pressed=true]{color:var(--gold2);border-color:rgba(201,164,92,.55)}
 #intro.lb .lb-pickrow{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}#intro.lb .lb-pickrow:empty{display:none}
 #intro.lb .eyebrow{margin-top:18px}
 #intro.lb .title{font-size:clamp(38px,11vw,46px);line-height:1.12;text-shadow:0 2px 18px rgba(8,6,14,.7)}
@@ -17906,7 +17906,7 @@ function sndHook(k,x){ switch(k){
   case 'm_buff': case 'm_hex': case 'm_ward': case 'm_heal': Snd.sfx(k,{group:'magic'}); break;
   case 'retreat': Snd.sfx('f_retreat'); break; case 'ambush': Snd.sfx('f_ambush'); SB=null; break; case 'battle': SB=null; break; } }
 // 게임 상단의 소리 버튼: 재생/일시정지와 음량을 설정 창을 열지 않고 바꾼다
-function sndQuick(){ const q=$('#sndQ'); if(!q) return; const c=Snd.cfg(), on=c.on===true;
+function sndQuick(){ try{ window.__lbSndSt&&window.__lbSndSt(); }catch(e){} const q=$('#sndQ'); if(!q) return; const c=Snd.cfg(), on=c.on===true;
   q.classList.toggle('on',on); q.classList.toggle('off',!on); q.setAttribute('title',tr(on?'소리 · 켜짐 (M)':'소리 · 꺼짐 (M)'));
   const p=$('#sndQPlay'); p.setAttribute('aria-pressed',on?'true':'false'); $('#sndQLbl').textContent=tr(on?'일시정지':'재생'); $('#sndQSt').textContent=tr(on?'재생 중':'꺼져 있음');
   $('#sndQB').value=c.bgm; $('#sndQS').value=c.sfx; $('#sndQBv').textContent=c.bgm+'%'; $('#sndQSv').textContent=c.sfx+'%'; }
@@ -17966,7 +17966,7 @@ window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.
   { const t=intro.querySelector('h1.title'); if(t) t.innerHTML=t.innerHTML.replace(/<br\s*\/?>/gi,LANG==='ja'?'':' '); }
   const scr=el('div','lb-screen'), top=el('div','lb-top'), tools=el('div','lb-tools'), pr=el('div','lb-pickrow');
   const snd=el('button','lb-ico','<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 8h3l4-3v10l-4-3H4z" fill="currentColor"/><path d="M13.5 7.5a3.5 3.5 0 0 1 0 5M15.5 5.5a6.4 6.4 0 0 1 0 9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>'); snd.type='button'; snd.setAttribute('aria-label',TX.snd); snd.title=TX.snd;
-  const sndSt=()=>{ try{ snd.setAttribute('aria-pressed',String(!!Snd.on())); }catch(e){} };
+  const sndSt=()=>{ try{ snd.setAttribute('aria-pressed',String(!!Snd.on())); }catch(e){} }; window.__lbSndSt=sndSt;
   snd.onclick=()=>{ try{ Snd.enable(!Snd.on()); if(typeof sndBtn==='function') sndBtn(); if(typeof sndSync==='function') sndSync(); }catch(e){} sndSt(); };
   mv(top,'#langPick'); mv(tools,snd,'#setBtn'); top.appendChild(tools); mv(pr,'#pickBtn');
   const lit=el('div','lb-lit'), more=el('button','lb-more',TX.more+' <span aria-hidden="true">›</span>'); more.type='button'; more.setAttribute('aria-expanded','false'); more.setAttribute('aria-controls','lbAbout');
