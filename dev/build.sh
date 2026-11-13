@@ -25,6 +25,7 @@ python3 alex_apply.py build/game.html            # 이스칸다르의 소원: �
 python3 epi2_apply.py build/game.html            # 에필로그 시간 흐름: 일 · 달 · 해 구간
 python3 bxach_apply.py build/game.html           # 비스트 위기 업적 17개 (11-13)
 python3 ach_order_apply.py build/game.html       # 업적 화면: 업데이트된 순서 · 분류 순서 고정 (11-13)
+python3 reg1113_apply.py build/game.html         # 갈림길 · 재촉 · 쉼 대사를 서번트 말투에 맞게 (11-13)
 python3 fix1113_apply.py build/game.html         # 11-13 문의: 인질 구출전 대화 · 인질 날 결투장 겹침
 python3 lobby_apply.py build/game.html            # 로비 새 배경 · 새 배치 (11-13)
 python3 lbrec_apply.py build/game.html            # 로비: 기록 화면을 배경 위에 펼침 (A안 · 11-13)
