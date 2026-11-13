@@ -44,7 +44,7 @@ const cxKind=c=>c.type!=='beast3R'?'black':c.stage>=3?'beast':c.noBB?'empty':'se
 // 조 목록 맨 위의 위기 현판: 상징 · 이름 · 단계 · 진행 표시 세 칸
 function cxBanner(w){ const c=w.crisis; if(!c||!c.stage||!(w.cupKnown||c.stage>=2)) return ''; const k=cxKind(c);
   const nm={black:'검은 성배',seal:'봉인된 성배',empty:'비어 있는 성배',beast:'비스트 Ⅲ/R'}[k];
-  const ph=k==='black'?['','징조','범람','강림'][c.stage]+(c.zones&&c.zones.length?` · 오염 구역 ${c.zones.join(', ')}`:''):k==='beast'?'강림':k==='seal'?'봉인 중':'성배가 차오르는 중';
+  const ph=k==='black'?['','징조','범람','강림'][c.stage]:k==='beast'?'강림':k==='seal'?'봉인 중':'성배가 차오르는 중';
   return `<div class="cxb k-${k}">${CX_IC[k]}<span class="t"><span class="n">${nm}</span><span class="ph">${ph}</span></span><span class="mt" aria-label="${c.stage}/3">${[1,2,3].map(i=>`<i class="${c.stage>=i?'on':''}"></i>`).join('')}</span></div>`; }
 '''
 for P in sys.argv[1:]:
