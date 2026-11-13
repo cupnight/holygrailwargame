@@ -34,10 +34,16 @@ for a, b in ((R1, END), (R3a, END), (R3b, END)):
     T.append((a + '\n' + b, ea[1] + '\n' + eb[1], ea[2] + '\n' + eb[2]))
 eb0 = [x for x in T if x[0] == B0][0]; ed = [x for x in D if x[0] == DEEP][0]
 T.append((B0 + '\n' + DEEP, eb0[1] + '\n' + ed[1], eb0[2] + '\n' + ed[2]))
+# 11-14 A안: 다른 조가 키아라를 쓰러뜨린 결말은 그 사실부터 짚는다
+BN = t_('다른 조가 키아라를 쓰러뜨렸다는 통지가 돌았다. 성배는 달로 갔고, 우리의 겨울은 그렇게 끝났다. {0}의 발끝부터 빛으로 풀려 가고 있었다. 붙잡아 둘 성배는 이제 이 세계에 없다.',
+        "Word came that another team had brought Kiara down. The Grail went to the moon, and our winter ended just like that. {0} was coming undone into light, starting from the toes. There is no Grail left in this world to hold them here.",
+        '別の組がキアラを倒したという通知が回った。聖杯は月へ行き、私たちの冬はそうして終わった。{0}の足先から光となってほどけていく。引き留める聖杯は、もうこの世界にない。')
+ebn = [x for x in T if x[0] == BN][0]
+T.append((BN + '\n' + DEEP, ebn[1] + '\n' + ed[1], ebn[2] + '\n' + ed[2]))
 js = lambda x: json.dumps(x, ensure_ascii=False)
 SIM = ("  // 11-14: 「새벽의 작별」 — 키아라를 쓰러뜨린 뒤, 결말 연출이 끝나고 에필로그 첫 장면 전에\n"
        "  function bxBye(){ const w=W(), h=hero(); if(!h) return; const r=relOf(), deep=!!(r&&r.stage>=3), nm=h.name;\n"
-       "    const body=S.hero==='bb'?" + js(BBB) + ":[`성배가 달로 올라간 뒤, 도시 위로 첫 햇살이 번졌다. ${nm}의 발끝부터 빛으로 풀려 가고 있었다. 붙잡아 둘 성배는 이제 이 세계에 없다.`,deep?" + js(DEEP) + ":''].filter(Boolean).join('\\n');\n"
+       "    const body=S.hero==='bb'?" + js(BBB) + ":[S.flags.bxEnd==='npc'?`다른 조가 키아라를 쓰러뜨렸다는 통지가 돌았다. 성배는 달로 갔고, 우리의 겨울은 그렇게 끝났다. ${nm}의 발끝부터 빛으로 풀려 가고 있었다. 붙잡아 둘 성배는 이제 이 세계에 없다.`:`성배가 달로 올라간 뒤, 도시 위로 첫 햇살이 번졌다. ${nm}의 발끝부터 빛으로 풀려 가고 있었다. 붙잡아 둘 성배는 이제 이 세계에 없다.`,deep?" + js(DEEP) + ":''].filter(Boolean).join('\\n');\n"
        "    const end=`${nm}${J(nm,은)} 새벽빛 속으로 흩어졌다.`;\n"
        "    const res=(t,txt)=>{ decide({title:" + js(TITLE) + ",body:'→ '+t+'\\n'+txt,silent:true,byeFx:1,choices:[{t:'닫기',auto:true,f:()=>null}]}); return txt; };\n"
        "    decide({title:" + js(TITLE) + ",body,choices:[\n"
