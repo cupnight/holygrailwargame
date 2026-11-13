@@ -36,6 +36,7 @@ python3 fitchip_apply.py build/game.html          # 궁합 어긋남 칩: 서번
 python3 bxnote_apply.py build/game.html           # 비스트: 봉인 1~2일 뒤 BB의 쪽지 (11-13)
 python3 bxally_apply.py build/game.html           # 키아라전: 동행(BB·멜트·립)과 호위를 카드·대사·행동 묘사로 (11-13)
 python3 bxbye_apply.py build/game.html            # 키아라 처치 뒤 「새벽의 작별」 · 닫기 연출 (11-14)
+python3 epi1114_apply.py build/game.html          # 에필로그: 키아라 결말에 안 맞는 사건 정리 (11-14)
 python3 fix1113_apply.py build/game.html         # 11-13 문의: 인질 구출전 대화 · 인질 날 결투장 겹침
 python3 lobby_apply.py build/game.html            # 로비 새 배경 · 새 배치 (11-13)
 python3 lbrec_apply.py build/game.html            # 로비: 기록 화면을 배경 위에 펼침 (A안 · 11-13)
