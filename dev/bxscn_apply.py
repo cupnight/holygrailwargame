@@ -64,6 +64,7 @@ for P in sys.argv[1:]:
        """{ const c=war&&S.war.crisis, st=c&&!c.done?c.stage:0, bx=!!(c&&c.type==='beast3R'); for(const k of [1,2,3]){ $('#game').classList.toggle('cx'+k,!bx&&st===k); $('#game').classList.toggle('bx'+k,bx&&st===k); } }""")
     rp("""  if(w.crisis&&w.crisis.stage>=2&&!w.ended) return 'black';""",
        """  if(w.crisis&&w.crisis.stage>=2&&!w.ended&&w.crisis.type!=='beast3R') return 'black'; // 비스트 위기는 전용 곡이 생기기 전까지 평소 낮 · 밤 곡""")
+    rp("""${c.zones&&c.zones.length?` · 오염 구역 ${c.zones.join(', ')}`:''}</p>`; })()}""", """${c.type!=='beast3R'&&c.zones&&c.zones.length?` · 오염 구역 ${c.zones.join(', ')}`:''}</p>`; })()}""")
     s, nd, nt = i18n.add(s, D)
     print('bxscn miss', miss, 'tr', nd)
     open(P, 'w', encoding='utf-8').write(s)
