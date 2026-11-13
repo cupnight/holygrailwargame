@@ -1,4 +1,5 @@
 """로비: 지난 생 · 서번트 도감 · 업적(· 보낸 조)을 「이 밤의 이야기와 규칙」처럼 배경 위에 펼친다 (A안 · 11-13).
+보낸 조가 있으면: 소식은 버튼 묶음 위 한 줄, 버튼 줄에 「보낸 조」, 알림 켜고 끄기는 보낸 조 탭 머리글 옆.
 lobby_apply.py 뒤에 쓴다. 사용: python3 lbrec_apply.py <game.html>"""
 import sys
 CSS = r'''
@@ -17,6 +18,20 @@ CSS = r'''
 /* 카드는 반투명하게: 뒤의 하늘이 살짝 비친다 */
 #lbRec .past-item,#lbRec .dx,#lbRec .dex-item,#lbRec .ach,#lbRec .ach-item,#lbRec .sent-item{background:rgba(26,23,36,.74);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 body.lb-rec #intro.lb .lb-screen{opacity:0;transition:opacity .45s;pointer-events:none}
+
+/* 보낸 조: 소식은 버튼 묶음 위 한 줄로, 알림 켜고 끄기는 보낸 조 탭 안으로 */
+#intro.lb #ghNews{display:none!important}
+#intro.lb .lb-news{display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;padding:9px 14px;border-radius:10px;border:1px solid rgba(201,164,92,.45);background:linear-gradient(180deg,rgba(44,35,24,.80),rgba(22,19,30,.80));color:var(--gold2);font:inherit;font-size:13px;line-height:1.3;cursor:pointer;text-align:left}
+#intro.lb .lb-news[hidden]{display:none}
+#intro.lb .lb-news:hover{border-color:var(--gold)}
+#intro.lb .lb-news i{width:7px;height:7px;flex:none;border-radius:50%;background:var(--seal,#e58b93)}
+#intro.lb .lb-news b{font-weight:500;color:var(--text);font-variant-numeric:tabular-nums}
+#intro.lb .lb-news .ar{margin-left:auto;color:var(--dim)}
+body.lb-wide #intro.lb .lb-acts .lb-news{grid-column:1/-1}
+#intro.lb .lb-row.n4 .btn{font-size:13px;padding-inline:4px}
+#paneSent .past-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+#paneSent #ghnRow{margin:0 0 0 auto}
+#paneSent #ghnRow .pn-btn{font-size:12.5px;padding:5px 12px}
 @media (prefers-reduced-motion:reduce){#lbRec .ab-veil,#lbRec .rec-in{transition:none}}
 '''
 JS = r'''
@@ -40,6 +55,25 @@ JS = r'''
   // 로비를 떠나면 바로 닫는다. 지난 생 카드로 그 생의 기록을 보러 간 것이면, 돌아왔을 때 다시 펼친다
   let reopen=false;
   new MutationObserver(()=>{ if(intro.classList.contains('hidden')){ reopen=!sec.hidden&&!!$q('#ending:not(.hidden)'); close(true); } else if(reopen){ reopen=false; setTimeout(open,30); } }).observe(intro,{attributes:true,attributeFilter:['class']});
+
+  // ---- 보낸 조 (보낸 적이 있는 사람만) ----
+  const acts=$q('#intro .lb-acts'), row=$q('#intro .lb-row'), gr=$q('#ghnRow');
+  const pill=document.createElement('button'); pill.type='button'; pill.className='lb-news'; pill.hidden=true;
+  pill.innerHTML='<i aria-hidden="true"></i><span>다른 성배전쟁에서 온 소식</span><b></b><span class="ar" aria-hidden="true">›</span>';
+  if(acts) acts.insertBefore(pill,acts.firstChild);
+  pill.onclick=()=>{ VT='sent'; renderVT(); open(); };
+  const sb=document.createElement('button'); sb.type='button'; sb.className='btn'; sb.dataset.v='sent'; sb.textContent='보낸 조'; sb.hidden=true;
+  sb.onclick=()=>{ VT='sent'; renderVT(); }; if(row) row.appendChild(sb);
+  const upd=()=>{ let n=0, on=false; try{ on=API_OK&&sentOn(); n=API_OK&&!gnQuiet()?GN.list.filter(gnUnseen).length:0; }catch(e){}
+    const ph=pill.hidden; pill.hidden=!n; pill.querySelector('b').textContent=n;
+    const sh=sb.hidden; sb.hidden=!on; if(row) row.classList.toggle('n4',on);
+    if((ph!==pill.hidden||sh!==sb.hidden)&&LOBBY.active) requestAnimationFrame(()=>LOBBY.fit()); };
+  // 알림 켜고 끄기: 보낸 조 탭 머리글 옆으로. 탭을 다시 그리면(innerHTML) 빠지므로 그때마다 다시 붙인다
+  const ps=$q('#paneSent'); const putGr=()=>{ const hd=ps&&ps.querySelector('.past-head'); if(gr&&hd&&gr.parentNode!==hd){ hd.appendChild(gr); try{ ghNewsRow(); }catch(e){} } };
+  if(ps) new MutationObserver(putGr).observe(ps,{childList:true});
+  ['#ghNews','#vtabs'].forEach(k=>{ const n=$q(k); if(n) new MutationObserver(upd).observe(n,{childList:true,attributes:true,attributeFilter:['class']}); });
+  new MutationObserver(upd).observe(intro,{attributes:true,attributeFilter:['class']});
+  if(gr&&ps) ps.appendChild(gr); upd(); putGr();
 })();
 '''
 for P in sys.argv[1:]:
