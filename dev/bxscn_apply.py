@@ -83,7 +83,8 @@ for P in sys.argv[1:]:
     rp("""{ const c=war&&S.war.crisis, st=c&&!c.done?c.stage:0; for(const k of [1,2,3]) $('#game').classList.toggle('cx'+k,st===k); }""",
        """{ const c=war&&S.war.crisis, st=c&&!c.done?c.stage:0, bx=!!(c&&c.type==='beast3R'); for(const k of [1,2,3]){ $('#game').classList.toggle('cx'+k,!bx&&st===k); $('#game').classList.toggle('bx'+k,bx&&st===k); } }""")
     rp("""  if(w.crisis&&w.crisis.stage>=2&&!w.ended) return 'black';""",
-       """  if(w.crisis&&w.crisis.stage>=2&&!w.ended&&w.crisis.type!=='beast3R') return 'black'; // 비스트 위기는 전용 곡이 생기기 전까지 평소 낮 · 밤 곡""")
+       """  if(w.crisis&&w.crisis.stage>=2&&!w.ended) return w.crisis.type==='beast3R'?(w.crisis.stage>=3?'bxdesc':'bxseal'):'black'; // 비스트: 봉인 중 bxseal · 강림 뒤 bxdesc (bgm_bx.py)""")
+    rp('"emiyafight":{"d":155.77,"ls":91.27,"le":155.27}', '"emiyafight":{"d":155.77,"ls":91.27,"le":155.27},"bxseal":{"d":102.50,"ls":54.000,"le":102.000},"bxdesc":{"d":74.35,"ls":41.026,"le":73.846}')
     rp("""${c.zones&&c.zones.length?` · 오염 구역 ${c.zones.join(', ')}`:''}</p>`; })()}""", """${c.type!=='beast3R'&&c.zones&&c.zones.length?` · 오염 구역 ${c.zones.join(', ')}`:''}</p>`; })()}""")
     # ---- 비스트 화면 효과 ----
     i = s.index('</style>'); s = s[:i] + CSS + s[i:]
