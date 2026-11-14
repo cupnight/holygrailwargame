@@ -44,6 +44,7 @@ python3 cap_apply.py build/game.html             # 결과 화면: 조 목록 초
 python3 fix1113_apply.py build/game.html         # 11-13 문의: 인질 구출전 대화 · 인질 날 결투장 겹침
 python3 lobby_apply.py build/game.html            # 로비 새 배경 · 새 배치 (11-13)
 python3 lbsnd_apply.py build/game.html           # 로비 소리 아이콘: 켜지면 금색 (11-14)
+python3 lbbond_apply.py build/game.html          # 로비: 인연 소환을 펼쳐도 태어나기 칸이 늘어나지 않게 (11-14)
 python3 allyev_apply.py build/game.html          # 문의: 이미 동맹인 조가 동맹을 다시 걸어오던 것 (11-14)
 python3 infox_apply.py build/game.html           # 정보 창 닫기 버튼을 아래에 띄움 (11-14)
 python3 lbrec_apply.py build/game.html            # 로비: 기록 화면을 배경 위에 펼침 (A안 · 11-13)
