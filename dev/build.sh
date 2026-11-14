@@ -48,6 +48,7 @@ python3 lbbond_apply.py build/game.html          # 로비: 인연 소환을 펼�
 python3 allyev_apply.py build/game.html          # 문의: 이미 동맹인 조가 동맹을 다시 걸어오던 것 (11-14)
 python3 infox_apply.py build/game.html           # 정보 창 닫기 버튼을 아래에 띄움 (11-14)
 python3 lbrec_apply.py build/game.html            # 로비: 기록 화면을 배경 위에 펼침 (A안 · 11-13)
+python3 lb2_apply.py build/game.html              # 로비 두 단계 · 고풍 스타일 · 인연 소환 목록 (11-14)
 python3 loading_apply.py build/game.html          # 로딩 화면: 성배에 금빛이 차오름 (11-13)
 python3 bxfx_apply.py build/game.html            # 비스트 연출 ①~⑥: 봉인 · 빈 자리 · 강림 · 키아라 입장 · 단독현현 · 결말 (11-12 시안 → 11-13 연결)
 python3 bxfx2_apply.py build/game.html           # 비스트 연출 ⑦~⑪: KP · 해방 · 봉인이 갈라짐 · 토벌령 · 격돌 (11-13 연결)
